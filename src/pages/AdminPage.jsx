@@ -284,7 +284,7 @@ export default function AdminPage() {
               className="modal__input"
               type="text"
               id="field-name"
-              placeholder="Рубашка оверсайз"
+              placeholder='T-shirt "Cardinal sins"'
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -298,7 +298,7 @@ export default function AdminPage() {
             <textarea
               className="modal__textarea"
               id="field-description"
-              placeholder="Свободный крой, хлопок..."
+              placeholder="оверсайз крой\nвсе принты - вышивка"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
@@ -313,7 +313,7 @@ export default function AdminPage() {
                 className="modal__input"
                 type="text"
                 id="field-material"
-                placeholder="Хлопок"
+                placeholder="100% хлопок"
                 value={form.material}
                 onChange={(e) => setForm({ ...form, material: e.target.value })}
               />
