@@ -42,7 +42,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {!loading && products.length === 0 && <p className="catalog__empty">Товары скоро появятся</p>}
+        {!loading && products.length === 0 && <p className="catalog__empty">Ой, забыл товары добавить...</p>}
 
         <div className="product-grid product-grid--catalog">
           {products.map((product) => (
