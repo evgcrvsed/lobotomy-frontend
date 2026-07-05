@@ -67,28 +67,21 @@ body {
 }
 
 
-/* PAGE TRANSITIONS */
-.page-content {
+/* PAGE TRANSITIONS — белая вуаль поверх всего экрана (включая шапку),
+   появляется мгновенно при переходе и плавно растворяется.
+   Оверлей вместо opacity на контенте: шапку с mix-blend-mode нельзя
+   заворачивать в анимируемый контейнер — блендинг ломается. */
+.page-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 300; /* выше шапки (100) и модалки (200) */
+    background: var(--color-white);
+    pointer-events: none;
+}
+
+.page-veil--hidden {
     opacity: 0;
     transition: opacity 0.35s ease;
-}
-
-.page-content.page-visible {
-    opacity: 1;
-}
-
-.page-content.page-exit {
-    opacity: 0;
-    transition: opacity 0.22s ease;
-}
-
-/* Header fade — скрываем во время перехода, чтобы mix-blend-mode не мигал */
-.header {
-    transition: opacity 0.15s ease;
-}
-
-.header--exit {
-    opacity: 0;
 }
 
 

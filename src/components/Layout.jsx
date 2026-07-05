@@ -5,21 +5,29 @@ import Footer from './Footer'
 
 export default function Layout() {
   const location = useLocation()
-  const [visible, setVisible] = useState(false)
+  const [covered, setCovered] = useState(true)
 
   useEffect(() => {
-    setVisible(false)
-    const frame = requestAnimationFrame(() => setVisible(true))
-    return () => cancelAnimationFrame(frame)
+    setCovered(true)
+    // двойной rAF: браузер должен успеть отрисовать белый слой до старта растворения
+    let second
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => setCovered(false))
+    })
+    return () => {
+      cancelAnimationFrame(first)
+      if (second) cancelAnimationFrame(second)
+    }
   }, [location.pathname])
 
   return (
     <>
       <Header />
-      <div className={`page-content${visible ? ' page-visible' : ''}`}>
+      <div className="page-content">
         <Outlet />
       </div>
       <Footer />
+      <div className={`page-veil${covered ? '' : ' page-veil--hidden'}`} />
     </>
   )
 }
