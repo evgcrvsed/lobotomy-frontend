@@ -4,6 +4,16 @@ import Modal from '../components/Modal'
 import '../styles/components/modal.css'
 import '../styles/pages/admin.css'
 
+const SIZE_FIELDS = [
+  ['length', 'Length'],
+  ['shoulder', 'Shoulder'],
+  ['chest', 'Chest'],
+  ['sleeve', 'Sleeve'],
+]
+
+const emptySizeRow = (label = '') => ({ label, length: '', shoulder: '', chest: '', sleeve: '' })
+const defaultSizes = () => ['S', 'M', 'L', 'XL'].map(emptySizeRow)
+
 const EMPTY_FORM = {
   collectionId: '',
   name: '',
@@ -13,6 +23,8 @@ const EMPTY_FORM = {
   price: '',
   imageMain: null,
   imageHover: null,
+  gallery: [],
+  sizes: [],
 }
 
 function formatSize(bytes) {
@@ -61,6 +73,10 @@ export default function AdminPage() {
   const [submitting, setSubmitting] = useState(false)
   const [uploadingField, setUploadingField] = useState(null)
 
+  const [colModalOpen, setColModalOpen] = useState(false)
+  const [colDrafts, setColDrafts] = useState({})
+  const [newColName, setNewColName] = useState('')
+
   useEffect(() => {
     init()
   }, [])
@@ -81,6 +97,58 @@ export default function AdminPage() {
 
   async function refreshMedia() {
     setMedia(await api.getImages())
+  }
+
+  async function reloadCollections() {
+    const cols = await api.getCollections()
+    setCollections(cols)
+    setColDrafts(Object.fromEntries(cols.map((c) => [c.id, c.name])))
+  }
+
+  function openColModal() {
+    setColDrafts(Object.fromEntries(collections.map((c) => [c.id, c.name])))
+    setNewColName('')
+    setColModalOpen(true)
+  }
+
+  async function saveCollectionName(id) {
+    const name = (colDrafts[id] ?? '').trim()
+    if (!name) return
+
+    const res = await api.updateCollection(id, { name })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Не удалось переименовать: ' + (err.detail ?? 'что-то пошло не так'))
+      return
+    }
+    await reloadCollections()
+  }
+
+  async function addCollection() {
+    const name = newColName.trim()
+    if (!name) return
+
+    const res = await api.createCollection({ name })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Не удалось создать: ' + (err.detail ?? 'что-то пошло не так'))
+      return
+    }
+    setNewColName('')
+    await reloadCollections()
+  }
+
+  async function removeCollection(col) {
+    if (!confirm(`Удалить коллекцию «${col.name}»?`)) return
+
+    const res = await api.deleteCollection(col.id)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Не удалось удалить: ' + (err.detail ?? 'что-то пошло не так'))
+      return
+    }
+    if (activeCollectionId === col.id) setActiveCollectionId(null)
+    await reloadCollections()
   }
 
   async function deleteMediaFile(filename) {
@@ -104,7 +172,7 @@ export default function AdminPage() {
 
   function openCreateModal() {
     setCurrentProductId(null)
-    setForm({ ...EMPTY_FORM, collectionId: collections[0]?.id ?? '' })
+    setForm({ ...EMPTY_FORM, collectionId: collections[0]?.id ?? '', sizes: defaultSizes() })
     setModalOpen(true)
   }
 
@@ -122,6 +190,19 @@ export default function AdminPage() {
       price: product.price,
       imageMain: product.images.find((i) => i.role === 'main')?.filename ?? null,
       imageHover: product.images.find((i) => i.role === 'hover')?.filename ?? null,
+      gallery: product.images
+        .filter((i) => i.role === 'gallery')
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((i) => i.filename),
+      sizes: product.sizes.length
+        ? product.sizes.map((s) => ({
+            label: s.label,
+            length: s.length ?? '',
+            shoulder: s.shoulder ?? '',
+            chest: s.chest ?? '',
+            sleeve: s.sleeve ?? '',
+          }))
+        : defaultSizes(),
     })
     setModalOpen(true)
   }
@@ -152,6 +233,51 @@ export default function AdminPage() {
     }
   }
 
+  async function handleGallerySelect(e) {
+    const files = Array.from(e.target.files)
+    if (!files.length) return
+
+    setUploadingField('gallery')
+    try {
+      const uploaded = []
+      for (const file of files) {
+        const res = await api.uploadImage(file)
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          alert(`Не удалось загрузить ${file.name}: ` + (err.detail ?? 'что-то пошло не так'))
+          continue
+        }
+        uploaded.push((await res.json()).filename)
+      }
+      if (uploaded.length) {
+        setForm((f) => ({ ...f, gallery: [...f.gallery, ...uploaded] }))
+      }
+      await refreshMedia()
+    } finally {
+      setUploadingField(null)
+      e.target.value = ''
+    }
+  }
+
+  function removeGalleryItem(index) {
+    setForm((f) => ({ ...f, gallery: f.gallery.filter((_, i) => i !== index) }))
+  }
+
+  function updateSizeRow(index, field, value) {
+    setForm((f) => ({
+      ...f,
+      sizes: f.sizes.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
+    }))
+  }
+
+  function addSizeRow() {
+    setForm((f) => ({ ...f, sizes: [...f.sizes, emptySizeRow()] }))
+  }
+
+  function removeSizeRow(index) {
+    setForm((f) => ({ ...f, sizes: f.sizes.filter((_, i) => i !== index) }))
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
 
@@ -164,6 +290,21 @@ export default function AdminPage() {
     if (form.imageHover) {
       images.push({ filename: form.imageHover, role: 'hover', sort_order: 2 })
     }
+    form.gallery.forEach((filename, i) => {
+      images.push({ filename, role: 'gallery', sort_order: 3 + i })
+    })
+
+    // строки, где не заполнен ни один замер, не сохраняем
+    const toNum = (v) => (v === '' ? null : parseInt(v, 10))
+    const sizes = form.sizes
+      .filter((row) => row.label.trim() && SIZE_FIELDS.some(([field]) => row[field] !== ''))
+      .map((row) => ({
+        label: row.label.trim(),
+        length: toNum(row.length),
+        shoulder: toNum(row.shoulder),
+        chest: toNum(row.chest),
+        sleeve: toNum(row.sleeve),
+      }))
 
     const data = {
       collection_id: parseInt(form.collectionId, 10),
@@ -173,6 +314,7 @@ export default function AdminPage() {
       density: form.density ? parseInt(form.density, 10) : null,
       price: parseInt(form.price, 10),
       images,
+      sizes,
     }
 
     setSubmitting(true)
@@ -209,10 +351,15 @@ export default function AdminPage() {
     <>
       <div className="admin-page">
         <div className="admin-page__top">
-          <h1 className="admin-page__title">Каталог — управление</h1>
-          <button className="btn btn--dark" onClick={openCreateModal}>
-            + Добавить изделие
-          </button>
+          <h1 className="admin-page__title">Каталог</h1>
+          <div className="admin-page__actions">
+            <button className="btn btn--dark" onClick={openColModal}>
+              + Редактировать коллекции
+            </button>
+            <button className="btn btn--dark" onClick={openCreateModal}>
+              + Добавить изделие
+            </button>
+          </div>
         </div>
 
         <div className="admin-filters">
@@ -276,9 +423,9 @@ export default function AdminPage() {
         </div>
 
         <section className="admin-media">
-          <h2 className="admin-media__title">Медиатека</h2>
+          <h2 className="admin-media__title">Картинки на бэке (чисто отладка чтобы мусор детектить и удалять сразу же)</h2>
           <p className="admin-media__hint">
-            Все загруженные файлы. Файлы без товара можно удалить — они больше нигде не используются.
+            Все загруженные файлы. Файлы без товара можно удалить — они больше нигде не используются. Удалить используемые файлы нельзя.
           </p>
           {media.length === 0 ? (
             <p className="admin-empty">Файлов нет</p>
@@ -431,6 +578,85 @@ export default function AdminPage() {
             />
           </div>
 
+          <div className="modal__field">
+            <span className="modal__label">Фотографии на странице товара</span>
+            <div className="gallery-grid">
+              {form.gallery.map((filename, i) => (
+                <div className="image-slot image-slot--filled" key={`${filename}-${i}`}>
+                  <img src={imageUrl(filename)} alt="" className="image-slot__preview" />
+                  <button
+                    type="button"
+                    className="image-slot__remove"
+                    onClick={() => removeGalleryItem(i)}
+                    aria-label="Убрать фото"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <label className="image-slot" htmlFor="field-gallery">
+                <input
+                  id="field-gallery"
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp"
+                  className="image-slot__input"
+                  disabled={uploadingField === 'gallery'}
+                  onChange={handleGallerySelect}
+                />
+                <span className="image-slot__hint">
+                  {uploadingField === 'gallery' ? 'Загрузка...' : '+ Добавить'}
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div className="modal__field">
+            <span className="modal__label">Размерная сетка, всё в СМ!</span>
+            <div className="size-table">
+              <div className="size-table__row size-table__row--head">
+                <span></span>
+                {SIZE_FIELDS.map(([field, title]) => (
+                  <span key={field}>{title}</span>
+                ))}
+                <span />
+              </div>
+              {form.sizes.map((row, i) => (
+                <div className="size-table__row" key={i}>
+                  <input
+                    className="modal__input"
+                    type="text"
+                    placeholder="S"
+                    value={row.label}
+                    onChange={(e) => updateSizeRow(i, 'label', e.target.value)}
+                  />
+                  {SIZE_FIELDS.map(([field]) => (
+                    <input
+                      key={field}
+                      className="modal__input"
+                      type="number"
+                      min="1"
+                      placeholder="—"
+                      value={row[field]}
+                      onChange={(e) => updateSizeRow(i, field, e.target.value)}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    className="size-table__remove"
+                    onClick={() => removeSizeRow(i)}
+                    aria-label="Убрать размер"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button type="button" className="btn btn--outline size-table__add" onClick={addSizeRow}>
+                + Добавить размер
+              </button>
+            </div>
+          </div>
+
           <div className="modal__actions">
             <button className="btn btn--dark" type="submit" disabled={submitting}>
               {submitting ? 'Сохранение...' : 'Сохранить'}
@@ -440,6 +666,52 @@ export default function AdminPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal open={colModalOpen} titleId="col-modal-title" title="Коллекции" onClose={() => setColModalOpen(false)}>
+        <div className="modal__form">
+          {collections.map((col) => (
+            <div className="col-row" key={col.id}>
+              <input
+                className="modal__input"
+                type="text"
+                value={colDrafts[col.id] ?? ''}
+                onChange={(e) => setColDrafts({ ...colDrafts, [col.id]: e.target.value })}
+              />
+              <button
+                className="btn btn--outline"
+                type="button"
+                disabled={(colDrafts[col.id] ?? '').trim() === col.name || !(colDrafts[col.id] ?? '').trim()}
+                onClick={() => saveCollectionName(col.id)}
+              >
+                Сохранить
+              </button>
+              <button
+                className="btn btn--outline admin-btn--danger"
+                type="button"
+                onClick={() => removeCollection(col)}
+              >
+                Уд.
+              </button>
+            </div>
+          ))}
+
+          <div className="col-row col-row--new">
+            <input
+              className="modal__input"
+              type="text"
+              placeholder="Новая коллекция"
+              value={newColName}
+              onChange={(e) => setNewColName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') addCollection()
+              }}
+            />
+            <button className="btn btn--dark" type="button" disabled={!newColName.trim()} onClick={addCollection}>
+              Добавить
+            </button>
+          </div>
+        </div>
       </Modal>
     </>
   )

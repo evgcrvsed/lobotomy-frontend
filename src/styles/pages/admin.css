@@ -160,6 +160,82 @@
     background-color: transparent;
 }
 
+.admin-page__actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Collections manage modal */
+.col-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.col-row .modal__input { flex: 1; min-width: 0; }
+.col-row .btn { flex-shrink: 0; white-space: nowrap; }
+
+.col-row--new {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Gallery grid in product modal */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.gallery-grid .image-slot__hint { font-size: 12px; }
+
+/* Size table in product modal */
+.size-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.size-table__row {
+    display: grid;
+    grid-template-columns: 64px repeat(4, 1fr) 24px;
+    gap: 6px;
+    align-items: center;
+}
+
+.size-table__row--head span {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.size-table__row .modal__input {
+    padding: 7px 8px;
+    font-size: 13px;
+}
+
+.size-table__remove {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    color: var(--color-muted);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.size-table__remove:hover { color: #c0392b; }
+
+.size-table__add {
+    margin-top: 4px;
+    align-self: flex-start;
+}
+
 /* Media library */
 .admin-media {
     margin-top: 48px;

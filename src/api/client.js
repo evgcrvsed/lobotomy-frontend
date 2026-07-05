@@ -33,6 +33,19 @@ export const api = {
     fd.append('file', file)
     return request('/api/uploads/image', { method: 'POST', body: fd })
   },
+  createCollection: (data) =>
+    request('/api/collections/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  updateCollection: (id, data) =>
+    request(`/api/collections/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  deleteCollection: (id) => request(`/api/collections/${id}`, { method: 'DELETE' }),
   getImages: () => request('/api/uploads/images').then((r) => (r.ok ? r.json() : [])),
   deleteImage: (filename) => request(`/api/uploads/images/${encodeURIComponent(filename)}`, { method: 'DELETE' }),
 }
