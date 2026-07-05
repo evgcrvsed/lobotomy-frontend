@@ -464,6 +464,7 @@ export default function AdminPage() {
         titleId="modal-title"
         title={currentProductId ? 'Редактировать изделие' : 'Добавить изделие'}
         onClose={closeModal}
+        wide
       >
         <form className="modal__form" onSubmit={handleSubmit} noValidate>
           <div className="modal__field">

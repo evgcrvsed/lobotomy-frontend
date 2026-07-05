@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export default function Modal({ open, titleId, title, onClose, children }) {
+export default function Modal({ open, titleId, title, onClose, wide = false, children }) {
   useEffect(() => {
     if (!open) return
 
@@ -21,7 +21,7 @@ export default function Modal({ open, titleId, title, onClose, children }) {
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-      <div className="modal">
+      <div className={`modal${wide ? ' modal--wide' : ''}`}>
         <div className="modal__header">
           <span className="modal__title" id={titleId}>
             {title}
