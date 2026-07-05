@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, imageUrl } from '../api/client'
 import ProductCard from '../components/ProductCard'
-import previewImg from '../assets/images/preview.png'
+import previewImg from '../assets/images/preview.webp'
 import '../styles/components/product-card.css'
 import '../styles/pages/index.css'
 
