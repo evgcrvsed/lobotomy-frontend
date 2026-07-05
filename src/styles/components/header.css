@@ -28,10 +28,11 @@
     align-items: center;
     justify-content: center;
     border-radius: 4px;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .header__icon-btn:hover       { opacity: 0.5; }
+.header__icon-btn:active      { transform: scale(1.1); }
 .header__icon-btn:focus-visible {
     outline: 2px solid var(--color-black);
     outline-offset: 2px;
