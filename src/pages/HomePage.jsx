@@ -1,19 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api, imageUrl } from '../api/client'
 import ProductCard from '../components/ProductCard'
 import previewImg from '../assets/images/preview.png'
-import productImg from '../assets/images/product_1.jpg'
 import '../styles/components/product-card.css'
 import '../styles/pages/index.css'
 
-const CATALOG_PRODUCTS = Array.from({ length: 8 }, () => ({
-  image: productImg,
-  name: 'Айтем',
-  color: 'цвет',
-  price: '5 000 ₽',
-}))
+function findImage(product, role) {
+  const img = product.images.find((i) => i.role === role)
+  return img ? imageUrl(img.filename) : null
+}
 
 export default function HomePage() {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
+
+  useEffect(() => {
+    api.getProducts().then((list) => {
+      setProducts(list)
+      setLoading(false)
+    })
+  }, [])
 
   return (
     <>
@@ -35,9 +42,19 @@ export default function HomePage() {
           </div>
         </div>
 
+        {!loading && products.length === 0 && <p className="catalog__empty">Товары скоро появятся</p>}
+
         <div className="product-grid product-grid--catalog">
-          {CATALOG_PRODUCTS.map((product, i) => (
-            <ProductCard key={i} variant="v2" {...product} />
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              variant="v2"
+              image={findImage(product, 'main') ?? (product.images[0] ? imageUrl(product.images[0].filename) : null)}
+              hoverImage={findImage(product, 'hover')}
+              name={product.name}
+              color={product.material ?? ''}
+              price={`${product.price.toLocaleString('ru-RU')} ₽`}
+            />
           ))}
         </div>
       </section>

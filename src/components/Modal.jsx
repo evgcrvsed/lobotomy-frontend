@@ -1,8 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
 export default function Modal({ open, titleId, title, onClose, children }) {
-  const overlayRef = useRef(null)
-
   useEffect(() => {
     if (!open) return
 
@@ -22,16 +20,7 @@ export default function Modal({ open, titleId, title, onClose, children }) {
   if (!open) return null
 
   return (
-    <div
-      className="modal-overlay"
-      ref={overlayRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose()
-      }}
-    >
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className="modal">
         <div className="modal__header">
           <span className="modal__title" id={titleId}>

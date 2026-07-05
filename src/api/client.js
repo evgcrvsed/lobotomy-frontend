@@ -28,4 +28,9 @@ export const api = {
       body: JSON.stringify(data),
     }),
   deleteProduct: (id) => request(`/api/products/${id}`, { method: 'DELETE' }),
+  uploadImage: (file) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return request('/api/uploads/image', { method: 'POST', body: fd })
+  },
 }

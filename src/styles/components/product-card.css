@@ -42,6 +42,7 @@
 }
 
 .product-card__img-wrap {
+    position: relative;
     display: block;
     aspect-ratio: 1 / 1;
     overflow: hidden;
@@ -57,6 +58,18 @@
 
 .product-card:hover .product-card__img {
     transform: scale(1.03);
+}
+
+/* Второе фото поверх основного, проявляется при наведении на карточку */
+.product-card__img--hover {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.3s ease;
+}
+
+.product-card:hover .product-card__img--hover {
+    opacity: 1;
 }
 
 .product-card__info {

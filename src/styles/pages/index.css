@@ -66,6 +66,12 @@
     border-bottom-color: var(--color-black);
 }
 
+.catalog__empty {
+    padding: 32px 0;
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
 /* ---- PRODUCT GRID ---- */
 .product-grid--catalog {
     grid-template-columns: repeat(4, 1fr);

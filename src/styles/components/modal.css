@@ -142,3 +142,63 @@
         width: 100%;
     }
 }
+
+
+/* ---- IMAGE UPLOAD SLOTS (админка) ---- */
+.image-slot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    border: 1px dashed var(--color-muted-light);
+    border-radius: 4px;
+    background-color: var(--color-bg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.image-slot:hover { border-color: var(--color-muted); }
+
+.image-slot--filled {
+    border-style: solid;
+    cursor: default;
+}
+
+.image-slot__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.image-slot__hint {
+    font-size: 13px;
+    color: var(--color-muted);
+    pointer-events: none;
+}
+
+.image-slot__preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-slot__remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(17, 17, 17, 0.65);
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.image-slot__remove:hover { background-color: rgba(17, 17, 17, 0.9); }

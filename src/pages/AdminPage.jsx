@@ -11,7 +11,36 @@ const EMPTY_FORM = {
   material: '',
   density: '',
   price: '',
-  images: '',
+  imageMain: null,
+  imageHover: null,
+}
+
+function ImageUploadSlot({ id, label, filename, uploading, onSelect, onClear }) {
+  return (
+    <div className="modal__field">
+      <span className="modal__label">{label}</span>
+      {filename ? (
+        <div className="image-slot image-slot--filled">
+          <img src={imageUrl(filename)} alt="" className="image-slot__preview" />
+          <button type="button" className="image-slot__remove" onClick={onClear} aria-label="Убрать фото">
+            ×
+          </button>
+        </div>
+      ) : (
+        <label className="image-slot" htmlFor={id}>
+          <input
+            id={id}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="image-slot__input"
+            disabled={uploading}
+            onChange={onSelect}
+          />
+          <span className="image-slot__hint">{uploading ? 'Загрузка...' : '+ Выбрать файл'}</span>
+        </label>
+      )}
+    </div>
+  )
 }
 
 export default function AdminPage() {
@@ -24,6 +53,7 @@ export default function AdminPage() {
   const [currentProductId, setCurrentProductId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
+  const [uploadingField, setUploadingField] = useState(null)
 
   useEffect(() => {
     init()
@@ -67,11 +97,8 @@ export default function AdminPage() {
       material: product.material ?? '',
       density: product.density ?? '',
       price: product.price,
-      images: product.images
-        .slice()
-        .sort((a, b) => a.sort_order - b.sort_order)
-        .map((i) => i.filename)
-        .join('\n'),
+      imageMain: product.images.find((i) => i.role === 'main')?.filename ?? null,
+      imageHover: product.images.find((i) => i.role === 'hover')?.filename ?? null,
     })
     setModalOpen(true)
   }
@@ -81,15 +108,38 @@ export default function AdminPage() {
     setCurrentProductId(null)
   }
 
+  async function handleFileSelect(e, field) {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploadingField(field)
+    try {
+      const res = await api.uploadImage(file)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Не удалось загрузить фото: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      const { filename } = await res.json()
+      setForm((f) => ({ ...f, [field]: filename }))
+    } finally {
+      setUploadingField(null)
+      e.target.value = ''
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
 
-    const images = form.images
-      .trim()
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .map((filename, i) => ({ filename, sort_order: i + 1 }))
+    if (!form.imageMain) {
+      alert('Добавьте основное фото')
+      return
+    }
+
+    const images = [{ filename: form.imageMain, role: 'main', sort_order: 1 }]
+    if (form.imageHover) {
+      images.push({ filename: form.imageHover, role: 'hover', sort_order: 2 })
+    }
 
     const data = {
       collection_id: parseInt(form.collectionId, 10),
@@ -162,7 +212,8 @@ export default function AdminPage() {
           {!loading && filteredProducts.length === 0 && <p className="admin-empty">Нет изделий</p>}
           {!loading &&
             filteredProducts.map((product) => {
-              const firstImg = product.images[0]?.filename ?? null
+              const firstImg =
+                product.images.find((i) => i.role === 'main')?.filename ?? product.images[0]?.filename ?? null
               const meta = [product.material, product.density ? product.density + ' г/м²' : null]
                 .filter(Boolean)
                 .join(' · ')
@@ -299,16 +350,22 @@ export default function AdminPage() {
             />
           </div>
 
-          <div className="modal__field">
-            <label className="modal__label" htmlFor="field-images">
-              Изображения
-            </label>
-            <textarea
-              className="modal__textarea"
-              id="field-images"
-              placeholder={'front.jpg\nback.jpg\ndetail.jpg'}
-              value={form.images}
-              onChange={(e) => setForm({ ...form, images: e.target.value })}
+          <div className="modal__row">
+            <ImageUploadSlot
+              id="field-image-main"
+              label="Основное фото *"
+              filename={form.imageMain}
+              uploading={uploadingField === 'imageMain'}
+              onSelect={(e) => handleFileSelect(e, 'imageMain')}
+              onClear={() => setForm({ ...form, imageMain: null })}
+            />
+            <ImageUploadSlot
+              id="field-image-hover"
+              label="Фото при наведении"
+              filename={form.imageHover}
+              uploading={uploadingField === 'imageHover'}
+              onSelect={(e) => handleFileSelect(e, 'imageHover')}
+              onClear={() => setForm({ ...form, imageHover: null })}
             />
           </div>
 
