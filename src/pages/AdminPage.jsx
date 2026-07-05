@@ -15,6 +15,11 @@ const EMPTY_FORM = {
   imageHover: null,
 }
 
+function formatSize(bytes) {
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} МБ`
+  return `${Math.max(1, Math.round(bytes / 1024))} КБ`
+}
+
 function ImageUploadSlot({ id, label, filename, uploading, onSelect, onClear }) {
   return (
     <div className="modal__field">
@@ -46,6 +51,7 @@ function ImageUploadSlot({ id, label, filename, uploading, onSelect, onClear }) 
 export default function AdminPage() {
   const [collections, setCollections] = useState([])
   const [products, setProducts] = useState([])
+  const [media, setMedia] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeCollectionId, setActiveCollectionId] = useState(null)
 
@@ -63,6 +69,7 @@ export default function AdminPage() {
     const cols = await api.getCollections()
     setCollections(cols)
     await refreshProducts()
+    await refreshMedia()
   }
 
   async function refreshProducts() {
@@ -70,6 +77,22 @@ export default function AdminPage() {
     const list = await api.getProducts()
     setProducts(list)
     setLoading(false)
+  }
+
+  async function refreshMedia() {
+    setMedia(await api.getImages())
+  }
+
+  async function deleteMediaFile(filename) {
+    if (!confirm(`Удалить файл ${filename}? Отменить будет нельзя.`)) return
+
+    const res = await api.deleteImage(filename)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Не удалось удалить: ' + (err.detail ?? 'что-то пошло не так'))
+      return
+    }
+    await refreshMedia()
   }
 
   function getCollectionName(id) {
@@ -122,6 +145,7 @@ export default function AdminPage() {
       }
       const { filename } = await res.json()
       setForm((f) => ({ ...f, [field]: filename }))
+      await refreshMedia()
     } finally {
       setUploadingField(null)
       e.target.value = ''
@@ -163,6 +187,7 @@ export default function AdminPage() {
 
       closeModal()
       await refreshProducts()
+      await refreshMedia()
     } finally {
       setSubmitting(false)
     }
@@ -177,6 +202,7 @@ export default function AdminPage() {
       return
     }
     await refreshProducts()
+    await refreshMedia()
   }
 
   return (
@@ -248,6 +274,42 @@ export default function AdminPage() {
               )
             })}
         </div>
+
+        <section className="admin-media">
+          <h2 className="admin-media__title">Медиатека</h2>
+          <p className="admin-media__hint">
+            Все загруженные файлы. Файлы без товара можно удалить — они больше нигде не используются.
+          </p>
+          {media.length === 0 ? (
+            <p className="admin-empty">Файлов нет</p>
+          ) : (
+            <div className="media-grid">
+              {media.map((m) => (
+                <div className="media-item" key={m.filename}>
+                  <div className="media-item__thumb">
+                    <img src={imageUrl(m.filename)} alt={m.filename} loading="lazy" />
+                  </div>
+                  <div className="media-item__info">
+                    <span className="media-item__size">{formatSize(m.size)}</span>
+                    {m.products.length > 0 ? (
+                      <span className="media-item__usage" title={m.products.join(', ')}>
+                        {m.products.join(', ')}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="media-item__delete"
+                        onClick={() => deleteMediaFile(m.filename)}
+                      >
+                        Удалить
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
 
       <Modal

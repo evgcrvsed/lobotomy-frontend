@@ -33,4 +33,6 @@ export const api = {
     fd.append('file', file)
     return request('/api/uploads/image', { method: 'POST', body: fd })
   },
+  getImages: () => request('/api/uploads/images').then((r) => (r.ok ? r.json() : [])),
+  deleteImage: (filename) => request(`/api/uploads/images/${encodeURIComponent(filename)}`, { method: 'DELETE' }),
 }
