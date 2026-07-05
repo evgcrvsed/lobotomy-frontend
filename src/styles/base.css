@@ -6,6 +6,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* убирает серую/синюю вспышку при касании на мобильных */
+    -webkit-tap-highlight-color: transparent;
 }
 
 a {
