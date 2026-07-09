@@ -60,6 +60,18 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* Прилипающий футер: страница минимум во весь экран,
+   контент растягивается, футер прижат к самому низу */
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.page-content {
+    flex: 1 0 auto;
+}
+
 /* Shared section heading, reused across profile cards & recommendations */
 .section-title {
     font-size: 25px;
