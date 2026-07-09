@@ -119,6 +119,11 @@
 }
 
 .modal__input::placeholder { color: var(--color-muted-light); }
+
+.modal__hint {
+    font-size: 11px;
+    color: var(--color-muted);
+}
 .modal__input:hover        { border-color: #cccccc; }
 .modal__input:focus {
     border-color: var(--color-black);

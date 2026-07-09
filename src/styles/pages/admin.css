@@ -175,6 +175,49 @@
 .col-row .modal__input { flex: 1; min-width: 0; }
 .col-row .btn { flex-shrink: 0; white-space: nowrap; }
 
+.col-row__img {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--color-muted-light);
+    border-radius: 2px;
+    background-color: var(--color-bg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.col-row__img:hover { border-color: var(--color-muted); }
+
+.col-row__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.col-row__img-plus {
+    font-size: 16px;
+    color: var(--color-muted);
+}
+
+.col-row__img-input { display: none; }
+
+.col-row__img-clear {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: -4px;
+    font-size: 14px;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.col-row__img-clear:hover { color: #c0392b; }
+
 .col-row--new {
     margin-top: 8px;
     padding-top: 16px;

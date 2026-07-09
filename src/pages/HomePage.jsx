@@ -13,15 +13,22 @@ function findImage(product, role) {
 
 export default function HomePage() {
   const [products, setProducts] = useState([])
+  const [collections, setCollections] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
 
   useEffect(() => {
-    api.getProducts().then((list) => {
+    Promise.all([api.getProducts(), api.getCollections()]).then(([list, cols]) => {
       setProducts(list)
+      setCollections(cols)
       setLoading(false)
     })
   }, [])
+
+  function productHref(product) {
+    const colSlug = collections.find((c) => c.id === product.collection_id)?.slug
+    return colSlug && product.slug ? `/${colSlug}/${product.slug}` : '#'
+  }
 
   return (
     <>
@@ -50,7 +57,7 @@ export default function HomePage() {
             <ProductCard
               key={product.id}
               variant="v2"
-              href={`/product/${product.id}`}
+              href={productHref(product)}
               image={findImage(product, 'main') ?? (product.images[0] ? imageUrl(product.images[0].filename) : null)}
               hoverImage={findImage(product, 'hover')}
               name={product.name}

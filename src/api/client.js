@@ -15,6 +15,8 @@ export const api = {
   getCollections: () => request('/api/collections/').then((r) => (r.ok ? r.json() : [])),
   getProducts: () => request('/api/products/').then((r) => (r.ok ? r.json() : [])),
   getProduct: (id) => request(`/api/products/${id}`).then((r) => (r.ok ? r.json() : null)),
+  getProductBySlug: (slug) =>
+    request(`/api/products/slug/${encodeURIComponent(slug)}`).then((r) => (r.ok ? r.json() : null)),
   createProduct: (data) =>
     request('/api/products/', {
       method: 'POST',

@@ -17,6 +17,7 @@ const defaultSizes = () => ['S', 'M', 'L', 'XL'].map(emptySizeRow)
 const EMPTY_FORM = {
   collectionId: '',
   name: '',
+  slug: '',
   description: '',
   material: '',
   density: '',
@@ -111,17 +112,44 @@ export default function AdminPage() {
     setColModalOpen(true)
   }
 
-  async function saveCollectionName(id) {
-    const name = (colDrafts[id] ?? '').trim()
+  async function saveCollectionName(col) {
+    const name = (colDrafts[col.id] ?? '').trim()
     if (!name) return
 
-    const res = await api.updateCollection(id, { name })
+    const res = await api.updateCollection(col.id, { name, image: col.image })
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
       alert('Не удалось переименовать: ' + (err.detail ?? 'что-то пошло не так'))
       return
     }
     await reloadCollections()
+  }
+
+  async function setCollectionImage(col, image) {
+    const res = await api.updateCollection(col.id, { name: col.name, image })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Не удалось сохранить картинку: ' + (err.detail ?? 'что-то пошло не так'))
+      return
+    }
+    await reloadCollections()
+    await refreshMedia()
+  }
+
+  async function handleColImageSelect(e, col) {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const res = await api.uploadImage(file)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Не удалось загрузить фото: ' + (err.detail ?? 'что-то пошло не так'))
+      e.target.value = ''
+      return
+    }
+    const { filename } = await res.json()
+    e.target.value = ''
+    await setCollectionImage(col, filename)
   }
 
   async function addCollection() {
@@ -184,6 +212,7 @@ export default function AdminPage() {
     setForm({
       collectionId: product.collection_id,
       name: product.name,
+      slug: product.slug ?? '',
       description: product.description ?? '',
       material: product.material ?? '',
       density: product.density ?? '',
@@ -309,6 +338,7 @@ export default function AdminPage() {
     const data = {
       collection_id: parseInt(form.collectionId, 10),
       name: form.name.trim(),
+      slug: form.slug.trim() || null,
       description: form.description.trim() || null,
       material: form.material.trim() || null,
       density: form.density ? parseInt(form.density, 10) : null,
@@ -502,6 +532,23 @@ export default function AdminPage() {
           </div>
 
           <div className="modal__field">
+            <label className="modal__label" htmlFor="field-slug">
+              Название адреса страницы
+            </label>
+            <input
+              className="modal__input"
+              type="text"
+              id="field-slug"
+              placeholder="zip-hoodie-v1-2"
+              value={form.slug}
+              onChange={(e) => setForm({ ...form, slug: e.target.value })}
+            />
+            <span className="modal__hint">
+              Адрес карточки: /product/{form.slug.trim() || '...'} — если оставить пустым, сгенерируется из названия
+            </span>
+          </div>
+
+          <div className="modal__field">
             <label className="modal__label" htmlFor="field-description">
               Описание
             </label>
@@ -671,8 +718,34 @@ export default function AdminPage() {
 
       <Modal open={colModalOpen} titleId="col-modal-title" title="Коллекции" onClose={() => setColModalOpen(false)}>
         <div className="modal__form">
+          <p className="admin-media__hint">
+            Картинка коллекции показывается сверху на страницах её товаров. Клик по квадрату — выбрать файл.
+          </p>
           {collections.map((col) => (
             <div className="col-row" key={col.id}>
+              <label className="col-row__img" title="Картинка коллекции">
+                {col.image ? (
+                  <img src={imageUrl(col.image)} alt="" />
+                ) : (
+                  <span className="col-row__img-plus">+</span>
+                )}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="col-row__img-input"
+                  onChange={(e) => handleColImageSelect(e, col)}
+                />
+              </label>
+              {col.image && (
+                <button
+                  type="button"
+                  className="col-row__img-clear"
+                  onClick={() => setCollectionImage(col, null)}
+                  aria-label="Убрать картинку"
+                >
+                  ×
+                </button>
+              )}
               <input
                 className="modal__input"
                 type="text"
@@ -683,7 +756,7 @@ export default function AdminPage() {
                 className="btn btn--outline"
                 type="button"
                 disabled={(colDrafts[col.id] ?? '').trim() === col.name || !(colDrafts[col.id] ?? '').trim()}
-                onClick={() => saveCollectionName(col.id)}
+                onClick={() => saveCollectionName(col)}
               >
                 Сохранить
               </button>

@@ -30,6 +30,7 @@
     font-size: 36px;
     font-weight: 600;
     letter-spacing: 0.01em;
+    text-transform: uppercase;
 }
 
 .product-price {
@@ -61,6 +62,14 @@
     font-size: 14px;
     line-height: 1.6;
     color: var(--color-gray);
+    white-space: pre-line; /* переводы строк из описания в админке сохраняются */
+}
+
+.product-status {
+    padding: 48px 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-muted);
 }
 
 .product-select {
@@ -77,6 +86,11 @@
 }
 
 /* ---- КНОПКИ СПРАВА ---- */
+/* отступ = высота надписи «Размер» слева: кнопка корзины на одном уровне с селектом */
+.product-col--right {
+    padding-top: 33px;
+}
+
 .product-cart-btn {
     width: 100%;
     padding: 13px;
@@ -170,7 +184,8 @@
     padding-left: 0;
 }
 
-/* ---- ПОХОЖИЕ ТОВАРЫ (заглушки) ---- */
+/* ---- ФОТОГРАФИИ ТОВАРА ---- */
+/* Ряд центрируется при любом количестве фото; лишние переносятся на новую строку */
 .product-similar {
     display: flex;
     justify-content: center;
@@ -179,10 +194,19 @@
     margin-top: 72px;
 }
 
-.product-similar__ph {
+.product-similar__img {
     width: 100px;
     height: 140px;
-    background-color: #2f2f2f;
+    object-fit: cover;
+    display: block;
+    background-color: #f0f0f0;
+    transition: transform 0.25s ease;
+}
+
+.product-similar__img:hover {
+    transform: scale(1.2);
+    position: relative;
+    z-index: 1; /* увеличенная — поверх соседних */
 }
 
 /* ---- ЮРИДИЧЕСКАЯ СТРОКА ПЕРЕД ФУТЕРОМ ---- */
