@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, imageUrl } from '../api/client'
 import ProductCard from '../components/ProductCard'
 import previewImg from '../assets/images/preview.webp'
+import '../styles/components/hero.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/index.css'
 
@@ -49,6 +50,7 @@ export default function HomePage() {
             <ProductCard
               key={product.id}
               variant="v2"
+              href={`/product/${product.id}`}
               image={findImage(product, 'main') ?? (product.images[0] ? imageUrl(product.images[0].filename) : null)}
               hoverImage={findImage(product, 'hover')}
               name={product.name}

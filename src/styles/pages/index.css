@@ -2,23 +2,6 @@
    INDEX PAGE — full-bleed hero + catalog
    ============================================================ */
 
-/* ---- HERO ---- */
-.hero {
-    position: relative;
-    margin-top: calc(-1 * var(--header-height)); /* заходит под прозрачный хедер */
-    height: 92vh;
-    min-height: 400px;
-    background-color: var(--color-black);
-    overflow: hidden;
-}
-
-.hero__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
 /* ---- CATALOG ---- */
 .catalog {
     padding: 22px var(--container-pad) 22px;
@@ -108,8 +91,6 @@
 }
 
 @media (max-width: 640px) {
-    .hero { height: 90vh; }
-
     .product-grid--catalog { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .catalog__head { flex-direction: column; align-items: flex-start; gap: 14px; }
     .catalog__filter { padding: 4px 8px; }

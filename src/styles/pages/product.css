@@ -1,0 +1,225 @@
+/* ============================================================
+   PRODUCT PAGE — вёрстка-заглушка по макету
+   ============================================================ */
+
+/* ---- ШАПКА ИНФОРМАЦИИ ---- */
+.product-info {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 28px var(--container-pad) 72px;
+}
+
+.product-info__head {
+    position: relative;
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.product-breadcrumbs {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-black);
+}
+
+.product-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.product-price {
+    display: block;
+    margin-top: 4px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+}
+
+/* ---- ДВЕ КОЛОНКИ ---- */
+.product-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: start;
+}
+
+.product-block {
+    margin-bottom: 28px;
+}
+
+.product-label {
+    display: block;
+    font-size: 19px;
+    margin-bottom: 10px;
+}
+
+.product-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-gray);
+}
+
+.product-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    text-align: center;
+    color: var(--color-gray);
+    background-color: #e3e3e3;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+/* ---- КНОПКИ СПРАВА ---- */
+.product-cart-btn {
+    width: 100%;
+    padding: 13px;
+    background-color: var(--color-black);
+    color: var(--color-white);
+    border: none;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.product-cart-btn:hover { background-color: var(--color-btn-hover); }
+
+.product-actions-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.product-qty {
+    display: flex;
+    align-items: center;
+    background-color: #e3e3e3;
+    border-radius: 2px;
+    flex: 0 0 130px;
+    justify-content: space-between;
+}
+
+.product-qty button {
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    color: var(--color-black);
+}
+
+.product-qty__value {
+    font-size: 14px;
+}
+
+.product-fav-btn {
+    flex: 1;
+    background-color: #e3e3e3;
+    border: none;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.product-fav-btn:hover { background-color: #d6d6d6; }
+
+/* ---- МАТЕРИАЛ + ТАБЛИЦА РАЗМЕРОВ ---- */
+/* Три колонки: крайние одинаковые (1fr), поэтому таблица в середине —
+   строго по центру страницы, на одном уровне с блоком «Материал» */
+.product-material-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: start;
+    margin-top: 12px;
+}
+
+.product-material-row .product-block {
+    margin-bottom: 0;
+}
+
+.product-sizes {
+    border-collapse: collapse;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: var(--color-gray);
+}
+
+.product-sizes th {
+    font-weight: 400;
+    padding: 4px 18px;
+    text-align: center;
+}
+
+.product-sizes td {
+    padding: 4px 18px;
+    text-align: center;
+}
+
+.product-sizes td:first-child {
+    text-align: left;
+    padding-left: 0;
+}
+
+/* ---- ПОХОЖИЕ ТОВАРЫ (заглушки) ---- */
+.product-similar {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 72px;
+}
+
+.product-similar__ph {
+    width: 100px;
+    height: 140px;
+    background-color: #2f2f2f;
+}
+
+/* ---- ЮРИДИЧЕСКАЯ СТРОКА ПЕРЕД ФУТЕРОМ ---- */
+.product-legal {
+    margin-top: 64px;
+    text-align: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--color-gray);
+}
+
+.product-legal__copy {
+    font-size: 14px;
+}
+
+.product-legal__links {
+    margin-top: 6px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 960px) {
+    .product-columns {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .product-info__head {
+        text-align: left;
+        padding-top: 28px;
+    }
+
+    /* на узком экране — друг под другом */
+    .product-material-row {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        margin-top: 32px;
+    }
+}
