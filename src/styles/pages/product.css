@@ -172,11 +172,13 @@
     font-weight: 400;
     padding: 4px 18px;
     text-align: center;
+    white-space: nowrap; /* «S —» и значения не переносятся на новую строку */
 }
 
 .product-sizes td {
     padding: 4px 18px;
     text-align: center;
+    white-space: nowrap;
 }
 
 .product-sizes td:first-child {
@@ -245,5 +247,21 @@
         grid-template-columns: 1fr;
         gap: 28px;
         margin-top: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* компактная таблица, чтобы влезала в узкий экран без горизонтального скролла */
+    .product-sizes {
+        font-size: 13px;
+    }
+
+    .product-sizes th,
+    .product-sizes td {
+        padding: 4px 8px;
+    }
+
+    .product-sizes td:first-child {
+        padding-left: 0;
     }
 }
