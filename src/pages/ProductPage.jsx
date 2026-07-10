@@ -67,7 +67,7 @@ export default function ProductPage() {
                 /{product.name}
               </nav>
               <h1 className="product-title">{product.name}</h1>
-              <span className="product-price">{product.price.toLocaleString('ru-RU')}р</span>
+              <span className="product-price">{product.price.toLocaleString('ru-RU')} ₽</span>
             </div>
 
             <div className="product-columns">
