@@ -719,7 +719,7 @@ export default function AdminPage() {
       <Modal open={colModalOpen} titleId="col-modal-title" title="Коллекции" onClose={() => setColModalOpen(false)}>
         <div className="modal__form">
           <p className="admin-media__hint">
-            Картинка коллекции показывается сверху на страницах её товаров. Клик по квадрату — выбрать файл.
+            Картинка коллекции показывается сверху на страницах её товаров. Чтобы её установить - кликай по квадрату с плюсиком
           </p>
           {collections.map((col) => (
             <div className="col-row" key={col.id}>

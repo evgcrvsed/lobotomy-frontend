@@ -30,6 +30,9 @@ export default function HomePage() {
     return colSlug && product.slug ? `/${colSlug}/${product.slug}` : '#'
   }
 
+  const filteredProducts =
+    activeFilter === 'all' ? products : products.filter((p) => p.collection_id === activeFilter)
+
   return (
     <>
       <section className="hero">
@@ -47,13 +50,26 @@ export default function HomePage() {
             >
               Все
             </button>
+            {collections.map((col) => (
+              <button
+                key={col.id}
+                className={`catalog__filter${activeFilter === col.id ? ' catalog__filter--active' : ''}`}
+                type="button"
+                onClick={() => setActiveFilter(col.id)}
+              >
+                {col.name}
+              </button>
+            ))}
           </div>
         </div>
 
         {!loading && products.length === 0 && <p className="catalog__empty">Ой, забыл товары добавить...</p>}
+        {!loading && products.length > 0 && filteredProducts.length === 0 && (
+          <p className="catalog__empty">В этой коллекции пока пусто</p>
+        )}
 
         <div className="product-grid product-grid--catalog">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
               variant="v2"

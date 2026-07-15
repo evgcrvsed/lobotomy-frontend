@@ -4,13 +4,14 @@ import logoBlack from '../assets/images/logo-black.png'
 export default function Header() {
   return (
     <header className="header">
-      <button type="button" className="header__icon-btn" aria-label="Открыть меню">
-        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="20" height="1.5" fill="#111111" />
-          <rect y="6" width="14" height="1.5" fill="#111111" />
-          <rect y="12" width="20" height="1.5" fill="#111111" />
-        </svg>
-      </button>
+      {/*<button type="button" className="header__icon-btn" aria-label="Открыть меню">*/}
+      {/*  <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
+      {/*    <rect width="20" height="1.5" fill="#111111" />*/}
+      {/*    <rect y="6" width="14" height="1.5" fill="#111111" />*/}
+      {/*    <rect y="12" width="20" height="1.5" fill="#111111" />*/}
+      {/*  </svg>*/}
+      {/*</button>*/}
+      <div></div>
 
       <Link to="/" className="header__logo" aria-label="Lobotomy — главная">
         <img src={logoBlack} alt="Lobotomy" />
