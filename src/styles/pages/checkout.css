@@ -169,19 +169,26 @@
 .checkout-item__name { font-size: 15px; color: var(--color-black); }
 .checkout-item__size { font-size: 13px; color: var(--color-gray); }
 
-/* Управление позицией: [размер + сетка] сверху, количество под ними */
+/* Управление позицией: [размер + сетка] сверху, количество под ними.
+   Ширина фиксированная — у всех позиций одинаковая, от названия не зависит */
 .checkout-item__controls {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 7px;
     margin-top: 6px;
+    width: 104px;
 }
 
 .checkout-item__row {
     display: flex;
     align-items: stretch;
     gap: 7px;
+}
+
+.checkout-item__row .checkout-item__select {
+    flex: 1;
+    min-width: 0;
 }
 
 .checkout-item__chart {
