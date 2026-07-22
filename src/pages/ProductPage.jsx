@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import { addToCart } from '../cart'
 import previewImg from '../assets/images/preview.webp'
 import '../styles/components/hero.css'
 import '../styles/pages/product.css'
@@ -21,6 +22,22 @@ export default function ProductPage() {
   const [collection, setCollection] = useState(null)
   const [size, setSize] = useState('')
   const [qty, setQty] = useState(1)
+  const [added, setAdded] = useState(false)
+
+  function handleAddToCart() {
+    const mainImage = product.images.find((i) => i.role === 'main') ?? product.images[0]
+    addToCart({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      price: product.price,
+      size: size || null,
+      qty,
+      image: mainImage?.filename ?? null,
+    })
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1500)
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -94,8 +111,8 @@ export default function ProductPage() {
               </div>
 
               <div className="product-col product-col--right">
-                <button className="product-cart-btn" type="button">
-                  Добавить в корзину
+                <button className="product-cart-btn" type="button" onClick={handleAddToCart}>
+                  {added ? 'Добавлено ✓' : 'Добавить в корзину'}
                 </button>
 
                 <div className="product-actions-row">

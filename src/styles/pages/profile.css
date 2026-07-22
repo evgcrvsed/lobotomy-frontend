@@ -126,3 +126,64 @@
         grid-column: 1;
     }
 }
+
+
+/* ---- LOGIN SCREEN ---- */
+.profile-login {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 72px var(--container-pad) 96px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
+
+.profile-login__hint {
+    font-size: 14px;
+    color: var(--color-gray);
+}
+
+.profile-login__hint--muted {
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+.profile-login__vk {
+    width: 100%;
+    max-width: 320px;
+}
+
+.profile-login__error {
+    font-size: 13px;
+    color: #c0392b;
+}
+
+.profile-status {
+    padding: 96px 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+.sidebar-nav__logout {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+/* Блок входа внутри карточки «Личная информация» */
+.profile-card__login {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.profile-card__vk {
+    width: 100%;
+    max-width: 280px;
+}

@@ -6,8 +6,13 @@ export function imageUrl(filename) {
   return `${API_BASE_URL}/static/images/${filename}`
 }
 
-async function request(path, options) {
-  const res = await fetch(`${API_BASE_URL}${path}`, options)
+import { getToken } from '../auth'
+
+async function request(path, options = {}) {
+  const token = getToken()
+  const headers = { ...(options.headers ?? {}) }
+  if (token) headers.Authorization = `Bearer ${token}`
+  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
   return res
 }
 
@@ -48,6 +53,19 @@ export const api = {
       body: JSON.stringify(data),
     }),
   deleteCollection: (id) => request(`/api/collections/${id}`, { method: 'DELETE' }),
+  vkLogin: (accessToken) =>
+    request('/api/auth/vk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: accessToken }),
+    }),
+  getMe: () => request('/api/auth/me').then((r) => (r.ok ? r.json() : null)),
+  updateMe: (data) =>
+    request('/api/auth/me', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
   getImages: () => request('/api/uploads/images').then((r) => (r.ok ? r.json() : [])),
   deleteImage: (filename) => request(`/api/uploads/images/${encodeURIComponent(filename)}`, { method: 'DELETE' }),
 }

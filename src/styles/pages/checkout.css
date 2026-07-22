@@ -1,0 +1,227 @@
+/* ============================================================
+   CHECKOUT — оформление заказа
+   ============================================================ */
+
+.checkout {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 24px var(--container-pad) 72px;
+}
+
+.checkout__breadcrumbs {
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-black);
+    margin-bottom: 32px;
+}
+
+.checkout__empty {
+    padding: 64px 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    font-size: 15px;
+    color: var(--color-gray);
+}
+
+.checkout__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+}
+
+/* ---- ФОРМА ---- */
+.checkout__title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 26px;
+}
+
+.checkout__field {
+    margin-bottom: 18px;
+}
+
+.checkout__label {
+    display: block;
+    font-size: 13px;
+    color: var(--color-black);
+    margin-bottom: 7px;
+}
+
+.checkout__input {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: var(--color-gray);
+    background-color: #ededed;
+    border: none;
+    border-radius: 2px;
+    outline: none;
+}
+
+.checkout__input::placeholder { color: #b5b5b5; }
+.checkout__input:focus { box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.25); }
+
+/* Способ доставки */
+.delivery-options {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 4px;
+}
+
+.delivery-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    color: var(--color-black);
+    cursor: pointer;
+    user-select: none;
+}
+
+.delivery-option__input { display: none; }
+
+.delivery-option__box {
+    width: 14px;
+    height: 14px;
+    background-color: #d9d9d9;
+    border-radius: 2px;
+    flex-shrink: 0;
+    transition: background-color 0.15s ease;
+}
+
+.delivery-option__input:checked + .delivery-option__box {
+    background-color: var(--color-black);
+}
+
+/* ---- ПОЗИЦИИ КОРЗИНЫ ---- */
+.checkout__items {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.checkout-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.checkout-item__img {
+    position: relative;
+    width: 72px;
+    height: 88px;
+    flex-shrink: 0;
+    background-color: #f0f0f0;
+}
+
+.checkout-item__img img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.25s ease;
+}
+
+/* при наведении показывается превьюшка, как у карточек каталога */
+.checkout-item__img-hover { opacity: 0; }
+.checkout-item__img:hover .checkout-item__img-hover { opacity: 1; }
+
+.checkout-item__qty {
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    z-index: 1;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background-color: #c4c4c4;
+    color: var(--color-white);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+}
+
+.checkout-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 6px;
+    min-width: 0;
+}
+
+.checkout-item__name,
+.checkout-item__size,
+.checkout-item__price,
+.checkout__total-row {
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.checkout-item__name { font-size: 15px; color: var(--color-black); }
+.checkout-item__size { font-size: 13px; color: var(--color-gray); }
+
+.checkout-item__right {
+    margin-left: auto;
+    padding-top: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.checkout-item__price { font-size: 15px; }
+
+.checkout-item__remove {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.checkout-item__remove:hover { color: #c0392b; }
+
+/* ---- ИТОГИ ---- */
+.checkout__totals {
+    margin-top: 22px;
+    border-top: 1px solid var(--color-black);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkout__total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    color: var(--color-black);
+}
+
+.checkout__total-row--final {
+    border-top: 1px solid var(--color-black);
+    padding-top: 14px;
+    font-size: 17px;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 860px) {
+    .checkout__grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    /* на телефоне сначала товары и итог, потом форма */
+    .checkout__summary { order: -1; }
+}

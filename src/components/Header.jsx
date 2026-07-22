@@ -1,7 +1,21 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { cartCount } from '../cart'
 import logoBlack from '../assets/images/logo-black.png'
 
 export default function Header() {
+  const [count, setCount] = useState(() => cartCount())
+
+  useEffect(() => {
+    const update = () => setCount(cartCount())
+    window.addEventListener('cart-changed', update) // изменения в этой вкладке
+    window.addEventListener('storage', update) // изменения из других вкладок
+    return () => {
+      window.removeEventListener('cart-changed', update)
+      window.removeEventListener('storage', update)
+    }
+  }, [])
+
   return (
     <header className="header">
       {/*<button type="button" className="header__icon-btn" aria-label="Открыть меню">*/}
@@ -29,7 +43,7 @@ export default function Header() {
             />
           </svg>
         </Link>
-        <a href="#" className="header__icon-btn" aria-label="Корзина">
+        <Link to="/checkout" className="header__icon-btn" aria-label="Корзина">
           <svg width="20" height="22" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M1 1H4L6 14H16L18.5 5H5"
@@ -41,7 +55,8 @@ export default function Header() {
             <circle cx="8" cy="18" r="1.5" fill="#111111" />
             <circle cx="14" cy="18" r="1.5" fill="#111111" />
           </svg>
-        </a>
+          {count > 0 && <span className="header__cart-badge">{count}</span>}
+        </Link>
       </div>
     </header>
   )

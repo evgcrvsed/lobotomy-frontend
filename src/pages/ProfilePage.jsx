@@ -1,4 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import * as VKID from '@vkid/sdk'
+import { api } from '../api/client'
+import { clearToken, getToken, setToken } from '../auth'
 import Modal from '../components/Modal'
 import ProductCard from '../components/ProductCard'
 import productImg from '../assets/images/product_1.jpg'
@@ -6,24 +10,15 @@ import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/profile.css'
 
-const STORAGE_KEY = 'lobotomy_profile'
+const VK_APP_ID = Number(import.meta.env.VITE_VK_APP_ID) || 0
 
 const FIELDS = [
-  { key: 'name', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text', autoComplete: 'name' },
+  { key: 'full_name', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text', autoComplete: 'name' },
   { key: 'address', label: 'Адрес', placeholder: 'ул. Пушкина, д. 1, кв. 2', type: 'text', autoComplete: 'street-address' },
   { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text', autoComplete: 'address-level2' },
-  { key: 'zip', label: 'Индекс', placeholder: '101000', type: 'text', autoComplete: 'postal-code', inputMode: 'numeric' },
+  { key: 'postal_code', label: 'Индекс', placeholder: '101000', type: 'text', autoComplete: 'postal-code', inputMode: 'numeric' },
   { key: 'email', label: 'Почта', placeholder: 'hello@example.com', type: 'email', autoComplete: 'email' },
 ]
-
-function loadProfile() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
-}
 
 const RECOMMENDATIONS = [
   { image: productImg, name: 'Zip-Hoodie v1.2', color: 'Чёрный', price: '5500₽' },
@@ -31,38 +26,99 @@ const RECOMMENDATIONS = [
 ]
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState({})
+  const [user, setUser] = useState(null)
+  const [checking, setChecking] = useState(true)
   const [form, setForm] = useState({})
   const [modalOpen, setModalOpen] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [loginError, setLoginError] = useState(null)
+  const vkContainerRef = useRef(null)
 
+  // при заходе на страницу проверяем сохранённый токен
   useEffect(() => {
-    setProfile(loadProfile())
+    if (!getToken()) {
+      setChecking(false)
+      return
+    }
+    api.getMe().then((me) => {
+      if (!me) clearToken() // токен протух — забываем его
+      setUser(me)
+      setChecking(false)
+    })
   }, [])
 
+  // кнопка VK ID рисуется самим SDK в контейнер
+  useEffect(() => {
+    if (checking || user || !VK_APP_ID || !vkContainerRef.current) return
+
+    VKID.Config.init({
+      app: VK_APP_ID,
+      redirectUrl: `${window.location.origin}/profile`,
+      responseMode: VKID.ConfigResponseMode.Callback,
+      source: VKID.ConfigSource.LOWCODE,
+      scope: 'email',
+    })
+
+    const oneTap = new VKID.OneTap()
+    oneTap.render({ container: vkContainerRef.current, showAlternativeLogin: false })
+    oneTap.on(VKID.WidgetEvents.ERROR, () => setLoginError('VK ID: не удалось загрузить виджет'))
+    oneTap.on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async ({ code, device_id: deviceId }) => {
+      try {
+        const { access_token: accessToken } = await VKID.Auth.exchangeCode(code, deviceId)
+        const res = await api.vkLogin(accessToken)
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          setLoginError(err.detail ?? 'Не удалось войти')
+          return
+        }
+        const { token, user: me } = await res.json()
+        setToken(token)
+        setUser(me)
+      } catch {
+        setLoginError('Не удалось войти через VK ID')
+      }
+    })
+
+    return () => oneTap.close()
+  }, [checking, user])
+
+  function logout() {
+    clearToken()
+    setUser(null)
+  }
+
   function openModal() {
-    setForm(profile)
+    setForm({
+      full_name: user.full_name ?? '',
+      address: user.address ?? '',
+      city: user.city ?? '',
+      postal_code: user.postal_code ?? '',
+      email: user.email ?? '',
+    })
     setModalOpen(true)
   }
 
-  function closeModal() {
-    setModalOpen(false)
-  }
-
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(form))
-    setProfile(form)
-    setModalOpen(false)
 
+    const payload = Object.fromEntries(FIELDS.map(({ key }) => [key, form[key]?.trim() || null]))
+    const res = await api.updateMe(payload)
+    if (!res.ok) {
+      alert('Не удалось сохранить')
+      return
+    }
+    setUser(await res.json())
+    setModalOpen(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 1800)
   }
 
+  const firstName = user?.full_name?.split(' ').at(-1)
+
   return (
     <>
       <section className="hello">
-        <h1 className="hello__title">Привет, Lobotomy</h1>
+        <h1 className="hello__title">Привет, {firstName || 'Lobotomy'}</h1>
       </section>
 
       <section className="profile">
@@ -76,11 +132,13 @@ export default function ProfilePage() {
                     История заказов
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="sidebar-nav__link">
-                    Выйти из аккаунта
-                  </a>
-                </li>
+                {user && (
+                  <li>
+                    <button type="button" className="sidebar-nav__link sidebar-nav__logout" onClick={logout}>
+                      Выйти из аккаунта
+                    </button>
+                  </li>
+                )}
               </ul>
             </nav>
           </aside>
@@ -90,45 +148,65 @@ export default function ProfilePage() {
               <h2 className="profile-card__title section-title">Последние заказы</h2>
               <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
               <div className="profile-card__actions">
-                <a href="#" className="btn btn--dark">
+                <Link to="/" className="btn btn--dark">
                   Каталог
-                </a>
+                </Link>
               </div>
             </div>
 
             <div className="profile-card">
               <h2 className="profile-card__title section-title">Личная информация</h2>
-              <ul className="profile-info__list">
-                {FIELDS.map(({ key, label }) => {
-                  const value = profile[key]?.trim?.()
-                  return (
-                    <li className={`profile-info__item${value ? '' : ' profile-info__item--empty'}`} key={key}>
-                      {value ? `${label}: ${value}` : label}
-                    </li>
-                  )
-                })}
-              </ul>
-              <div className="profile-card__actions">
-                <button className="btn btn--dark" onClick={openModal} disabled={saved}>
-                  {saved ? 'Сохранено ✓' : 'Изменить'}
-                </button>
-              </div>
+              {checking && <p className="profile-card__empty">Загрузка...</p>}
+
+              {!checking && user && (
+                <>
+                  <ul className="profile-info__list">
+                    {FIELDS.map(({ key, label }) => {
+                      const value = user[key]?.trim?.()
+                      return (
+                        <li className={`profile-info__item${value ? '' : ' profile-info__item--empty'}`} key={key}>
+                          {value ? `${label}: ${value}` : label}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  <div className="profile-card__actions">
+                    <button className="btn btn--dark" onClick={openModal} disabled={saved}>
+                      {saved ? 'Сохранено ✓' : 'Изменить'}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {!checking && !user && (
+                <div className="profile-card__login">
+                  <p className="profile-card__empty">
+                    Войдите...
+                  </p>
+                  {VK_APP_ID ? (
+                    <div className="profile-card__vk" ref={vkContainerRef} />
+                  ) : (
+                    <p className="profile-login__hint--muted">Вход через VK ID пока не настроен</p>
+                  )}
+                  {loginError && <p className="profile-login__error">{loginError}</p>}
+                </div>
+              )}
             </div>
 
             <div className="profile-card profile-card--wide">
               <h2 className="profile-card__title section-title">История заказов</h2>
               <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
               <div className="profile-card__actions">
-                <a href="#" className="btn btn--dark">
+                <Link to="/" className="btn btn--dark">
                   Каталог
-                </a>
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <Modal open={modalOpen} titleId="modalTitle" title="Личная информация" onClose={closeModal}>
+      <Modal open={modalOpen} titleId="modalTitle" title="Личная информация" onClose={() => setModalOpen(false)}>
         <form className="modal__form" onSubmit={handleSubmit} noValidate>
           {FIELDS.map(({ key, label, placeholder, type, autoComplete, inputMode }) => (
             <div className="modal__field" key={key}>
@@ -152,7 +230,7 @@ export default function ProfilePage() {
             <button type="submit" className="btn btn--dark">
               Сохранить
             </button>
-            <button type="button" className="btn btn--outline" onClick={closeModal}>
+            <button type="button" className="btn btn--outline" onClick={() => setModalOpen(false)}>
               Отмена
             </button>
           </div>

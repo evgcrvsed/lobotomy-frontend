@@ -4,6 +4,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+# ID приложения VK ID (вшивается в сборку)
+ARG VITE_VK_APP_ID
+ENV VITE_VK_APP_ID=$VITE_VK_APP_ID
 RUN npm run build
 
 # Стадия 2: nginx отдаёт статику и проксирует API на бэкенд
