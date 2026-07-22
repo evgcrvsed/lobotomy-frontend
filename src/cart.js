@@ -38,6 +38,23 @@ export function setCartQty(productId, size, qty) {
   save(items)
 }
 
+export function changeCartSize(productId, oldSize, newSize) {
+  if (oldSize === newSize) return
+  const items = getCart()
+  const item = items.find((i) => i.productId === productId && i.size === oldSize)
+  if (!item) return
+
+  const target = items.find((i) => i.productId === productId && i.size === newSize)
+  if (target) {
+    // такой размер уже лежит в корзине — склеиваем позиции
+    target.qty += item.qty
+    save(items.filter((i) => i !== item))
+  } else {
+    item.size = newSize
+    save(items)
+  }
+}
+
 export function clearCart() {
   save([])
 }

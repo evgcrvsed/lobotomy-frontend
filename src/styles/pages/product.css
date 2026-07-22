@@ -91,8 +91,40 @@
     padding-top: 33px;
 }
 
+.product-cart-row {
+    display: flex;
+    gap: 0;
+}
+
+/* Ярлык «в корзину»: появляется, когда товар уже добавлен.
+   Ширина и прозрачность анимируются — кнопка добавления плавно ужимается */
+.product-goto-cart {
+    width: 0;
+    opacity: 0;
+    margin-left: 0;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-black);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: width 0.3s ease, opacity 0.3s ease, margin-left 0.3s ease, background-color 0.15s ease;
+}
+
+.product-goto-cart--visible {
+    width: 52px;
+    opacity: 1;
+    margin-left: 10px;
+    pointer-events: auto;
+}
+
+.product-goto-cart:hover { background-color: var(--color-btn-hover); }
+
 .product-cart-btn {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 13px;
     background-color: var(--color-black);
     color: var(--color-white);

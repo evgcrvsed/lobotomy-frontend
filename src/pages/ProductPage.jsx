@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
-import { addToCart } from '../cart'
+import { addToCart, getCart } from '../cart'
 import previewImg from '../assets/images/preview.webp'
 import '../styles/components/hero.css'
 import '../styles/pages/product.css'
@@ -23,6 +23,15 @@ export default function ProductPage() {
   const [size, setSize] = useState('')
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
+  const [cartItems, setCartItems] = useState(() => getCart())
+
+  useEffect(() => {
+    const sync = () => setCartItems(getCart())
+    window.addEventListener('cart-changed', sync)
+    return () => window.removeEventListener('cart-changed', sync)
+  }, [])
+
+  const inCart = product ? cartItems.some((i) => i.productId === product.id) : false
 
   function handleAddToCart() {
     const mainImage = product.images.find((i) => i.role === 'main') ?? product.images[0]
@@ -111,9 +120,29 @@ export default function ProductPage() {
               </div>
 
               <div className="product-col product-col--right">
-                <button className="product-cart-btn" type="button" onClick={handleAddToCart}>
-                  {added ? 'Добавлено ✓' : 'Добавить в корзину'}
-                </button>
+                <div className="product-cart-row">
+                  <button className="product-cart-btn" type="button" onClick={handleAddToCart}>
+                    {added ? 'Добавлено ✓' : 'Добавить в корзину'}
+                  </button>
+                  <Link
+                    to="/checkout"
+                    className={`product-goto-cart${inCart ? ' product-goto-cart--visible' : ''}`}
+                    aria-label="Перейти в корзину"
+                    tabIndex={inCart ? 0 : -1}
+                  >
+                    <svg width="20" height="22" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M1 1H4L6 14H16L18.5 5H5"
+                        stroke="#ffffff"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <circle cx="8" cy="18" r="1.5" fill="#ffffff" />
+                      <circle cx="14" cy="18" r="1.5" fill="#ffffff" />
+                    </svg>
+                  </Link>
+                </div>
 
                 <div className="product-actions-row">
                   <div className="product-qty">

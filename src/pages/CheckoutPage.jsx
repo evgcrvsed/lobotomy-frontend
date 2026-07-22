@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { getToken } from '../auth'
-import { getCart, removeFromCart } from '../cart'
+import { changeCartSize, getCart, removeFromCart, setCartQty } from '../cart'
 import '../styles/pages/checkout.css'
 
 const DELIVERY_OPTIONS = [
@@ -151,7 +151,41 @@ export default function CheckoutPage() {
                   </Link>
                   <div className="checkout-item__info">
                     <span className="checkout-item__name">{item.name}</span>
-                    {item.size && <span className="checkout-item__size">{item.size}</span>}
+                    <div className="checkout-item__controls">
+                      {(productsById[item.productId]?.sizes?.length ?? 0) > 0 ? (
+                        <select
+                          className="checkout-item__select"
+                          value={item.size ?? ''}
+                          aria-label="Размер"
+                          onChange={(e) => changeCartSize(item.productId, item.size, e.target.value)}
+                        >
+                          {productsById[item.productId].sizes.map((s) => (
+                            <option key={s.id} value={s.label}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        item.size && <span className="checkout-item__size">{item.size}</span>
+                      )}
+                      <div className="checkout-item__stepper">
+                        <button
+                          type="button"
+                          aria-label="Меньше"
+                          onClick={() => setCartQty(item.productId, item.size, item.qty - 1)}
+                        >
+                          −
+                        </button>
+                        <span>{item.qty}</span>
+                        <button
+                          type="button"
+                          aria-label="Больше"
+                          onClick={() => setCartQty(item.productId, item.size, item.qty + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   <div className="checkout-item__right">
                     <span className="checkout-item__price">
