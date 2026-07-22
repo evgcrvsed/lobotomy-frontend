@@ -9,6 +9,8 @@ export default function Layout() {
 
   useEffect(() => {
     setCovered(true)
+    // новая страница всегда открывается сверху (прыжок скрыт белой вуалью)
+    window.scrollTo(0, 0)
     // двойной rAF: браузер должен успеть отрисовать белый слой до старта растворения
     let second
     const first = requestAnimationFrame(() => {
