@@ -406,6 +406,10 @@
     gap: 12px;
 }
 
+.modal__row--triple {
+    grid-template-columns: repeat(3, 1fr);
+}
+
 @media (max-width: 768px) {
     .admin-row {
         grid-template-columns: 56px 1fr auto;

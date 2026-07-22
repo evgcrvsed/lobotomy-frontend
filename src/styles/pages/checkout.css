@@ -169,13 +169,34 @@
 .checkout-item__name { font-size: 15px; color: var(--color-black); }
 .checkout-item__size { font-size: 13px; color: var(--color-gray); }
 
-/* Управление позицией: размер + количество */
+/* Управление позицией: [размер + сетка] сверху, количество под ними */
 .checkout-item__controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
     margin-top: 6px;
 }
+
+.checkout-item__row {
+    display: flex;
+    align-items: stretch;
+    gap: 7px;
+}
+
+.checkout-item__chart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    background-color: #ededed;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.checkout-item__chart:hover { background-color: #dedede; }
 
 .checkout-item__select {
     font-family: var(--font-body);
@@ -192,6 +213,7 @@
 .checkout-item__stepper {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     background-color: #ededed;
     border-radius: 2px;
 }
@@ -256,6 +278,43 @@
     border-top: 1px solid var(--color-black);
     padding-top: 14px;
     font-size: 17px;
+}
+
+/* ---- ПРОСМОТР РАЗМЕРНОЙ СЕТКИ ---- */
+.sizechart-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(17, 17, 17, 0.85);
+    cursor: zoom-out;
+    animation: chartIn 0.18s ease;
+}
+
+@keyframes chartIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.sizechart-overlay img {
+    max-width: 94vw;
+    max-height: 94vh;
+    object-fit: contain;
+    background-color: var(--color-white);
+}
+
+.sizechart-overlay__close {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
 }
 
 /* ---- RESPONSIVE ---- */

@@ -11,14 +11,12 @@ const DELIVERY_OPTIONS = [
   { id: 'cis', label: 'Страны СНГ', price: 750 },
 ]
 
-const FORM_FIELDS = [
-  { key: 'email', label: 'Email', placeholder: 'lobotomymerchstore@gmail.com', type: 'email' },
-  { key: 'country', label: 'Страна', placeholder: 'Россия', type: 'text' },
-  { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text' },
-  { key: 'fullName', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text' },
-  { key: 'address', label: 'Адрес', placeholder: 'ул. Ленина, 29', type: 'text' },
-  { key: 'cdekPoint', label: 'Пункт СДЭК (Только для доставки СДЭКом)', placeholder: 'ул. Кутузова, 27', type: 'text' },
-]
+// Подписи двух последних полей меняются вместе со способом доставки
+const DELIVERY_TEXTS = {
+  cdek: { index: 'Индекс СДЭК', point: 'Адрес пункта СДЭК' },
+  post: { index: 'Индекс Почты России', point: 'Адрес отделения Почты России' },
+  cis: { index: 'Индекс', point: 'Адрес' },
+}
 
 function plural(n, one, few, many) {
   const mod10 = n % 10
@@ -33,14 +31,24 @@ export default function CheckoutPage() {
   const [productsById, setProductsById] = useState({})
   const [collections, setCollections] = useState([])
   const [delivery, setDelivery] = useState('cdek')
+  const [chartSrc, setChartSrc] = useState(null)
   const [form, setForm] = useState({
+    fullName: '',
     email: '',
     country: '',
     city: '',
-    fullName: '',
-    address: '',
-    cdekPoint: '',
+    postal: '',
+    pickupPoint: '',
   })
+
+  const formFields = [
+    { key: 'fullName', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text' },
+    { key: 'email', label: 'Почта', placeholder: 'lobotomymerchstore@gmail.com', type: 'email' },
+    { key: 'country', label: 'Страна', placeholder: 'Россия', type: 'text' },
+    { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text' },
+    { key: 'postal', label: DELIVERY_TEXTS[delivery].index, placeholder: '101000', type: 'text' },
+    { key: 'pickupPoint', label: DELIVERY_TEXTS[delivery].point, placeholder: 'ул. Кутузова, 27', type: 'text' },
+  ]
 
   // корзина может измениться (кнопка «убрать») — держим список свежим
   useEffect(() => {
@@ -63,7 +71,7 @@ export default function CheckoutPage() {
           email: me.email ?? '',
           city: me.city ?? '',
           fullName: me.full_name ?? '',
-          address: me.address ?? '',
+          postal: me.postal_code ?? '',
         }))
       })
     }
@@ -81,6 +89,11 @@ export default function CheckoutPage() {
 
   function hoverImage(item) {
     const img = productsById[item.productId]?.images.find((i) => i.role === 'hover')
+    return img ? imageUrl(img.filename) : null
+  }
+
+  function sizeChart(item) {
+    const img = productsById[item.productId]?.images.find((i) => i.role === 'sizechart')
     return img ? imageUrl(img.filename) : null
   }
 
@@ -102,7 +115,7 @@ export default function CheckoutPage() {
           <section className="checkout__form">
             <h1 className="checkout__title">Личная информация</h1>
 
-            {FORM_FIELDS.map(({ key, label, placeholder, type }) => (
+            {formFields.map(({ key, label, placeholder, type }) => (
               <div className="checkout__field" key={key}>
                 <label className="checkout__label" htmlFor={`co-${key}`}>
                   {label}
@@ -152,22 +165,43 @@ export default function CheckoutPage() {
                   <div className="checkout-item__info">
                     <span className="checkout-item__name">{item.name}</span>
                     <div className="checkout-item__controls">
-                      {(productsById[item.productId]?.sizes?.length ?? 0) > 0 ? (
-                        <select
-                          className="checkout-item__select"
-                          value={item.size ?? ''}
-                          aria-label="Размер"
-                          onChange={(e) => changeCartSize(item.productId, item.size, e.target.value)}
-                        >
-                          {productsById[item.productId].sizes.map((s) => (
-                            <option key={s.id} value={s.label}>
-                              {s.label}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        item.size && <span className="checkout-item__size">{item.size}</span>
-                      )}
+                      <div className="checkout-item__row">
+                        {(productsById[item.productId]?.sizes?.length ?? 0) > 0 ? (
+                          <select
+                            className="checkout-item__select"
+                            value={item.size ?? ''}
+                            aria-label="Размер"
+                            onChange={(e) => changeCartSize(item.productId, item.size, e.target.value)}
+                          >
+                            {productsById[item.productId].sizes.map((s) => (
+                              <option key={s.id} value={s.label}>
+                                {s.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          item.size && <span className="checkout-item__size">{item.size}</span>
+                        )}
+                        {sizeChart(item) && (
+                          <button
+                            type="button"
+                            className="checkout-item__chart"
+                            aria-label="Показать размерную сетку"
+                            title="Размерная сетка"
+                            onClick={() => setChartSrc(sizeChart(item))}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path
+                                d="M5 2L2 4L3.5 6.5L5 5.5V13H13V5.5L14.5 6.5L16 4L13 2H10.5C10.5 2.8 9.8 3.5 9 3.5C8.2 3.5 7.5 2.8 7.5 2H5Z"
+                                stroke="#111111"
+                                strokeWidth="1.3"
+                                strokeLinejoin="round"
+                              />
+                              <path d="M16.5 9V15M16.5 9L15.3 10.2M16.5 9L17.7 10.2M16.5 15L15.3 13.8M16.5 15L17.7 13.8" stroke="#111111" strokeWidth="1.1" strokeLinecap="round" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                       <div className="checkout-item__stepper">
                         <button
                           type="button"
@@ -220,6 +254,16 @@ export default function CheckoutPage() {
               </div>
             </div>
           </aside>
+        </div>
+      )}
+
+      {/* Полноэкранный просмотр размерной сетки */}
+      {chartSrc && (
+        <div className="sizechart-overlay" onClick={() => setChartSrc(null)}>
+          <img src={chartSrc} alt="Размерная сетка" />
+          <button type="button" className="sizechart-overlay__close" aria-label="Закрыть">
+            ×
+          </button>
         </div>
       )}
     </div>

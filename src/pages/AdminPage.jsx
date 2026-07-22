@@ -24,6 +24,7 @@ const EMPTY_FORM = {
   price: '',
   imageMain: null,
   imageHover: null,
+  imageSizechart: null,
   gallery: [],
   sizes: [],
 }
@@ -219,6 +220,7 @@ export default function AdminPage() {
       price: product.price,
       imageMain: product.images.find((i) => i.role === 'main')?.filename ?? null,
       imageHover: product.images.find((i) => i.role === 'hover')?.filename ?? null,
+      imageSizechart: product.images.find((i) => i.role === 'sizechart')?.filename ?? null,
       gallery: product.images
         .filter((i) => i.role === 'gallery')
         .sort((a, b) => a.sort_order - b.sort_order)
@@ -322,6 +324,9 @@ export default function AdminPage() {
     form.gallery.forEach((filename, i) => {
       images.push({ filename, role: 'gallery', sort_order: 3 + i })
     })
+    if (form.imageSizechart) {
+      images.push({ filename: form.imageSizechart, role: 'sizechart', sort_order: 99 })
+    }
 
     // строки, где не заполнен ни один замер, не сохраняем
     const toNum = (v) => (v === '' ? null : parseInt(v, 10))
@@ -607,7 +612,7 @@ export default function AdminPage() {
             />
           </div>
 
-          <div className="modal__row">
+          <div className="modal__row modal__row--triple">
             <ImageUploadSlot
               id="field-image-main"
               label="Основное фото *"
@@ -623,6 +628,14 @@ export default function AdminPage() {
               uploading={uploadingField === 'imageHover'}
               onSelect={(e) => handleFileSelect(e, 'imageHover')}
               onClear={() => setForm({ ...form, imageHover: null })}
+            />
+            <ImageUploadSlot
+              id="field-image-sizechart"
+              label="Размерная сетка"
+              filename={form.imageSizechart}
+              uploading={uploadingField === 'imageSizechart'}
+              onSelect={(e) => handleFileSelect(e, 'imageSizechart')}
+              onClear={() => setForm({ ...form, imageSizechart: null })}
             />
           </div>
 
