@@ -59,6 +59,18 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ access_token: accessToken }),
     }),
+  requestEmailCode: (email) =>
+    request('/api/auth/email/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }),
+  verifyEmailCode: (email, code) =>
+    request('/api/auth/email/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    }),
   getMe: () => request('/api/auth/me').then((r) => (r.ok ? r.json() : null)),
   updateMe: (data) =>
     request('/api/auth/me', {

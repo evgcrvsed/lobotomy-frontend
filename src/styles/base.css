@@ -99,6 +99,23 @@ body {
 }
 
 
+/* ACCESS GUARD (админские страницы) */
+.guard-status,
+.guard-denied {
+    padding: 96px var(--container-pad);
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+.guard-denied {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
     :root {

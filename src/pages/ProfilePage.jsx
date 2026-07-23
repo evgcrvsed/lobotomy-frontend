@@ -1,16 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import * as VKID from '@vkid/sdk'
 import { api } from '../api/client'
-import { clearToken, getToken, setToken } from '../auth'
+import { clearToken, getToken } from '../auth'
 import Modal from '../components/Modal'
 import ProductCard from '../components/ProductCard'
 import productImg from '../assets/images/product_1.jpg'
 import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/profile.css'
-
-const VK_APP_ID = Number(import.meta.env.VITE_VK_APP_ID) || 0
 
 const FIELDS = [
   { key: 'full_name', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text', autoComplete: 'name' },
@@ -31,8 +28,6 @@ export default function ProfilePage() {
   const [form, setForm] = useState({})
   const [modalOpen, setModalOpen] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [loginError, setLoginError] = useState(null)
-  const vkContainerRef = useRef(null)
 
   // при заходе на страницу проверяем сохранённый токен
   useEffect(() => {
@@ -46,41 +41,6 @@ export default function ProfilePage() {
       setChecking(false)
     })
   }, [])
-
-  // кнопка VK ID рисуется самим SDK в контейнер
-  useEffect(() => {
-    if (checking || user || !VK_APP_ID || !vkContainerRef.current) return
-
-    VKID.Config.init({
-      app: VK_APP_ID,
-      redirectUrl: `${window.location.origin}/profile`,
-      responseMode: VKID.ConfigResponseMode.Callback,
-      source: VKID.ConfigSource.LOWCODE,
-      scope: 'email',
-    })
-
-    const oneTap = new VKID.OneTap()
-    oneTap.render({ container: vkContainerRef.current, showAlternativeLogin: false })
-    oneTap.on(VKID.WidgetEvents.ERROR, () => setLoginError('VK ID: не удалось загрузить виджет'))
-    oneTap.on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async ({ code, device_id: deviceId }) => {
-      try {
-        const { access_token: accessToken } = await VKID.Auth.exchangeCode(code, deviceId)
-        const res = await api.vkLogin(accessToken)
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          setLoginError(err.detail ?? 'Не удалось войти')
-          return
-        }
-        const { token, user: me } = await res.json()
-        setToken(token)
-        setUser(me)
-      } catch {
-        setLoginError('Не удалось войти через VK ID')
-      }
-    })
-
-    return () => oneTap.close()
-  }, [checking, user])
 
   function logout() {
     clearToken()
@@ -181,14 +141,11 @@ export default function ProfilePage() {
               {!checking && !user && (
                 <div className="profile-card__login">
                   <p className="profile-card__empty">
-                    Войдите...
+                    Войдите, чтобы сохранить данные доставки и оформлять заказы
                   </p>
-                  {VK_APP_ID ? (
-                    <div className="profile-card__vk" ref={vkContainerRef} />
-                  ) : (
-                    <p className="profile-login__hint--muted">Вход через VK ID пока не настроен</p>
-                  )}
-                  {loginError && <p className="profile-login__error">{loginError}</p>}
+                  <Link to="/login" className="btn btn--dark">
+                    Войти
+                  </Link>
                 </div>
               )}
             </div>
