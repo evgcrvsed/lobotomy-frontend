@@ -5,7 +5,10 @@
 .login-page {
     display: flex;
     justify-content: center;
-    padding: 64px var(--container-pad) 96px;
+    align-items: center;
+    /* высота экрана за вычетом шапки — карточка встаёт по центру, а не под хедером */
+    min-height: calc(100vh - var(--header-height));
+    padding: 32px var(--container-pad);
 }
 
 .login-card {
