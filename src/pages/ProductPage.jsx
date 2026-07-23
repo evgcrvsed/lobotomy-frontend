@@ -7,10 +7,10 @@ import '../styles/components/hero.css'
 import '../styles/pages/product.css'
 
 const SIZE_COLUMNS = [
-  ['length', 'Lenght'],
-  ['shoulder', 'Shoulder'],
-  ['chest', 'Chest'],
-  ['sleeve', 'Sleeve'],
+  ['length', 'Длина'],
+  ['shoulder', 'Плечо'],
+  ['chest', 'Грудь'],
+  ['sleeve', 'Рукав'],
 ]
 
 const cm = (value) => (value ? `${value}cm` : '—')
