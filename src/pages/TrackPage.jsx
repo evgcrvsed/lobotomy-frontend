@@ -39,7 +39,7 @@ export default function TrackPage() {
         <input
           className="track-form__input"
           type="text"
-          placeholder="LOBO-XXXXXXXXXX"
+          placeholder="Номер заказа из письма"
           value={number}
           onChange={(e) => setNumber(e.target.value)}
           autoFocus
