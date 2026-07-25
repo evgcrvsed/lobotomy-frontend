@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
-import ProductCard from '../components/ProductCard'
-import '../styles/components/product-card.css'
-import '../styles/pages/index.css'
+import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
+
+const DELIVERY_OPTIONS = [
+  { id: 'cdek', label: 'СДЭК', price: 450 },
+  { id: 'post', label: 'Почта России', price: 350 },
+  { id: 'cis', label: 'Страны СНГ', price: 750 },
+]
+
+const DELIVERY_TEXTS = {
+  cdek: { index: 'Индекс СДЭК', point: 'Адрес пункта СДЭК' },
+  post: { index: 'Индекс Почты России', point: 'Адрес отделения Почты России' },
+  cis: { index: 'Индекс', point: 'Адрес' },
+}
 
 const STATUS_LABELS = {
   pending: 'Ожидает оплаты',
@@ -13,10 +23,12 @@ const STATUS_LABELS = {
   cancelled: 'Отменён',
 }
 
-const DELIVERY_LABELS = {
-  cdek: 'СДЭК',
-  post: 'Почта России',
-  cis: 'Страны СНГ',
+function plural(n, one, few, many) {
+  const mod10 = n % 10
+  const mod100 = n % 100
+  if (mod10 === 1 && mod100 !== 11) return one
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
+  return many
 }
 
 export default function OrderPage() {
@@ -42,91 +54,124 @@ export default function OrderPage() {
   if (state === 'loading') return <p className="order-page__status">Загрузка...</p>
   if (state === 'notfound') return <p className="order-page__status">Заказ не найден</p>
 
-  function itemHref(item) {
+  const texts = DELIVERY_TEXTS[order.delivery_method] ?? DELIVERY_TEXTS.cis
+  const fields = [
+    { label: 'ФИО', value: order.full_name },
+    { label: 'Почта', value: order.email },
+    { label: 'Страна', value: order.country },
+    { label: 'Город', value: order.city },
+    { label: texts.index, value: order.postal_code },
+    { label: texts.point, value: order.pickup_point },
+  ]
+
+  function productHref(item) {
     const product = productsById[item.product_id]
     const colSlug = collections.find((c) => c.id === product?.collection_id)?.slug
-    return product?.slug && colSlug ? `/${colSlug}/${product.slug}` : null
+    return product?.slug && colSlug ? `/${colSlug}/${product.slug}` : '#'
   }
 
-  // картинки берём у самого товара по product_id — как карточка в корзине
   function itemImage(item) {
     const product = productsById[item.product_id]
     const img = product?.images.find((i) => i.role === 'main') ?? product?.images?.[0]
     return img ? imageUrl(img.filename) : null
   }
 
-  function itemHoverImage(item) {
+  function hoverImage(item) {
     const img = productsById[item.product_id]?.images.find((i) => i.role === 'hover')
     return img ? imageUrl(img.filename) : null
   }
 
-  const address = [order.country, order.city, order.address, order.postal_code, order.pickup_point]
-    .filter(Boolean)
-    .join(', ')
+  const itemsCount = order.items.reduce((sum, i) => sum + i.qty, 0)
 
   return (
-    <div className="order-page">
-      <div className="order-page__head">
-        <div>
-          <span className="order-page__label">Заказ</span>
-          <h1 className="order-page__number">{order.number}</h1>
-        </div>
-        <span className={`order-page__status-badge order-view__status--${order.status}`}>
+    <div className="checkout">
+      <nav className="checkout__breadcrumbs">
+        <Link to="/">Главная</Link>/Заказ {order.number}
+        <span className={`order-page__status-badge order-page__status-badge--${order.status}`}>
           {STATUS_LABELS[order.status] ?? order.status}
         </span>
-      </div>
+      </nav>
 
-      <p className="order-page__tracking">
-        {order.tracking_number ? (
-          <>Трек-номер: <strong>{order.tracking_number}</strong></>
-        ) : (
-          <span className="order-page__tracking--empty">Ещё не отправлено..</span>
-        )}
-      </p>
+      <div className="checkout__grid">
+        <section className="checkout__form">
+          <h1 className="checkout__title">Личная информация</h1>
 
-      <div className="product-grid product-grid--catalog order-cards">
-        {order.items.map((item, i) => (
-          <ProductCard
-            key={i}
-            variant="v2"
-            href={itemHref(item) ?? '#'}
-            image={itemImage(item)}
-            hoverImage={itemHoverImage(item)}
-            name={item.name}
-            color={item.size ? `Размер: ${item.size}` : ''}
-            price={`${item.qty} шт × ${item.price.toLocaleString('ru-RU')}₽`}
-          />
-        ))}
-      </div>
+          {fields.map((f, i) => (
+            <div className="checkout__field" key={i}>
+              <span className="checkout__label">{f.label}</span>
+              <input className="checkout__input" value={f.value || '—'} readOnly />
+            </div>
+          ))}
 
-      <div className="order-page__details">
-        <div className="order-page__block">
-          <h2 className="order-page__block-title">Доставка</h2>
-          <p className="order-page__text">{DELIVERY_LABELS[order.delivery_method] ?? order.delivery_method}</p>
-          {address && <p className="order-page__text">{address}</p>}
-          {order.full_name && <p className="order-page__text">{order.full_name}</p>}
-          <p className="order-page__text">{order.email}</p>
-        </div>
-
-        <div className="order-page__block order-page__block--totals">
-          <div className="order-page__total-row">
-            <span>Товары</span>
-            <span>{order.items_total.toLocaleString('ru-RU')}₽</span>
+          <div className="checkout__field">
+            <span className="checkout__label">Способ доставки</span>
+            <div className="delivery-options">
+              {DELIVERY_OPTIONS.map((opt) => (
+                <label className="delivery-option" key={opt.id}>
+                  <input
+                    type="radio"
+                    className="delivery-option__input"
+                    checked={order.delivery_method === opt.id}
+                    disabled
+                    readOnly
+                  />
+                  <span className="delivery-option__box" />
+                  {opt.label} {opt.price}р
+                </label>
+              ))}
+            </div>
           </div>
-          <div className="order-page__total-row">
-            <span>Доставка</span>
-            <span>{order.delivery_price.toLocaleString('ru-RU')}₽</span>
-          </div>
-          <div className="order-page__total-row order-page__total-row--final">
-            <span>Итого</span>
-            <span>{order.total.toLocaleString('ru-RU')}₽</span>
-          </div>
-        </div>
-      </div>
+        </section>
 
-      <Link to="/" className="order-page__back">
-        ← В каталог
-      </Link>
+        <aside className="checkout__summary">
+          <div className="checkout__items">
+            {order.items.map((item, i) => (
+              <div className="checkout-item" key={i}>
+                <Link to={productHref(item)} className="checkout-item__img">
+                  {itemImage(item) && <img src={itemImage(item)} alt={item.name} />}
+                  {hoverImage(item) && (
+                    <img src={hoverImage(item)} alt="" aria-hidden="true" className="checkout-item__img-hover" />
+                  )}
+                  <span className="checkout-item__qty">{item.qty}</span>
+                </Link>
+                <div className="checkout-item__info">
+                  <span className="checkout-item__name">{item.name}</span>
+                  {item.size && <span className="checkout-item__size">{item.size}</span>}
+                </div>
+                <div className="checkout-item__right">
+                  <span className="checkout-item__price">
+                    {(item.price * item.qty).toLocaleString('ru-RU')}Р
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="checkout__totals">
+            <div className="checkout__total-row">
+              <span>
+                Итог: {itemsCount} {plural(itemsCount, 'изделие', 'изделия', 'изделий')}
+              </span>
+              <span>{order.items_total.toLocaleString('ru-RU')}Р</span>
+            </div>
+            <div className="checkout__total-row">
+              <span>Доставка:</span>
+              <span>{order.delivery_price.toLocaleString('ru-RU')}Р</span>
+            </div>
+            <div className="checkout__total-row checkout__total-row--final">
+              <span>Итог:</span>
+              <span>{order.total.toLocaleString('ru-RU')}Р</span>
+            </div>
+          </div>
+
+          <div className="order-tracking">
+            <span className="order-tracking__label">Трек-номер</span>
+            <span className={`order-tracking__value${order.tracking_number ? '' : ' order-tracking__value--empty'}`}>
+              {order.tracking_number || 'Ещё не отправлено..'}
+            </span>
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }

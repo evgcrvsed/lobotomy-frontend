@@ -1,153 +1,64 @@
 /* ============================================================
-   ORDER PAGE — отдельная страница одного заказа
+   ORDER PAGE — вид как страница оформления, но только для чтения
    ============================================================ */
 
-.order-page {
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 40px var(--container-pad) 80px;
-}
-
 .order-page__status {
-    padding: 96px 0;
+    padding: 96px var(--container-pad);
     text-align: center;
     color: var(--color-muted);
     font-size: 14px;
 }
 
-.order-page__head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
+/* Бейдж статуса рядом с хлебными крошками */
+.order-page__status-badge {
+    display: inline-block;
+    margin-left: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background-color: #ededed;
+    color: var(--color-gray);
+    vertical-align: middle;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
-.order-page__label {
+.order-page__status-badge--paid { background-color: #e1f5ee; color: #0f6e56; }
+.order-page__status-badge--shipped { background-color: #e6f1fb; color: #185fa5; }
+.order-page__status-badge--cancelled { background-color: #faece7; color: #993c1d; }
+
+/* Поля только для чтения */
+.checkout__input[readonly] {
+    cursor: default;
+}
+
+/* Блок трек-номера вместо кнопки «Оплатить» */
+.order-tracking {
+    margin-top: 22px;
+    padding: 16px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.order-tracking__label {
     font-size: 12px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-muted);
 }
 
-.order-page__number {
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    margin-top: 2px;
-}
-
-.order-page__status-badge {
-    font-size: 13px;
+.order-tracking__value {
+    font-size: 16px;
     font-weight: 600;
-    padding: 5px 14px;
-    border-radius: 20px;
-    background-color: #ededed;
-    color: var(--color-gray);
-    white-space: nowrap;
-}
-
-.order-page__tracking {
-    margin-top: 14px;
-    font-size: 15px;
     color: var(--color-black);
 }
 
-.order-page__tracking--empty {
-    color: var(--color-muted);
+.order-tracking__value--empty {
+    font-weight: 400;
     font-style: italic;
-}
-
-/* ---- Карточки товаров ---- */
-.order-cards {
-    margin-top: 28px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 20px;
-}
-
-.order-card__link { display: block; }
-
-.order-card__media,
-.order-card__ph {
-    aspect-ratio: 3 / 4;
-    background-color: #ebebeb;
-    overflow: hidden;
-    border-radius: 2px;
-}
-
-.order-card__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-}
-
-.order-card__link:hover img { transform: scale(1.04); }
-
-.order-card__info {
-    padding: 12px 2px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.order-card__name { font-size: 14px; font-weight: 500; color: var(--color-black); }
-.order-card__size { font-size: 13px; color: var(--color-muted); }
-.order-card__qty { font-size: 13px; color: var(--color-gray); margin-top: 2px; }
-
-/* ---- Детали заказа ---- */
-.order-page__details {
-    margin-top: 40px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    align-items: start;
-}
-
-.order-page__block-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 12px;
-}
-
-.order-page__text {
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--color-gray);
-}
-
-.order-page__block--totals {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.order-page__total-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    color: var(--color-gray);
-}
-
-.order-page__total-row--final {
-    border-top: 1px solid var(--color-border);
-    padding-top: 10px;
-    margin-top: 4px;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-black);
-}
-
-.order-page__back {
-    display: inline-block;
-    margin-top: 40px;
-    font-size: 14px;
     color: var(--color-muted);
-}
-
-.order-page__back:hover { color: var(--color-black); }
-
-@media (max-width: 640px) {
-    .order-page__details { grid-template-columns: 1fr; gap: 28px; }
-    .order-cards { grid-template-columns: 1fr 1fr; gap: 12px; }
 }
