@@ -80,4 +80,12 @@ export const api = {
     }),
   getImages: () => request('/api/uploads/images').then((r) => (r.ok ? r.json() : [])),
   deleteImage: (filename) => request(`/api/uploads/images/${encodeURIComponent(filename)}`, { method: 'DELETE' }),
+  createOrder: (data) =>
+    request('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  trackOrder: (number) => request(`/api/orders/track/${encodeURIComponent(number)}`),
+  getMyOrders: () => request('/api/orders/my').then((r) => (r.ok ? r.json() : [])),
 }

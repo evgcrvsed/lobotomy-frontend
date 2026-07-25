@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import { clearToken, getToken } from '../auth'
 import Modal from '../components/Modal'
+import OrderView from '../components/OrderView'
 import ProductCard from '../components/ProductCard'
 import productImg from '../assets/images/product_1.jpg'
 import '../styles/components/modal.css'
@@ -24,6 +25,7 @@ const RECOMMENDATIONS = [
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null)
+  const [orders, setOrders] = useState([])
   const [checking, setChecking] = useState(true)
   const [form, setForm] = useState({})
   const [modalOpen, setModalOpen] = useState(false)
@@ -36,15 +38,21 @@ export default function ProfilePage() {
       return
     }
     api.getMe().then((me) => {
-      if (!me) clearToken() // токен протух — забываем его
+      if (!me) {
+        clearToken() // токен протух — забываем его
+        setChecking(false)
+        return
+      }
       setUser(me)
       setChecking(false)
+      api.getMyOrders().then(setOrders)
     })
   }, [])
 
   function logout() {
     clearToken()
     setUser(null)
+    setOrders([])
   }
 
   function openModal() {
@@ -105,13 +113,19 @@ export default function ProfilePage() {
 
           <div className="profile__cards">
             <div className="profile-card">
-              <h2 className="profile-card__title section-title">Последние заказы</h2>
-              <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
-              <div className="profile-card__actions">
-                <Link to="/" className="btn btn--dark">
-                  Каталог
-                </Link>
-              </div>
+              <h2 className="profile-card__title section-title">Последний заказ</h2>
+              {orders.length > 0 ? (
+                <OrderView order={orders[0]} />
+              ) : (
+                <>
+                  <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
+                  <div className="profile-card__actions">
+                    <Link to="/" className="btn btn--dark">
+                      Каталог
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="profile-card">
@@ -152,12 +166,18 @@ export default function ProfilePage() {
 
             <div className="profile-card profile-card--wide">
               <h2 className="profile-card__title section-title">История заказов</h2>
-              <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
-              <div className="profile-card__actions">
-                <Link to="/" className="btn btn--dark">
-                  Каталог
-                </Link>
-              </div>
+              {orders.length > 0 ? (
+                orders.map((o) => <OrderView key={o.number} order={o} />)
+              ) : (
+                <>
+                  <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
+                  <div className="profile-card__actions">
+                    <Link to="/" className="btn btn--dark">
+                      Каталог
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

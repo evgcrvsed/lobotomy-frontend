@@ -287,6 +287,24 @@
     font-size: 17px;
 }
 
+.checkout__pay {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    background-color: var(--color-black);
+    color: var(--color-white);
+    border: none;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.checkout__pay:hover:not(:disabled) { background-color: var(--color-btn-hover); }
+.checkout__pay:disabled { opacity: 0.5; cursor: default; }
+
 /* ---- ПРОСМОТР РАЗМЕРНОЙ СЕТКИ ---- */
 .sizechart-overlay {
     position: fixed;

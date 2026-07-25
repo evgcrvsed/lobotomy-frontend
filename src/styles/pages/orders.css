@@ -1,0 +1,169 @@
+/* ============================================================
+   ORDERS — трек, результат оплаты, карточка заказа
+   ============================================================ */
+
+/* ---- Результат оплаты (успех/неудача) ---- */
+.order-result {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 72px var(--container-pad) 96px;
+    text-align: center;
+}
+
+.order-result__title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.order-result__number {
+    margin-top: 14px;
+    font-size: 15px;
+}
+
+.order-result__text {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--color-gray);
+    line-height: 1.6;
+}
+
+.order-result__actions {
+    margin-top: 28px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ---- Страница отслеживания ---- */
+.track-page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 48px var(--container-pad) 96px;
+}
+
+.track-page__title {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.track-page__hint {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+.track-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.track-form__input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    background-color: #ededed;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    outline: none;
+}
+
+.track-form__input:focus { border-color: var(--color-black); }
+
+.track-page__error {
+    margin-top: 18px;
+    font-size: 14px;
+    color: #c0392b;
+}
+
+.track-page__login-hint {
+    margin-top: 28px;
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+.track-page__login-hint a { text-decoration: underline; }
+
+/* ---- Карточка заказа ---- */
+.order-view {
+    margin-top: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 18px 20px;
+    text-align: left;
+}
+
+.order-view + .order-view { margin-top: 14px; }
+
+.order-view__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.order-view__number {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.order-view__status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background-color: #ededed;
+    color: var(--color-gray);
+    white-space: nowrap;
+}
+
+.order-view__status--paid { background-color: #e1f5ee; color: #0f6e56; }
+.order-view__status--shipped { background-color: #e6f1fb; color: #185fa5; }
+.order-view__status--cancelled { background-color: #faece7; color: #993c1d; }
+
+.order-view__items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.order-view__item {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    font-size: 14px;
+    color: var(--color-black);
+}
+
+.order-view__totals {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--color-gray);
+}
+
+.order-view__totals > div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.order-view__total {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+.order-view__tracking {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--color-gray);
+}

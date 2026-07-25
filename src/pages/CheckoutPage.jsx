@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   const [collections, setCollections] = useState([])
   const [delivery, setDelivery] = useState('cdek')
   const [chartSrc, setChartSrc] = useState(null)
+  const [paying, setPaying] = useState(false)
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -95,6 +96,36 @@ export default function CheckoutPage() {
   function sizeChart(item) {
     const img = productsById[item.productId]?.images.find((i) => i.role === 'sizechart')
     return img ? imageUrl(img.filename) : null
+  }
+
+  async function pay() {
+    if (!form.email.trim()) {
+      alert('Укажите почту — на неё придёт информация о заказе')
+      return
+    }
+    setPaying(true)
+    try {
+      const payload = {
+        email: form.email.trim(),
+        full_name: form.fullName.trim() || null,
+        delivery_method: delivery,
+        country: form.country.trim() || null,
+        city: form.city.trim() || null,
+        postal_code: form.postal.trim() || null,
+        pickup_point: form.pickupPoint.trim() || null,
+        items: items.map((i) => ({ product_id: i.productId, size: i.size, qty: i.qty })),
+      }
+      const res = await api.createOrder(payload)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Не удалось оформить заказ: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      const { payment_url } = await res.json()
+      window.location.href = payment_url // уходим на страницу оплаты Т-Банка
+    } finally {
+      setPaying(false)
+    }
   }
 
   return (
@@ -253,6 +284,10 @@ export default function CheckoutPage() {
                 <span>{(itemsTotal + deliveryPrice).toLocaleString('ru-RU')}Р</span>
               </div>
             </div>
+
+            <button className="checkout__pay" type="button" onClick={pay} disabled={paying}>
+              {paying ? 'Переходим к оплате...' : `Оплатить ${(itemsTotal + deliveryPrice).toLocaleString('ru-RU')}Р`}
+            </button>
           </aside>
         </div>
       )}

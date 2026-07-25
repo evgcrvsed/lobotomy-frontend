@@ -5,6 +5,9 @@ import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
 import ProductPage from './pages/ProductPage'
 import CheckoutPage from './pages/CheckoutPage'
+import CheckoutSuccessPage from './pages/CheckoutSuccessPage'
+import CheckoutFailPage from './pages/CheckoutFailPage'
+import TrackPage from './pages/TrackPage'
 import LoginPage from './pages/LoginPage'
 import RequireAdmin from './components/RequireAdmin'
 
@@ -17,6 +20,9 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+          <Route path="/checkout/fail" element={<CheckoutFailPage />} />
+          <Route path="/track" element={<TrackPage />} />
           <Route path="/:collectionSlug/:productSlug" element={<ProductPage />} />
           <Route
             path="/admin"
