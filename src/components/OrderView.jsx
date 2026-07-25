@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { api } from '../api/client'
 import '../styles/pages/orders.css'
 
 const STATUS_LABELS = {
@@ -14,6 +16,23 @@ const DELIVERY_LABELS = {
 }
 
 export default function OrderView({ order }) {
+  const [paying, setPaying] = useState(false)
+
+  async function pay() {
+    setPaying(true)
+    try {
+      const res = await api.resumePayment(order.number)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Не удалось перейти к оплате: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      window.location.href = (await res.json()).payment_url
+    } finally {
+      setPaying(false)
+    }
+  }
+
   return (
     <div className="order-view">
       <div className="order-view__head">
@@ -48,6 +67,12 @@ export default function OrderView({ order }) {
 
       {order.tracking_number && (
         <p className="order-view__tracking">Трек-номер: <strong>{order.tracking_number}</strong></p>
+      )}
+
+      {order.status === 'pending' && (
+        <button className="order-view__pay" type="button" onClick={pay} disabled={paying}>
+          {paying ? 'Переходим к оплате...' : 'Оплатить'}
+        </button>
       )}
     </div>
   )

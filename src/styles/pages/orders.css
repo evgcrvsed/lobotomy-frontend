@@ -167,3 +167,21 @@
     font-size: 13px;
     color: var(--color-gray);
 }
+
+.order-view__pay {
+    margin-top: 14px;
+    width: 100%;
+    padding: 11px;
+    background-color: var(--color-black);
+    color: var(--color-white);
+    border: none;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.order-view__pay:hover:not(:disabled) { background-color: var(--color-btn-hover); }
+.order-view__pay:disabled { opacity: 0.5; cursor: default; }
