@@ -48,6 +48,7 @@ export default function OrderPage() {
     return product?.slug && colSlug ? `/${colSlug}/${product.slug}` : null
   }
 
+  // картинки берём у самого товара по product_id — как карточка в корзине
   function itemImage(item) {
     const product = productsById[item.product_id]
     const img = product?.images.find((i) => i.role === 'main') ?? product?.images?.[0]
