@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import '../styles/pages/orders.css'
 
@@ -15,7 +16,7 @@ const DELIVERY_LABELS = {
   cis: 'Страны СНГ',
 }
 
-export default function OrderView({ order }) {
+export default function OrderView({ order, linkTo }) {
   const [paying, setPaying] = useState(false)
 
   async function pay() {
@@ -36,7 +37,13 @@ export default function OrderView({ order }) {
   return (
     <div className="order-view">
       <div className="order-view__head">
-        <span className="order-view__number">Заказ {order.number}</span>
+        {linkTo ? (
+          <Link to={linkTo} target="_blank" rel="noopener" className="order-view__number order-view__number--link">
+            Заказ {order.number}
+          </Link>
+        ) : (
+          <span className="order-view__number">Заказ {order.number}</span>
+        )}
         <span className={`order-view__status order-view__status--${order.status}`}>
           {STATUS_LABELS[order.status] ?? order.status}
         </span>

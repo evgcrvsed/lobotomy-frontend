@@ -115,7 +115,7 @@ export default function ProfilePage() {
             <div className="profile-card">
               <h2 className="profile-card__title section-title">Последний заказ</h2>
               {orders.length > 0 ? (
-                <OrderView order={orders[0]} />
+                <OrderView order={orders[0]} linkTo={`/order/${orders[0].number}`} />
               ) : (
                 <>
                   <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
@@ -167,7 +167,7 @@ export default function ProfilePage() {
             <div className="profile-card profile-card--wide">
               <h2 className="profile-card__title section-title">История заказов</h2>
               {orders.length > 0 ? (
-                orders.map((o) => <OrderView key={o.number} order={o} />)
+                orders.map((o) => <OrderView key={o.number} order={o} linkTo={`/order/${o.number}`} />)
               ) : (
                 <>
                   <p className="profile-card__empty">Вы ещё ничего не заказывали</p>

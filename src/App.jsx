@@ -8,6 +8,7 @@ import CheckoutPage from './pages/CheckoutPage'
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage'
 import CheckoutFailPage from './pages/CheckoutFailPage'
 import TrackPage from './pages/TrackPage'
+import OrderPage from './pages/OrderPage'
 import LoginPage from './pages/LoginPage'
 import RequireAdmin from './components/RequireAdmin'
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
           <Route path="/checkout/fail" element={<CheckoutFailPage />} />
           <Route path="/track" element={<TrackPage />} />
+          <Route path="/order/:number" element={<OrderPage />} />
           <Route path="/:collectionSlug/:productSlug" element={<ProductPage />} />
           <Route
             path="/admin"

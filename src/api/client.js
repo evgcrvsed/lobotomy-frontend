@@ -89,4 +89,5 @@ export const api = {
   trackOrder: (number) => request(`/api/orders/track/${encodeURIComponent(number)}`),
   getMyOrders: () => request('/api/orders/my').then((r) => (r.ok ? r.json() : [])),
   resumePayment: (number) => request(`/api/orders/${encodeURIComponent(number)}/pay`, { method: 'POST' }),
+  getOrder: (number) => request(`/api/orders/${encodeURIComponent(number)}`).then((r) => (r.ok ? r.json() : null)),
 }

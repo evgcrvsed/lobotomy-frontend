@@ -112,6 +112,14 @@
     font-weight: 600;
 }
 
+.order-view__number--link {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.order-view__number--link:hover { color: var(--color-gray); }
+
 .order-view__status {
     font-size: 12px;
     font-weight: 600;
