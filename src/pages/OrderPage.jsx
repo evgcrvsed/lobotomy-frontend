@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import ProductCard from '../components/ProductCard'
+import '../styles/components/product-card.css'
+import '../styles/pages/index.css'
 import '../styles/pages/order-page.css'
 
 const STATUS_LABELS = {
@@ -51,6 +54,11 @@ export default function OrderPage() {
     return img ? imageUrl(img.filename) : null
   }
 
+  function itemHoverImage(item) {
+    const img = productsById[item.product_id]?.images.find((i) => i.role === 'hover')
+    return img ? imageUrl(img.filename) : null
+  }
+
   const address = [order.country, order.city, order.address, order.postal_code, order.pickup_point]
     .filter(Boolean)
     .join(', ')
@@ -75,34 +83,19 @@ export default function OrderPage() {
         )}
       </p>
 
-      <div className="order-cards">
-        {order.items.map((item, i) => {
-          const href = itemHref(item)
-          const img = itemImage(item)
-          const media = (
-            <div className="order-card__media">
-              {img ? <img src={img} alt={item.name} /> : <div className="order-card__ph" />}
-            </div>
-          )
-          return (
-            <div className="order-card" key={i}>
-              {href ? (
-                <Link to={href} className="order-card__link">
-                  {media}
-                </Link>
-              ) : (
-                media
-              )}
-              <div className="order-card__info">
-                <span className="order-card__name">{item.name}</span>
-                {item.size && <span className="order-card__size">Размер: {item.size}</span>}
-                <span className="order-card__qty">
-                  {item.qty} шт × {item.price.toLocaleString('ru-RU')}₽
-                </span>
-              </div>
-            </div>
-          )
-        })}
+      <div className="product-grid product-grid--catalog order-cards">
+        {order.items.map((item, i) => (
+          <ProductCard
+            key={i}
+            variant="v2"
+            href={itemHref(item) ?? '#'}
+            image={itemImage(item)}
+            hoverImage={itemHoverImage(item)}
+            name={item.name}
+            color={item.size ? `Размер: ${item.size}` : ''}
+            price={`${item.qty} шт × ${item.price.toLocaleString('ru-RU')}₽`}
+          />
+        ))}
       </div>
 
       <div className="order-page__details">
