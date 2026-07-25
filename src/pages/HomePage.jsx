@@ -33,10 +33,14 @@ export default function HomePage() {
   const filteredProducts =
     activeFilter === 'all' ? products : products.filter((p) => p.collection_id === activeFilter)
 
+  // hero — картинка последней добавленной коллекции, у которой она задана; иначе заглушка
+  const latestCollectionImage = [...collections].reverse().find((c) => c.image)?.image
+  const heroSrc = latestCollectionImage ? imageUrl(latestCollectionImage) : previewImg
+
   return (
     <>
       <section className="hero">
-        <img src={previewImg} alt="" className="hero__img" />
+        <img src={heroSrc} alt="" className="hero__img" />
       </section>
 
       <section className="catalog" id="catalog">
