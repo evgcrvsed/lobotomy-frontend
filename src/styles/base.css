@@ -55,6 +55,7 @@ img {
 
 body {
     font-family: var(--font-body), sans-serif;
+    font-variant-numeric: lining-nums;
     background-color: var(--color-white);
     color: var(--color-black);
     -webkit-font-smoothing: antialiased;
