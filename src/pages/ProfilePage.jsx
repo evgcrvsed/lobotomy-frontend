@@ -104,7 +104,8 @@ export default function ProfilePage() {
   return (
     <>
       <section className="hello">
-        <h1 className="hello__title">Привет, {firstName || 'Lobotomy'}</h1>
+        {/*<h1 className="hello__title">Привет, {firstName || 'Lobotomy'}</h1>*/}
+        <h1 className="hello__title">? ? ?</h1>
       </section>
 
       <section className="profile">

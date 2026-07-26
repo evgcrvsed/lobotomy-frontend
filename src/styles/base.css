@@ -45,7 +45,7 @@ img {
     0 1px 2px rgba(0, 0, 0, 0.04);
 
     /* Typography */
-    --font-body: 'Times New Roman', sans-serif;
+    --font-body: 'Montserrat', sans-serif;
 
     /* Layout */
     --header-height:    64px;
@@ -55,7 +55,6 @@ img {
 
 body {
     font-family: var(--font-body), sans-serif;
-    font-variant-numeric: lining-nums;
     background-color: var(--color-white);
     color: var(--color-black);
     -webkit-font-smoothing: antialiased;
