@@ -175,7 +175,7 @@ export default function CheckoutPage() {
                       onChange={() => setDelivery(opt.id)}
                     />
                     <span className="delivery-option__box" />
-                    {opt.label} {opt.price}р
+                    {opt.label} {opt.price}₽
                   </label>
                 ))}
               </div>
@@ -254,7 +254,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="checkout-item__right">
                     <span className="checkout-item__price">
-                      {(item.price * item.qty).toLocaleString('ru-RU')}Р
+                      {(item.price * item.qty).toLocaleString('ru-RU')}₽
                     </span>
                     <button
                       type="button"
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
               </div>
               <div className="checkout__total-row">
                 <span>Доставка:</span>
-                <span>{deliveryPrice.toLocaleString('ru-RU')}Р</span>
+                <span>{deliveryPrice.toLocaleString('ru-RU')}₽</span>
               </div>
               <div className="checkout__total-row checkout__total-row--final">
                 <span>Итог:</span>
@@ -286,7 +286,7 @@ export default function CheckoutPage() {
             </div>
 
             <button className="checkout__pay" type="button" onClick={pay} disabled={paying}>
-              {paying ? 'Переходим к оплате...' : `Оплатить ${(itemsTotal + deliveryPrice).toLocaleString('ru-RU')}Р`}
+              {paying ? 'Переходим к оплате...' : `Оплатить ${(itemsTotal + deliveryPrice).toLocaleString('ru-RU')}₽`}
             </button>
           </aside>
         </div>
