@@ -55,7 +55,7 @@
 .checkout__input {
     width: 100%;
     padding: 10px 12px;
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-body), 'Times New Roman', serif;
     font-size: 14px;
     color: var(--color-gray);
     background-color: #ededed;
@@ -163,7 +163,7 @@
 .checkout-item__size,
 .checkout-item__price,
 .checkout__total-row {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-body), serif;
 }
 
 .checkout-item__name { font-size: 15px; color: var(--color-black); }

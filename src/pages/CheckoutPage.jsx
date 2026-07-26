@@ -273,7 +273,7 @@ export default function CheckoutPage() {
                 <span>
                   Итог: {itemsCount} {plural(itemsCount, 'изделие', 'изделия', 'изделий')}
                 </span>
-                <span>{itemsTotal.toLocaleString('ru-RU')}Р</span>
+                <span>{itemsTotal.toLocaleString('ru-RU')}₽</span>
               </div>
               <div className="checkout__total-row">
                 <span>Доставка:</span>
@@ -281,7 +281,7 @@ export default function CheckoutPage() {
               </div>
               <div className="checkout__total-row checkout__total-row--final">
                 <span>Итог:</span>
-                <span>{(itemsTotal + deliveryPrice).toLocaleString('ru-RU')}Р</span>
+                <span>{(itemsTotal + deliveryPrice).toLocaleString('ru-RU')}₽</span>
               </div>
             </div>
 
