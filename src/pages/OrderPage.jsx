@@ -152,15 +152,15 @@ export default function OrderPage() {
               <span>
                 Итог: {itemsCount} {plural(itemsCount, 'изделие', 'изделия', 'изделий')}
               </span>
-              <span>{order.items_total.toLocaleString('ru-RU')}Р</span>
+              <span>{order.items_total.toLocaleString('ru-RU')}₽</span>
             </div>
             <div className="checkout__total-row">
               <span>Доставка:</span>
-              <span>{order.delivery_price.toLocaleString('ru-RU')}Р</span>
+              <span>{order.delivery_price.toLocaleString('ru-RU')}₽</span>
             </div>
             <div className="checkout__total-row checkout__total-row--final">
               <span>Итог:</span>
-              <span>{order.total.toLocaleString('ru-RU')}Р</span>
+              <span>{order.total.toLocaleString('ru-RU')}₽</span>
             </div>
           </div>
 
