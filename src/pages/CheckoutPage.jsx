@@ -78,6 +78,12 @@ export default function CheckoutPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (delivery === 'cdek') {
+      setForm(f => ({ ...f, postal: '' }))
+    }
+  }, [delivery])
+
   const itemsTotal = items.reduce((sum, i) => sum + i.price * i.qty, 0)
   const itemsCount = items.reduce((sum, i) => sum + i.qty, 0)
   const deliveryPrice = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.price ?? 0
@@ -157,6 +163,8 @@ export default function CheckoutPage() {
                   type={type}
                   placeholder={placeholder}
                   value={form[key]}
+                  {/*Если сдэк, то отрисовывать не надо*/}
+                  {key === 'postal' && delivery === 'cdek'}
                   onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                 />
               </div>
