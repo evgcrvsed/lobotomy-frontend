@@ -163,8 +163,7 @@ export default function CheckoutPage() {
                   type={type}
                   placeholder={placeholder}
                   value={form[key]}
-                  {/*Если сдэк, то отрисовывать не надо*/}
-                  {key === 'postal' && delivery === 'cdek'}
+                  disabled={key === 'postal' && delivery === 'cdek'}
                   onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                 />
               </div>
