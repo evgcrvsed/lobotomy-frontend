@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api } from '../api/client'
+import { api, imageUrl } from '../api/client'
 import { clearToken, getToken } from '../auth'
 import Modal from '../components/Modal'
 import OrderView from '../components/OrderView'
 import ProductCard from '../components/ProductCard'
-import productImg from '../assets/images/product_1.jpg'
 import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/profile.css'
@@ -18,18 +17,37 @@ const FIELDS = [
   { key: 'email', label: 'Почта', placeholder: 'hello@example.com', type: 'email', autoComplete: 'email' },
 ]
 
-const RECOMMENDATIONS = [
-  { image: productImg, name: 'Zip-Hoodie v1.2', color: 'Чёрный', price: '5500₽' },
-  { image: productImg, name: 'Zip-Hoodie v1.2', color: 'Чёрный', price: '5500₽' },
-]
-
 export default function ProfilePage() {
   const [user, setUser] = useState(null)
   const [orders, setOrders] = useState([])
+  const [recommended, setRecommended] = useState([])
+  const [collections, setCollections] = useState([])
   const [checking, setChecking] = useState(true)
   const [form, setForm] = useState({})
   const [modalOpen, setModalOpen] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  // 2 случайных существующих товара в блок «Вам также может понравиться»
+  useEffect(() => {
+    Promise.all([api.getProducts(), api.getCollections()]).then(([list, cols]) => {
+      setCollections(cols)
+      setRecommended([...list].sort(() => Math.random() - 0.5).slice(0, 2))
+    })
+  }, [])
+
+  function recommendedProps(product) {
+    const main = product.images.find((i) => i.role === 'main') ?? product.images[0]
+    const hover = product.images.find((i) => i.role === 'hover')
+    const colSlug = collections.find((c) => c.id === product.collection_id)?.slug
+    return {
+      href: colSlug && product.slug ? `/${colSlug}/${product.slug}` : '#',
+      image: main ? imageUrl(main.filename) : null,
+      hoverImage: hover ? imageUrl(hover.filename) : null,
+      name: product.name,
+      color: product.material ?? '',
+      price: `${product.price.toLocaleString('ru-RU')} ₽`,
+    }
+  }
 
   // при заходе на страницу проверяем сохранённый токен
   useEffect(() => {
@@ -218,8 +236,8 @@ export default function ProfilePage() {
         <div className="recommendations__container">
           <h2 className="recommendations__title section-title">Вам также может понравиться:</h2>
           <div className="product-grid">
-            {RECOMMENDATIONS.map((product, i) => (
-              <ProductCard key={i} {...product} />
+            {recommended.map((product) => (
+              <ProductCard key={product.id} {...recommendedProps(product)} />
             ))}
           </div>
         </div>
