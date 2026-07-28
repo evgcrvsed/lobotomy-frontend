@@ -5,6 +5,7 @@ import { clearToken, getToken } from '../auth'
 import Modal from '../components/Modal'
 import OrderView from '../components/OrderView'
 import ProductCard from '../components/ProductCard'
+import { formatPrice } from '../constants'
 import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/profile.css'
@@ -45,7 +46,7 @@ export default function ProfilePage() {
       hoverImage: hover ? imageUrl(hover.filename) : null,
       name: product.name,
       color: product.material ?? '',
-      price: `${product.price.toLocaleString('ru-RU')} ₽`,
+      price: formatPrice(product.price),
     }
   }
 

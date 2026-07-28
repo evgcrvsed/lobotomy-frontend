@@ -66,9 +66,9 @@
     padding: 12px 14px;
     font-family: var(--font-body);
     font-size: 15px;
-    background-color: #ededed;
+    background-color: var(--color-field);
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: var(--radius);
     outline: none;
 }
 
@@ -77,7 +77,7 @@
 .track-page__error {
     margin-top: 18px;
     font-size: 14px;
-    color: #c0392b;
+    color: var(--color-danger);
 }
 
 .track-page__login-hint {
@@ -92,7 +92,7 @@
 .order-view {
     margin-top: 24px;
     border: 1px solid var(--color-border);
-    border-radius: 4px;
+    border-radius: var(--radius);
     padding: 18px 20px;
     text-align: left;
 }
@@ -124,15 +124,15 @@
     font-size: 12px;
     font-weight: 600;
     padding: 3px 10px;
-    border-radius: 20px;
-    background-color: #ededed;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-field);
     color: var(--color-gray);
     white-space: nowrap;
 }
 
-.order-view__status--paid { background-color: #e1f5ee; color: #0f6e56; }
-.order-view__status--shipped { background-color: #e6f1fb; color: #185fa5; }
-.order-view__status--cancelled { background-color: #faece7; color: #993c1d; }
+.order-view__status--paid { background-color: var(--status-paid-bg); color: var(--status-paid-fg); }
+.order-view__status--shipped { background-color: var(--status-shipped-bg); color: var(--status-shipped-fg); }
+.order-view__status--cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-fg); }
 
 .order-view__items {
     display: flex;
@@ -183,7 +183,7 @@
     background-color: var(--color-black);
     color: var(--color-white);
     border: none;
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 14px;
     font-weight: 500;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { addToCart, getCart } from '../cart'
+import { formatPrice } from '../constants'
 import previewImg from '../assets/images/preview.webp'
 import '../styles/components/hero.css'
 import '../styles/pages/product.css'
@@ -93,7 +94,7 @@ export default function ProductPage() {
                 /{product.name}
               </nav>
               <h1 className="product-title">{product.name}</h1>
-              <span className="product-price">{product.price.toLocaleString('ru-RU')} ₽</span>
+              <span className="product-price">{formatPrice(product.price)}</span>
             </div>
 
             <div className="product-columns">

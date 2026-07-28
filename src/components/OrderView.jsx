@@ -1,20 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
+import { DELIVERY_LABELS, ORDER_STATUS_LABELS, formatPrice } from '../constants'
 import '../styles/pages/orders.css'
-
-const STATUS_LABELS = {
-  pending: 'Ожидает оплаты',
-  paid: 'Оплачен',
-  shipped: 'Отправлен',
-  cancelled: 'Отменён',
-}
-
-const DELIVERY_LABELS = {
-  cdek: 'СДЭК',
-  post: 'Почта России',
-  cis: 'Страны СНГ',
-}
 
 export default function OrderView({ order, linkTo }) {
   const [paying, setPaying] = useState(false)
@@ -45,7 +33,7 @@ export default function OrderView({ order, linkTo }) {
           <span className="order-view__number">Заказ {order.number}</span>
         )}
         <span className={`order-view__status order-view__status--${order.status}`}>
-          {STATUS_LABELS[order.status] ?? order.status}
+          {ORDER_STATUS_LABELS[order.status] ?? order.status}
         </span>
       </div>
 
@@ -56,7 +44,7 @@ export default function OrderView({ order, linkTo }) {
               {it.name}
               {it.size ? `, ${it.size}` : ''} × {it.qty}
             </span>
-            <span>{(it.price * it.qty).toLocaleString('ru-RU')}₽</span>
+            <span>{formatPrice(it.price * it.qty)}</span>
           </li>
         ))}
       </ul>
@@ -64,11 +52,11 @@ export default function OrderView({ order, linkTo }) {
       <div className="order-view__totals">
         <div>
           <span>Доставка ({DELIVERY_LABELS[order.delivery_method] ?? order.delivery_method})</span>
-          <span>{order.delivery_price.toLocaleString('ru-RU')}₽</span>
+          <span>{formatPrice(order.delivery_price)}</span>
         </div>
         <div className="order-view__total">
           <span>Итого</span>
-          <span>{order.total.toLocaleString('ru-RU')}₽</span>
+          <span>{formatPrice(order.total)}</span>
         </div>
       </div>
 

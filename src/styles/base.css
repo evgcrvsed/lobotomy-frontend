@@ -30,24 +30,65 @@ img {
 
 /* CSS VARIABLES */
 :root {
-    /* Colors */
+    /* ---- Цвета: текст ---- */
     --color-black:       #111111;
     --color-gray:        #404040;
     --color-white:       #ffffff;
-    --color-border:      #e5e5e5;
     --color-muted:       #888888;
     --color-muted-light: #bbbbbb;
-    --color-bg:          #f7f7f7;
-    --color-btn-hover:   #333333;
 
-    /* Shadows */
+    /* ---- Цвета: поверхности и границы ---- */
+    --color-bg:            #f7f7f7;
+    --color-border:        #e5e5e5;
+    --color-border-hover:  #cccccc;
+    --color-btn-hover:     #333333;
+    --color-field:         #ededed;  /* фон полей ввода, чипов, счётчиков */
+    --color-field-hover:   #dedede;
+    --color-control:       #d9d9d9;  /* чекбоксы/радио доставки */
+    --color-placeholder:   #f0f0f0;  /* фон под картинками, пока не загрузились */
+    --color-placeholder-2: #ebebeb;
+    --color-badge:         #c4c4c4;  /* счётчик количества на миниатюре */
+
+    /* ---- Цвета: смысловые ---- */
+    --color-danger:        #c0392b;
+    --color-danger-border: #f0d0ce;
+
+    /* Статусы заказа: фон / текст */
+    --status-paid-bg:      #e1f5ee;  --status-paid-fg:      #0f6e56;
+    --status-shipped-bg:   #e6f1fb;  --status-shipped-fg:   #185fa5;
+    --status-cancelled-bg: #faece7;  --status-cancelled-fg: #993c1d;
+
+    /* ---- Тени ---- */
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06),
     0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+    --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+    --focus-ring: 0 0 0 3px rgba(17, 17, 17, 0.08);
 
-    /* Typography */
+    /* ---- Типографика ---- */
     --font-body: 'Montserrat', sans-serif;
+    /* Акцентный шрифт: заголовки товара, цены, таблица размеров.
+       Поменяй здесь — изменится везде (напр. Georgia, 'Times New Roman', serif). */
+    --font-display: var(--font-body);
 
-    /* Layout */
+    /* ---- Скругления ---- */
+    --radius-sm:   2px;
+    --radius:      4px;
+    --radius-pill: 20px;
+
+    /* ---- Скорости анимаций ---- */
+    --transition-fast: 0.15s ease;
+    --transition:      0.25s ease;
+
+    /* ---- Слои (z-index) ---- */
+    --z-header:  100;
+    --z-modal:   200;
+    --z-veil:    300;
+    --z-overlay: 400;
+
+    /* ---- Раскладка ---- */
     --header-height:    64px;
     --container-width:  1250px;
     --container-pad:    24px;
@@ -88,7 +129,7 @@ body {
 .page-veil {
     position: fixed;
     inset: 0;
-    z-index: 300; /* выше шапки (100) и модалки (200) */
+    z-index: var(--z-veil); /* выше шапки (100) и модалки (200) */
     background: var(--color-white);
     pointer-events: none;
 }

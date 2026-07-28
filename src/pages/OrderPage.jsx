@@ -1,35 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import { DELIVERY_OPTIONS, DELIVERY_TEXTS, ORDER_STATUS_LABELS, formatPrice, plural } from '../constants'
 import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
-
-const DELIVERY_OPTIONS = [
-  { id: 'cdek', label: 'СДЭК', price: 450 },
-  { id: 'post', label: 'Почта России', price: 350 },
-  { id: 'cis', label: 'Страны СНГ', price: 750 },
-]
-
-const DELIVERY_TEXTS = {
-  cdek: { index: 'Индекс СДЭК', point: 'Адрес пункта СДЭК' },
-  post: { index: 'Индекс Почты России', point: 'Адрес отделения Почты России' },
-  cis: { index: 'Индекс', point: 'Адрес' },
-}
-
-const STATUS_LABELS = {
-  pending: 'Ожидает оплаты',
-  paid: 'Оплачен',
-  shipped: 'Отправлен',
-  cancelled: 'Отменён',
-}
-
-function plural(n, one, few, many) {
-  const mod10 = n % 10
-  const mod100 = n % 100
-  if (mod10 === 1 && mod100 !== 11) return one
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
-  return many
-}
 
 export default function OrderPage() {
   const { number } = useParams()
@@ -88,7 +62,7 @@ export default function OrderPage() {
       <nav className="checkout__breadcrumbs">
         <Link to="/">Главная</Link>/Заказ {order.number}
         <span className={`order-page__status-badge order-page__status-badge--${order.status}`}>
-          {STATUS_LABELS[order.status] ?? order.status}
+          {ORDER_STATUS_LABELS[order.status] ?? order.status}
         </span>
       </nav>
 
@@ -140,7 +114,7 @@ export default function OrderPage() {
                 </div>
                 <div className="checkout-item__right">
                   <span className="checkout-item__price">
-                    {(item.price * item.qty).toLocaleString('ru-RU')}Р
+                    {formatPrice(item.price * item.qty)}
                   </span>
                 </div>
               </div>
@@ -152,15 +126,15 @@ export default function OrderPage() {
               <span>
                 Итог: {itemsCount} {plural(itemsCount, 'изделие', 'изделия', 'изделий')}
               </span>
-              <span>{order.items_total.toLocaleString('ru-RU')}₽</span>
+              <span>{formatPrice(order.items_total)}</span>
             </div>
             <div className="checkout__total-row">
               <span>Доставка:</span>
-              <span>{order.delivery_price.toLocaleString('ru-RU')}₽</span>
+              <span>{formatPrice(order.delivery_price)}</span>
             </div>
             <div className="checkout__total-row checkout__total-row--final">
               <span>Итог:</span>
-              <span>{order.total.toLocaleString('ru-RU')}₽</span>
+              <span>{formatPrice(order.total)}</span>
             </div>
           </div>
 

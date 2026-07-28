@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, imageUrl } from '../api/client'
 import ProductCard from '../components/ProductCard'
+import { formatPrice } from '../constants'
 import previewImg from '../assets/images/preview.webp'
 import '../styles/components/hero.css'
 import '../styles/components/product-card.css'
@@ -82,7 +83,7 @@ export default function HomePage() {
               hoverImage={findImage(product, 'hover')}
               name={product.name}
               color={product.material ?? ''}
-              price={`${product.price.toLocaleString('ru-RU')} ₽`}
+              price={formatPrice(product.price)}
             />
           ))}
         </div>

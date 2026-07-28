@@ -90,4 +90,12 @@ export const api = {
   getMyOrders: () => request('/api/orders/my').then((r) => (r.ok ? r.json() : [])),
   resumePayment: (number) => request(`/api/orders/${encodeURIComponent(number)}/pay`, { method: 'POST' }),
   getOrder: (number) => request(`/api/orders/${encodeURIComponent(number)}`).then((r) => (r.ok ? r.json() : null)),
+  // админские
+  getAllOrders: () => request('/api/orders').then((r) => (r.ok ? r.json() : [])),
+  setOrderTracking: (number, trackingNumber) =>
+    request(`/api/orders/${encodeURIComponent(number)}/tracking`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tracking_number: trackingNumber }),
+    }),
 }

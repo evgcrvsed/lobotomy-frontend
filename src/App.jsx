@@ -10,6 +10,7 @@ import CheckoutFailPage from './pages/CheckoutFailPage'
 import TrackPage from './pages/TrackPage'
 import OrderPage from './pages/OrderPage'
 import LoginPage from './pages/LoginPage'
+import AdminOrdersPage from './pages/AdminOrdersPage'
 import RequireAdmin from './components/RequireAdmin'
 
 function App() {
@@ -31,6 +32,14 @@ function App() {
             element={
               <RequireAdmin>
                 <AdminPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/orders"
+            element={
+              <RequireAdmin>
+                <AdminOrdersPage />
               </RequireAdmin>
             }
           />

@@ -1,0 +1,136 @@
+/* ============================================================
+   ADMIN ORDERS — список всех заказов и ввод трек-номеров
+   ============================================================ */
+
+.admin-orders {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.admin-order {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-white);
+    padding: 16px 20px 18px;
+}
+
+/* ---- Шапка карточки ---- */
+.admin-order__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-order__ids {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.admin-order__number {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-black);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.admin-order__number:hover { color: var(--color-gray); }
+
+.admin-order__date {
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+.admin-order__status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-field);
+    color: var(--color-gray);
+    white-space: nowrap;
+}
+
+.admin-order__status--paid { background-color: var(--status-paid-bg); color: var(--status-paid-fg); }
+.admin-order__status--shipped { background-color: var(--status-shipped-bg); color: var(--status-shipped-fg); }
+.admin-order__status--cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-fg); }
+
+/* ---- Тело карточки ---- */
+.admin-order__body {
+    display: grid;
+    grid-template-columns: 1.1fr 1.3fr 1.3fr auto;
+    gap: 24px;
+    padding: 14px 0;
+}
+
+.admin-order__label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 6px;
+}
+
+.admin-order__text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-black);
+}
+
+.admin-order__text--small {
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+.admin-order__items {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+    color: var(--color-black);
+}
+
+.admin-order__col--total { text-align: right; min-width: 150px; }
+
+.admin-order__total {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+/* ---- Трек-номер ---- */
+.admin-order__tracking {
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border);
+}
+
+.admin-order__tracking-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-order__tracking-row .modal__input { flex: 1; min-width: 0; }
+.admin-order__tracking-row .btn { flex-shrink: 0; white-space: nowrap; }
+
+@media (max-width: 900px) {
+    .admin-order__body {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .admin-order__col--total { text-align: left; }
+}
+
+@media (max-width: 560px) {
+    .admin-order__body { grid-template-columns: 1fr; }
+    .admin-order__tracking-row { flex-direction: column; align-items: stretch; }
+}

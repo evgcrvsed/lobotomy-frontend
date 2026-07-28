@@ -26,7 +26,7 @@
 }
 
 .product-title {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-display);
     font-size: 36px;
     font-weight: 600;
     letter-spacing: 0.01em;
@@ -36,7 +36,7 @@
 .product-price {
     display: block;
     margin-top: 4px;
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-display);
     font-size: 20px;
 }
 
@@ -79,9 +79,9 @@
     font-size: 14px;
     text-align: center;
     color: var(--color-gray);
-    background-color: #e3e3e3;
+    background-color: var(--color-field);
     border: none;
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
 }
 
@@ -108,7 +108,7 @@
     align-items: center;
     justify-content: center;
     background-color: var(--color-black);
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     pointer-events: none;
     transition: width 0.3s ease, opacity 0.3s ease, margin-left 0.3s ease, background-color 0.15s ease;
 }
@@ -129,7 +129,7 @@
     background-color: var(--color-black);
     color: var(--color-white);
     border: none;
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 15px;
     cursor: pointer;
@@ -147,8 +147,8 @@
 .product-qty {
     display: flex;
     align-items: center;
-    background-color: #e3e3e3;
-    border-radius: 2px;
+    background-color: var(--color-field);
+    border-radius: var(--radius-sm);
     flex: 0 0 130px;
     justify-content: space-between;
 }
@@ -168,16 +168,16 @@
 
 .product-fav-btn {
     flex: 1;
-    background-color: #e3e3e3;
+    background-color: var(--color-field);
     border: none;
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     font-family: var(--font-body);
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
 
-.product-fav-btn:hover { background-color: #d6d6d6; }
+.product-fav-btn:hover { background-color: var(--color-field-hover); }
 
 /* ---- МАТЕРИАЛ + ТАБЛИЦА РАЗМЕРОВ ---- */
 /* Три колонки: крайние одинаковые (1fr), поэтому таблица в середине —
@@ -195,7 +195,7 @@
 
 .product-sizes {
     border-collapse: collapse;
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-display);
     font-size: 15px;
     color: var(--color-gray);
 }
@@ -233,7 +233,7 @@
     height: 140px;
     object-fit: cover;
     display: block;
-    background-color: #f0f0f0;
+    background-color: var(--color-placeholder);
     transition: transform 0.25s ease;
 }
 
@@ -247,7 +247,7 @@
 .product-legal {
     margin-top: 64px;
     text-align: center;
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-display);
     color: var(--color-gray);
 }
 

@@ -19,7 +19,7 @@
 .sidebar-nav {
     background-color: var(--color-white);
     border: 1px solid var(--color-border);
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     padding: 24px 20px;
     box-shadow: var(--shadow-card);
 }
@@ -65,7 +65,7 @@
 .profile-card {
     background-color: var(--color-white);
     border: 1px solid var(--color-border);
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -157,7 +157,7 @@
 
 .profile-login__error {
     font-size: 13px;
-    color: #c0392b;
+    color: var(--color-danger);
 }
 
 .profile-status {

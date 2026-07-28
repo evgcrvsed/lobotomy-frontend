@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import { formatPrice } from '../constants'
 import Modal from '../components/Modal'
 import '../styles/components/modal.css'
 import '../styles/pages/admin.css'
@@ -388,6 +390,9 @@ export default function AdminPage() {
         <div className="admin-page__top">
           <h1 className="admin-page__title">Каталог</h1>
           <div className="admin-page__actions">
+            <Link to="/admin/orders" className="btn btn--outline">
+              Заказы
+            </Link>
             <button className="btn btn--dark" onClick={openColModal}>
               + Редактировать коллекции
             </button>
@@ -440,7 +445,7 @@ export default function AdminPage() {
                     <span className="admin-row__collection">{getCollectionName(product.collection_id)}</span>
                   </div>
                   <div className="admin-row__meta">{meta}</div>
-                  <div className="admin-row__price">{product.price.toLocaleString('ru-RU')} ₽</div>
+                  <div className="admin-row__price">{formatPrice(product.price)}</div>
                   <div className="admin-row__actions">
                     <button className="btn btn--outline" onClick={() => openEditModal(product.id)}>
                       Ред.

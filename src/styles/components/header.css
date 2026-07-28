@@ -5,7 +5,7 @@
 .header {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: var(--z-header);
 
     display: flex;
     align-items: center;
@@ -27,7 +27,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: var(--radius);
     transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
