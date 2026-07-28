@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
-import { DELIVERY_OPTIONS, DELIVERY_TEXTS, ORDER_STATUS_LABELS, formatPrice, plural } from '../constants'
+import { ORDER_STATUS_LABELS, deliveryTexts, formatPrice, plural } from '../constants'
 import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
 
@@ -10,10 +10,16 @@ export default function OrderPage() {
   const [order, setOrder] = useState(null)
   const [productsById, setProductsById] = useState({})
   const [collections, setCollections] = useState([])
+  const [deliveryMethods, setDeliveryMethods] = useState([])
   const [state, setState] = useState('loading') // loading | ok | notfound
 
   useEffect(() => {
-    Promise.all([api.getOrder(number), api.getProducts(), api.getCollections()]).then(([ord, prods, cols]) => {
+    Promise.all([
+      api.getOrder(number),
+      api.getProducts(),
+      api.getCollections(),
+      api.getDeliveryMethods(),
+    ]).then(([ord, prods, cols, methods]) => {
       if (!ord) {
         setState('notfound')
         return
@@ -21,6 +27,7 @@ export default function OrderPage() {
       setOrder(ord)
       setProductsById(Object.fromEntries(prods.map((p) => [p.id, p])))
       setCollections(cols)
+      setDeliveryMethods(methods)
       setState('ok')
     })
   }, [number])
@@ -28,7 +35,7 @@ export default function OrderPage() {
   if (state === 'loading') return <p className="order-page__status">Загрузка...</p>
   if (state === 'notfound') return <p className="order-page__status">Заказ не найден</p>
 
-  const texts = DELIVERY_TEXTS[order.delivery_method] ?? DELIVERY_TEXTS.cis
+  const texts = deliveryTexts(deliveryMethods, order.delivery_method)
   const fields = [
     { label: 'ФИО', value: order.full_name },
     { label: 'Почта', value: order.email },
@@ -79,21 +86,15 @@ export default function OrderPage() {
 
           <div className="checkout__field">
             <span className="checkout__label">Способ доставки</span>
-            <div className="delivery-options">
-              {DELIVERY_OPTIONS.map((opt) => (
-                <label className="delivery-option" key={opt.id}>
-                  <input
-                    type="radio"
-                    className="delivery-option__input"
-                    checked={order.delivery_method === opt.id}
-                    disabled
-                    readOnly
-                  />
-                  <span className="delivery-option__box" />
-                  {opt.label} {opt.price}р
-                </label>
-              ))}
-            </div>
+            {/* только выбранный способ и цена, зафиксированная в заказе:
+                тарифы могли измениться после оформления */}
+            <input
+              className="checkout__input"
+              value={`${
+                deliveryMethods.find((m) => m.code === order.delivery_method)?.label ?? order.delivery_method
+              } — ${formatPrice(order.delivery_price)}`}
+              readOnly
+            />
           </div>
         </section>
 

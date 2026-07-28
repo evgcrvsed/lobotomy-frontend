@@ -91,6 +91,13 @@ export const api = {
   resumePayment: (number) => request(`/api/orders/${encodeURIComponent(number)}/pay`, { method: 'POST' }),
   getOrder: (number) => request(`/api/orders/${encodeURIComponent(number)}`).then((r) => (r.ok ? r.json() : null)),
   // админские
+  getDeliveryMethods: () => request('/api/delivery/').then((r) => (r.ok ? r.json() : [])),
+  updateDeliveryMethod: (code, data) =>
+    request(`/api/delivery/${encodeURIComponent(code)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
   getAllOrders: () => request('/api/orders').then((r) => (r.ok ? r.json() : [])),
   setOrderTracking: (number, trackingNumber) =>
     request(`/api/orders/${encodeURIComponent(number)}/tracking`, {

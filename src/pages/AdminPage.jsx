@@ -77,6 +77,10 @@ export default function AdminPage() {
   const [submitting, setSubmitting] = useState(false)
   const [uploadingField, setUploadingField] = useState(null)
 
+  const [deliveryModalOpen, setDeliveryModalOpen] = useState(false)
+  const [deliveryDrafts, setDeliveryDrafts] = useState([])
+  const [savingDelivery, setSavingDelivery] = useState(null)
+
   const [colModalOpen, setColModalOpen] = useState(false)
   const [colDrafts, setColDrafts] = useState({})
   const [newColName, setNewColName] = useState('')
@@ -107,6 +111,36 @@ export default function AdminPage() {
     const cols = await api.getCollections()
     setCollections(cols)
     setColDrafts(Object.fromEntries(cols.map((c) => [c.id, c.name])))
+  }
+
+  async function openDeliveryModal() {
+    setDeliveryDrafts(await api.getDeliveryMethods())
+    setDeliveryModalOpen(true)
+  }
+
+  function editDelivery(code, field, value) {
+    setDeliveryDrafts((list) => list.map((m) => (m.code === code ? { ...m, [field]: value } : m)))
+  }
+
+  async function saveDelivery(method) {
+    setSavingDelivery(method.code)
+    try {
+      const res = await api.updateDeliveryMethod(method.code, {
+        label: method.label,
+        price: parseInt(method.price, 10) || 0,
+        index_label: method.index_label,
+        point_label: method.point_label,
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Не удалось сохранить: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      const updated = await res.json()
+      setDeliveryDrafts((list) => list.map((m) => (m.code === updated.code ? updated : m)))
+    } finally {
+      setSavingDelivery(null)
+    }
   }
 
   function openColModal() {
@@ -393,6 +427,9 @@ export default function AdminPage() {
             <Link to="/admin/orders" className="btn btn--outline">
               Заказы
             </Link>
+            <button className="btn btn--outline" onClick={openDeliveryModal}>
+              Доставка
+            </button>
             <button className="btn btn--dark" onClick={openColModal}>
               + Редактировать коллекции
             </button>
@@ -732,6 +769,62 @@ export default function AdminPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        open={deliveryModalOpen}
+        titleId="delivery-modal-title"
+        title="Способы доставки"
+        onClose={() => setDeliveryModalOpen(false)}
+      >
+        <div className="modal__form">
+          <p className="admin-media__hint">
+            Стоимость и подписи полей на странице оформления. Меняется сразу для новых заказов —
+            в уже оформленных остаётся та цена, что была на момент покупки.
+          </p>
+          {deliveryDrafts.map((m) => (
+            <div className="delivery-row" key={m.code}>
+              <div className="delivery-row__main">
+                <input
+                  className="modal__input"
+                  value={m.label}
+                  aria-label="Название"
+                  onChange={(e) => editDelivery(m.code, 'label', e.target.value)}
+                />
+                <input
+                  className="modal__input delivery-row__price"
+                  type="number"
+                  min="0"
+                  value={m.price}
+                  aria-label="Стоимость"
+                  onChange={(e) => editDelivery(m.code, 'price', e.target.value)}
+                />
+                <button
+                  className="btn btn--dark"
+                  type="button"
+                  disabled={savingDelivery === m.code}
+                  onClick={() => saveDelivery(m)}
+                >
+                  {savingDelivery === m.code ? '...' : 'Сохранить'}
+                </button>
+              </div>
+              <div className="delivery-row__labels">
+                <input
+                  className="modal__input"
+                  value={m.index_label}
+                  aria-label="Подпись поля индекса"
+                  onChange={(e) => editDelivery(m.code, 'index_label', e.target.value)}
+                />
+                <input
+                  className="modal__input"
+                  value={m.point_label}
+                  aria-label="Подпись поля адреса"
+                  onChange={(e) => editDelivery(m.code, 'point_label', e.target.value)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </Modal>
 
       <Modal open={colModalOpen} titleId="col-modal-title" title="Коллекции" onClose={() => setColModalOpen(false)}>

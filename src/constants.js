@@ -2,19 +2,17 @@
 // Здесь единый источник правды: цены доставки, подписи, формат цены.
 // Раньше это дублировалось в CheckoutPage / OrderPage / OrderView.
 
-export const DELIVERY_OPTIONS = [
-  { id: 'cdek', label: 'СДЭК', price: 450 },
-  { id: 'post', label: 'Почта России', price: 350 },
-  { id: 'cis', label: 'Страны СНГ', price: 750 },
-]
+// Способы доставки живут в БД и грузятся с /api/delivery.
+// Хелперы ниже собирают из них то, что раньше лежало захардкоженным.
 
-export const DELIVERY_LABELS = Object.fromEntries(DELIVERY_OPTIONS.map((d) => [d.id, d.label]))
+/** Из списка методов -> { code: label } */
+export const deliveryLabels = (methods) =>
+  Object.fromEntries(methods.map((m) => [m.code, m.label]))
 
-// Подписи полей адреса меняются вместе со способом доставки
-export const DELIVERY_TEXTS = {
-  cdek: { index: 'Индекс СДЭК', point: 'Адрес пункта СДЭК' },
-  post: { index: 'Индекс Почты России', point: 'Адрес отделения Почты России' },
-  cis: { index: 'Индекс', point: 'Адрес' },
+/** Подписи полей адреса для выбранного способа */
+export const deliveryTexts = (methods, code) => {
+  const m = methods.find((x) => x.code === code)
+  return { index: m?.index_label ?? 'Индекс', point: m?.point_label ?? 'Адрес' }
 }
 
 export const ORDER_STATUS_LABELS = {

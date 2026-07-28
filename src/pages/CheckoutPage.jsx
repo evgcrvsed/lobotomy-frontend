@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { getToken } from '../auth'
 import { changeCartSize, getCart, removeFromCart, setCartQty } from '../cart'
-import { DELIVERY_OPTIONS, DELIVERY_TEXTS, formatPrice, plural } from '../constants'
+import { deliveryTexts, formatPrice, plural } from '../constants'
 import '../styles/pages/checkout.css'
 
 export default function CheckoutPage() {
   const [items, setItems] = useState(() => getCart())
   const [productsById, setProductsById] = useState({})
   const [collections, setCollections] = useState([])
-  const [delivery, setDelivery] = useState('cdek')
+  const [delivery, setDelivery] = useState('')
+  const [deliveryMethods, setDeliveryMethods] = useState([])
   const [chartSrc, setChartSrc] = useState(null)
   const [paying, setPaying] = useState(false)
   const [form, setForm] = useState({
@@ -22,13 +23,14 @@ export default function CheckoutPage() {
     pickupPoint: '',
   })
 
+  const texts = deliveryTexts(deliveryMethods, delivery)
   const formFields = [
     { key: 'fullName', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text' },
     { key: 'email', label: 'Почта', placeholder: 'lobotomymerchstore@gmail.com', type: 'email' },
     { key: 'country', label: 'Страна', placeholder: 'Россия', type: 'text' },
     { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text' },
-    { key: 'postal', label: DELIVERY_TEXTS[delivery].index, placeholder: '101000', type: 'text' },
-    { key: 'pickupPoint', label: DELIVERY_TEXTS[delivery].point, placeholder: 'ул. Кутузова, 27', type: 'text' },
+    { key: 'postal', label: texts.index, placeholder: '101000', type: 'text' },
+    { key: 'pickupPoint', label: texts.point, placeholder: 'ул. Кутузова, 27', type: 'text' },
   ]
 
   // корзина может измениться (кнопка «убрать») — держим список свежим
@@ -39,10 +41,14 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
-    Promise.all([api.getProducts(), api.getCollections()]).then(([list, cols]) => {
-      setProductsById(Object.fromEntries(list.map((p) => [p.id, p])))
-      setCollections(cols)
-    })
+    Promise.all([api.getProducts(), api.getCollections(), api.getDeliveryMethods()]).then(
+      ([list, cols, methods]) => {
+        setProductsById(Object.fromEntries(list.map((p) => [p.id, p])))
+        setCollections(cols)
+        setDeliveryMethods(methods)
+        setDelivery((cur) => cur || methods[0]?.code || '')
+      }
+    )
     // если авторизован — подставляем данные из профиля
     if (getToken()) {
       api.getMe().then((me) => {
@@ -66,7 +72,7 @@ export default function CheckoutPage() {
 
   const itemsTotal = items.reduce((sum, i) => sum + i.price * i.qty, 0)
   const itemsCount = items.reduce((sum, i) => sum + i.qty, 0)
-  const deliveryPrice = DELIVERY_OPTIONS.find((d) => d.id === delivery)?.price ?? 0
+  const deliveryPrice = deliveryMethods.find((d) => d.code === delivery)?.price ?? 0
 
   function productHref(item) {
     const product = productsById[item.productId]
@@ -152,17 +158,17 @@ export default function CheckoutPage() {
             <div className="checkout__field">
               <span className="checkout__label">Способ доставки</span>
               <div className="delivery-options">
-                {DELIVERY_OPTIONS.map((opt) => (
-                  <label className="delivery-option" key={opt.id}>
+                {deliveryMethods.map((opt) => (
+                  <label className="delivery-option" key={opt.code}>
                     <input
                       type="radio"
                       name="delivery"
                       className="delivery-option__input"
-                      checked={delivery === opt.id}
-                      onChange={() => setDelivery(opt.id)}
+                      checked={delivery === opt.code}
+                      onChange={() => setDelivery(opt.code)}
                     />
                     <span className="delivery-option__box" />
-                    {opt.label} {opt.price}₽
+                    {opt.label} {formatPrice(opt.price)}
                   </label>
                 ))}
               </div>

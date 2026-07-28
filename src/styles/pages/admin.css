@@ -423,3 +423,38 @@
 
     .modal__row { grid-template-columns: 1fr; }
 }
+
+/* Настройка способов доставки */
+.delivery-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.delivery-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.delivery-row__main {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.delivery-row__main .modal__input { flex: 1; min-width: 0; }
+.delivery-row__main .btn { flex-shrink: 0; white-space: nowrap; }
+
+.delivery-row__price { flex: 0 0 110px !important; }
+
+.delivery-row__labels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.delivery-row__labels .modal__input { font-size: 12px; padding: 7px 10px; }
+
+@media (max-width: 560px) {
+    .delivery-row__main { flex-wrap: wrap; }
+    .delivery-row__labels { grid-template-columns: 1fr; }
+}
