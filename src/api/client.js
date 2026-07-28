@@ -99,6 +99,12 @@ export const api = {
       body: JSON.stringify(data),
     }),
   getAllOrders: () => request('/api/orders').then((r) => (r.ok ? r.json() : [])),
+  adminUpdateOrder: (number, data) =>
+    request(`/api/orders/${encodeURIComponent(number)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
   setOrderTracking: (number, trackingNumber) =>
     request(`/api/orders/${encodeURIComponent(number)}/tracking`, {
       method: 'PATCH',

@@ -11,6 +11,7 @@ import TrackPage from './pages/TrackPage'
 import OrderPage from './pages/OrderPage'
 import LoginPage from './pages/LoginPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
+import AdminOrderEditPage from './pages/AdminOrderEditPage'
 import RequireAdmin from './components/RequireAdmin'
 
 function App() {
@@ -40,6 +41,14 @@ function App() {
             element={
               <RequireAdmin>
                 <AdminOrdersPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/orders/:number"
+            element={
+              <RequireAdmin>
+                <AdminOrderEditPage />
               </RequireAdmin>
             }
           />

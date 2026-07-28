@@ -103,9 +103,14 @@ export default function AdminOrdersPage() {
                   </Link>
                   <span className="admin-order__date">{formatDate(order.created_at)}</span>
                 </div>
-                <span className={`admin-order__status admin-order__status--${order.status}`}>
-                  {ORDER_STATUS_LABELS[order.status] ?? order.status}
-                </span>
+                <div className="admin-order__head-right">
+                  <Link to={`/admin/orders/${order.number}`} className="btn btn--outline">
+                    Редактировать
+                  </Link>
+                  <span className={`admin-order__status admin-order__status--${order.status}`}>
+                    {ORDER_STATUS_LABELS[order.status] ?? order.status}
+                  </span>
+                </div>
               </header>
 
               <div className="admin-order__body">
