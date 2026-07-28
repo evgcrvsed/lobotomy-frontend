@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
-import { DELIVERY_LABELS, ORDER_STATUS_LABELS, formatPrice } from '../constants'
+import { ORDER_STATUS_LABELS, formatPrice } from '../constants'
 import '../styles/pages/orders.css'
 
-export default function OrderView({ order, linkTo }) {
+export default function OrderView({ order, linkTo, deliveryLabels = {} }) {
   const [paying, setPaying] = useState(false)
 
   async function pay() {
@@ -51,7 +51,7 @@ export default function OrderView({ order, linkTo }) {
 
       <div className="order-view__totals">
         <div>
-          <span>Доставка ({DELIVERY_LABELS[order.delivery_method] ?? order.delivery_method})</span>
+          <span>Доставка ({deliveryLabels[order.delivery_method] ?? order.delivery_method})</span>
           <span>{formatPrice(order.delivery_price)}</span>
         </div>
         <div className="order-view__total">

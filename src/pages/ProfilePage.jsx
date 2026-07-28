@@ -5,7 +5,7 @@ import { clearToken, getToken } from '../auth'
 import Modal from '../components/Modal'
 import OrderView from '../components/OrderView'
 import ProductCard from '../components/ProductCard'
-import { formatPrice } from '../constants'
+import { deliveryLabels, formatPrice } from '../constants'
 import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/profile.css'
@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const [orders, setOrders] = useState([])
   const [recommended, setRecommended] = useState([])
   const [collections, setCollections] = useState([])
+  const [methods, setMethods] = useState([])
   const [checking, setChecking] = useState(true)
   const [form, setForm] = useState({})
   const [modalOpen, setModalOpen] = useState(false)
@@ -30,8 +31,9 @@ export default function ProfilePage() {
 
   // 2 случайных существующих товара в блок «Вам также может понравиться»
   useEffect(() => {
-    Promise.all([api.getProducts(), api.getCollections()]).then(([list, cols]) => {
+    Promise.all([api.getProducts(), api.getCollections(), api.getDeliveryMethods()]).then(([list, cols, dm]) => {
       setCollections(cols)
+      setMethods(dm)
       setRecommended([...list].sort(() => Math.random() - 0.5).slice(0, 2))
     })
   }, [])
@@ -138,7 +140,7 @@ export default function ProfilePage() {
             <div className="profile-card">
               <h2 className="profile-card__title section-title">Последний заказ</h2>
               {orders.length > 0 ? (
-                <OrderView order={orders[0]} linkTo={`/order/${orders[0].number}`} />
+                <OrderView order={orders[0]} linkTo={`/order/${orders[0].number}`} deliveryLabels={deliveryLabels(methods)} />
               ) : (
                 <>
                   <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
@@ -190,7 +192,9 @@ export default function ProfilePage() {
             <div className="profile-card profile-card--wide">
               <h2 className="profile-card__title section-title">История заказов</h2>
               {orders.length > 0 ? (
-                orders.map((o) => <OrderView key={o.number} order={o} linkTo={`/order/${o.number}`} />)
+                orders.map((o) => (
+                  <OrderView key={o.number} order={o} linkTo={`/order/${o.number}`} deliveryLabels={deliveryLabels(methods)} />
+                ))
               ) : (
                 <>
                   <p className="profile-card__empty">Вы ещё ничего не заказывали</p>

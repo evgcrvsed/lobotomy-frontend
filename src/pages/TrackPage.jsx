@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
 import OrderView from '../components/OrderView'
+import { deliveryLabels } from '../constants'
 import '../styles/pages/orders.css'
 
 export default function TrackPage() {
@@ -10,6 +11,11 @@ export default function TrackPage() {
   const [order, setOrder] = useState(null)
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [methods, setMethods] = useState([])
+
+  useEffect(() => {
+    api.getDeliveryMethods().then(setMethods)
+  }, [])
 
   async function lookup(e) {
     e?.preventDefault()
@@ -50,7 +56,7 @@ export default function TrackPage() {
       </form>
 
       {error && <p className="track-page__error">{error}</p>}
-      {order && <OrderView order={order} />}
+      {order && <OrderView order={order} deliveryLabels={deliveryLabels(methods)} />}
 
       <p className="track-page__login-hint">
         Оформляли с входом в аккаунт? <Link to="/profile">Заказы в профиле</Link>

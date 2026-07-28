@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
-import { DELIVERY_LABELS, ORDER_STATUS_LABELS, formatPrice } from '../constants'
+import { ORDER_STATUS_LABELS, deliveryLabels, formatPrice } from '../constants'
 import '../styles/pages/admin.css'
 import '../styles/pages/admin-orders.css'
 
@@ -25,6 +25,7 @@ function formatDate(iso) {
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([])
+  const [methods, setMethods] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [drafts, setDrafts] = useState({}) // номер заказа -> введённый трек
@@ -32,8 +33,9 @@ export default function AdminOrdersPage() {
   const [savedNumber, setSavedNumber] = useState(null)
 
   useEffect(() => {
-    api.getAllOrders().then((list) => {
+    Promise.all([api.getAllOrders(), api.getDeliveryMethods()]).then(([list, dm]) => {
       setOrders(list)
+      setMethods(dm)
       setDrafts(Object.fromEntries(list.map((o) => [o.number, o.tracking_number ?? ''])))
       setLoading(false)
     })
@@ -115,7 +117,7 @@ export default function AdminOrdersPage() {
 
                 <div className="admin-order__col">
                   <span className="admin-order__label">
-                    Доставка — {DELIVERY_LABELS[order.delivery_method] ?? order.delivery_method}
+                    Доставка — {deliveryLabels(methods)[order.delivery_method] ?? order.delivery_method}
                   </span>
                   <p className="admin-order__text">{address || '—'}</p>
                 </div>
