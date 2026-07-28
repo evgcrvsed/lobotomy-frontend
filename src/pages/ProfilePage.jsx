@@ -15,7 +15,7 @@ const FIELDS = [
   { key: 'address', label: 'Адрес', placeholder: 'ул. Пушкина, д. 1, кв. 2', type: 'text', autoComplete: 'street-address' },
   { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text', autoComplete: 'address-level2' },
   { key: 'postal_code', label: 'Индекс', placeholder: '101000', type: 'text', autoComplete: 'postal-code', inputMode: 'numeric' },
-  { key: 'email', label: 'Почта', placeholder: 'hello@example.com', type: 'email', autoComplete: 'email' },
+  { key: 'email', label: 'Почта', placeholder: 'hello@example.com', type: 'email', autoComplete: 'email', readOnly: true },
 ]
 
 export default function ProfilePage() {
@@ -88,7 +88,10 @@ export default function ProfilePage() {
   async function handleSubmit(e) {
     e.preventDefault()
 
-    const payload = Object.fromEntries(FIELDS.map(({ key }) => [key, form[key]?.trim() || null]))
+    // email не отправляем: его нельзя менять — он подтверждён входом
+    const payload = Object.fromEntries(
+      FIELDS.filter(({ readOnly }) => !readOnly).map(({ key }) => [key, form[key]?.trim() || null])
+    )
     const res = await api.updateMe(payload)
     if (!res.ok) {
       alert('Не удалось сохранить')
@@ -205,7 +208,7 @@ export default function ProfilePage() {
 
       <Modal open={modalOpen} titleId="modalTitle" title="Личная информация" onClose={() => setModalOpen(false)}>
         <form className="modal__form" onSubmit={handleSubmit} noValidate>
-          {FIELDS.map(({ key, label, placeholder, type, autoComplete, inputMode }) => (
+          {FIELDS.map(({ key, label, placeholder, type, autoComplete, inputMode, readOnly }) => (
             <div className="modal__field" key={key}>
               <label className="modal__label" htmlFor={`field-${key}`}>
                 {label}
@@ -218,6 +221,8 @@ export default function ProfilePage() {
                 placeholder={placeholder}
                 autoComplete={autoComplete}
                 inputMode={inputMode}
+                readOnly={readOnly}
+                title={readOnly ? 'Почта подтверждена при входе и не меняется' : undefined}
                 value={form[key] || ''}
                 onChange={(e) => setForm({ ...form, [key]: e.target.value })}
               />
