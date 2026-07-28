@@ -90,9 +90,37 @@ export default function CheckoutPage() {
     return img ? imageUrl(img.filename) : null
   }
 
+  /** Проверка формы перед оплатой. Возвращает список замечаний. */
+  function validate() {
+    const problems = []
+    const value = (key) => form[key].trim()
+
+    // ФИО: ждём фамилию, имя и отчество — то есть минимум два пробела
+    const fullName = value('fullName')
+    if (!fullName) problems.push('ФИО')
+    else if ((fullName.match(/\S+/g) ?? []).length < 3) {
+      problems.push('ФИО — полностью: фамилия, имя и отчество')
+    }
+
+    const email = value('email')
+    if (!email) problems.push('Почта')
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) problems.push('Почта — проверьте адрес')
+
+    if (!value('country')) problems.push('Страна')
+    if (!value('city')) problems.push('Город')
+
+    // для СДЭК индекс не нужен — там доставка до пункта выдачи
+    if (delivery !== 'cdek' && !value('postal')) problems.push(texts.index)
+
+    if (!value('pickupPoint')) problems.push(texts.point)
+
+    return problems
+  }
+
   async function pay() {
-    if (!form.email.trim()) {
-      alert('Укажите почту — на неё придёт информация о заказе')
+    const problems = validate()
+    if (problems.length) {
+      alert('Проверьте, пожалуйста:\n\n• ' + problems.join('\n• '))
       return
     }
     setPaying(true)
