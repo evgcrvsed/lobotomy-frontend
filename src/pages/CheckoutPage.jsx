@@ -14,9 +14,11 @@ export default function CheckoutPage() {
   const [deliveryMethods, setDeliveryMethods] = useState([])
   const [chartSrc, setChartSrc] = useState(null)
   const [paying, setPaying] = useState(false)
+  const [authorized, setAuthorized] = useState(false)
   const [form, setForm] = useState({
     fullName: '',
     email: '',
+    phone: '',
     country: '',
     city: '',
     postal: '',
@@ -26,7 +28,8 @@ export default function CheckoutPage() {
   const texts = deliveryTexts(deliveryMethods, delivery)
   const formFields = [
     { key: 'fullName', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text' },
-    { key: 'email', label: 'Почта', placeholder: 'lobotomymerchstore@gmail.com', type: 'email' },
+    { key: 'email', label: 'Почта', placeholder: 'lobotomymerchstore@gmail.com', type: 'email', locked: authorized },
+    { key: 'phone', label: 'Телефон', placeholder: '+7 900 000-00-00', type: 'tel' },
     { key: 'country', label: 'Страна', placeholder: 'Россия', type: 'text' },
     { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text' },
     { key: 'postal', label: texts.index, placeholder: '101000', type: 'text' },
@@ -53,12 +56,16 @@ export default function CheckoutPage() {
     if (getToken()) {
       api.getMe().then((me) => {
         if (!me) return
+        setAuthorized(true)
         setForm((f) => ({
           ...f,
           email: me.email ?? '',
-          city: me.city ?? '',
           fullName: me.full_name ?? '',
+          phone: me.phone ?? '',
+          country: me.country ?? '',
+          city: me.city ?? '',
           postal: me.postal_code ?? '',
+          pickupPoint: me.pickup_point ?? '',
         }))
       })
     }
@@ -106,6 +113,7 @@ export default function CheckoutPage() {
     if (!email) problems.push('Почта')
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) problems.push('Почта — проверьте адрес')
 
+    if (!value('phone')) problems.push('Телефон')
     if (!value('country')) problems.push('Страна')
     if (!value('city')) problems.push('Город')
 
@@ -128,6 +136,7 @@ export default function CheckoutPage() {
       const payload = {
         email: form.email.trim(),
         full_name: form.fullName.trim() || null,
+        phone: form.phone.trim() || null,
         delivery_method: delivery,
         country: form.country.trim() || null,
         city: form.city.trim() || null,
@@ -166,7 +175,7 @@ export default function CheckoutPage() {
           <section className="checkout__form">
             <h1 className="checkout__title">Личная информация</h1>
 
-            {formFields.map(({ key, label, placeholder, type }) => (
+            {formFields.map(({ key, label, placeholder, type, locked }) => (
               <div className="checkout__field" key={key}>
                 <label className="checkout__label" htmlFor={`co-${key}`}>
                   {label}
@@ -178,6 +187,8 @@ export default function CheckoutPage() {
                   placeholder={placeholder}
                   value={form[key]}
                   disabled={key === 'postal' && delivery === 'cdek'}
+                  readOnly={locked}
+                  title={locked ? 'Почта подтверждена при входе и не меняется' : undefined}
                   onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                 />
               </div>

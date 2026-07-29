@@ -10,12 +10,16 @@ import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/profile.css'
 
+// Порядок как на оформлении заказа — данные там и тут одни и те же
 const FIELDS = [
   { key: 'full_name', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text', autoComplete: 'name' },
-  { key: 'address', label: 'Адрес', placeholder: 'ул. Пушкина, д. 1, кв. 2', type: 'text', autoComplete: 'street-address' },
-  { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text', autoComplete: 'address-level2' },
-  { key: 'postal_code', label: 'Индекс', placeholder: '101000', type: 'text', autoComplete: 'postal-code', inputMode: 'numeric' },
   { key: 'email', label: 'Почта', placeholder: 'hello@example.com', type: 'email', autoComplete: 'email', readOnly: true },
+  { key: 'phone', label: 'Телефон', placeholder: '+7 900 000-00-00', type: 'tel', autoComplete: 'tel' },
+  { key: 'country', label: 'Страна', placeholder: 'Россия', type: 'text', autoComplete: 'country-name' },
+  { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text', autoComplete: 'address-level2' },
+  { key: 'address', label: 'Адрес', placeholder: 'ул. Пушкина, д. 1, кв. 2', type: 'text', autoComplete: 'street-address' },
+  { key: 'postal_code', label: 'Индекс', placeholder: '101000', type: 'text', autoComplete: 'postal-code', inputMode: 'numeric' },
+  { key: 'pickup_point', label: 'Пункт выдачи', placeholder: 'ул. Кутузова, 27', type: 'text' },
 ]
 
 export default function ProfilePage() {
@@ -77,13 +81,7 @@ export default function ProfilePage() {
   }
 
   function openModal() {
-    setForm({
-      full_name: user.full_name ?? '',
-      address: user.address ?? '',
-      city: user.city ?? '',
-      postal_code: user.postal_code ?? '',
-      email: user.email ?? '',
-    })
+    setForm(Object.fromEntries(FIELDS.map(({ key }) => [key, user[key] ?? ''])))
     setModalOpen(true)
   }
 
