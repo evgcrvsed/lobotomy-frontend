@@ -24,6 +24,7 @@ const EMPTY_FORM = {
   material: '',
   density: '',
   price: '',
+  sortOrder: '',
   imageMain: null,
   imageHover: null,
   imageSizechart: null,
@@ -254,6 +255,7 @@ export default function AdminPage() {
       material: product.material ?? '',
       density: product.density ?? '',
       price: product.price,
+      sortOrder: String(product.sort_order ?? ''),
       imageMain: product.images.find((i) => i.role === 'main')?.filename ?? null,
       imageHover: product.images.find((i) => i.role === 'hover')?.filename ?? null,
       imageSizechart: product.images.find((i) => i.role === 'sizechart')?.filename ?? null,
@@ -384,6 +386,8 @@ export default function AdminPage() {
       material: form.material.trim() || null,
       density: form.density ? parseInt(form.density, 10) : null,
       price: parseInt(form.price, 10),
+      // пусто — бэкенд поставит товар в конец каталога
+      sort_order: form.sortOrder.trim() === '' ? null : parseInt(form.sortOrder, 10),
       images,
       sizes,
     }
@@ -470,6 +474,9 @@ export default function AdminPage() {
 
               return (
                 <div className="admin-row" key={product.id}>
+                  <span className="admin-row__order" title="Порядок в каталоге">
+                    {product.sort_order}
+                  </span>
                   <div className="admin-row__img">
                     {firstImg ? (
                       <img src={imageUrl(firstImg)} alt={product.name} />
@@ -638,20 +645,40 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="modal__field">
-            <label className="modal__label" htmlFor="field-price">
-              Стоимость, ₽ *
-            </label>
-            <input
-              className="modal__input"
-              type="number"
-              id="field-price"
-              placeholder="5000"
-              min="1"
-              required
-              value={form.price}
-              onChange={(e) => setForm({ ...form, price: e.target.value })}
-            />
+          <div className="modal__row">
+            <div className="modal__field">
+              <label className="modal__label" htmlFor="field-price">
+                Стоимость, ₽ *
+              </label>
+              <input
+                className="modal__input"
+                type="number"
+                id="field-price"
+                placeholder="5000"
+                min="1"
+                required
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+              />
+            </div>
+            <div className="modal__field">
+              <label className="modal__label" htmlFor="field-sort">
+                Порядок в каталоге
+              </label>
+              <input
+                className="modal__input"
+                type="number"
+                id="field-sort"
+                placeholder="в конец"
+                min="0"
+                value={form.sortOrder}
+                onChange={(e) => setForm({ ...form, sortOrder: e.target.value })}
+              />
+              <span className="modal__hint">
+                Меньше — выше в каталоге. Номера идут с шагом 10, поэтому чтобы
+                поставить товар между 20 и 30 — впишите 25. Пусто — в конец.
+              </span>
+            </div>
           </div>
 
           <div className="modal__row modal__row--triple">
