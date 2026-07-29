@@ -9,11 +9,13 @@ import '../styles/pages/admin-orders.css'
 export default function AdminOrderEditPage() {
   const { number } = useParams()
   const [order, setOrder] = useState(null)
+  const [products, setProducts] = useState([])
   const [productsById, setProductsById] = useState({})
   const [methods, setMethods] = useState([])
   const [state, setState] = useState('loading') // loading | ok | notfound
   const [form, setForm] = useState(null)
   const [sizes, setSizes] = useState({}) // id позиции -> размер
+  const [newItems, setNewItems] = useState([]) // дозаказ: позиции, которых ещё нет в заказе
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -25,6 +27,7 @@ export default function AdminOrderEditPage() {
           return
         }
         setOrder(ord)
+        setProducts(prods)
         setProductsById(Object.fromEntries(prods.map((p) => [p.id, p])))
         setMethods(dm)
         setForm({
@@ -68,6 +71,32 @@ export default function AdminOrderEditPage() {
     return productsById[item.product_id]?.sizes ?? []
   }
 
+  // ---- дозаказ ----
+  function addRow() {
+    const product = products[0]
+    if (!product) return
+    setNewItems([
+      ...newItems,
+      { key: Date.now() + Math.random(), product_id: product.id, size: '', qty: 1, price: String(product.price) },
+    ])
+  }
+
+  function patchRow(key, patch) {
+    setNewItems(newItems.map((r) => (r.key === key ? { ...r, ...patch } : r)))
+  }
+
+  function pickProduct(key, productId) {
+    const product = productsById[productId]
+    // товар сменился — размер от прежнего больше не подходит, цену берём новую
+    patchRow(key, { product_id: productId, size: '', price: String(product?.price ?? 0) })
+  }
+
+  function rowSum(row) {
+    return (Number(row.price) || 0) * (Number(row.qty) || 0)
+  }
+
+  const addedTotal = newItems.reduce((sum, r) => sum + rowSum(r), 0)
+
   async function save() {
     setSaving(true)
     try {
@@ -78,6 +107,12 @@ export default function AdminOrderEditPage() {
         email: form.email.trim(),
         delivery_method: form.delivery_method,
         items: order.items.map((i) => ({ id: i.id, size: sizes[i.id]?.trim() || null })),
+        new_items: newItems.map((r) => ({
+          product_id: r.product_id,
+          size: r.size.trim() || null,
+          qty: Math.max(1, Number(r.qty) || 1),
+          price: Math.max(0, Number(r.price) || 0),
+        })),
       }
       const res = await api.adminUpdateOrder(number, payload)
       if (!res.ok) {
@@ -88,6 +123,7 @@ export default function AdminOrderEditPage() {
       const updated = await res.json()
       setOrder(updated)
       setSizes(Object.fromEntries(updated.items.map((i) => [i.id, i.size ?? ''])))
+      setNewItems([]) // дозаказ уехал в заказ — черновик больше не нужен
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } finally {
@@ -95,7 +131,11 @@ export default function AdminOrderEditPage() {
     }
   }
 
-  const itemsCount = order.items.reduce((sum, i) => sum + i.qty, 0)
+  // в итогах сразу показываем, каким заказ станет после сохранения дозаказа
+  const itemsCount =
+    order.items.reduce((sum, i) => sum + i.qty, 0) +
+    newItems.reduce((sum, r) => sum + (Number(r.qty) || 0), 0)
+  const itemsTotal = order.items_total + addedTotal
 
   return (
     <div className="checkout">
@@ -190,14 +230,100 @@ export default function AdminOrderEditPage() {
                 </div>
               </div>
             ))}
+
+            {newItems.map((row) => {
+              const product = productsById[row.product_id]
+              const sizeOptions = product?.sizes ?? []
+              return (
+                <div className="checkout-item checkout-item--new" key={row.key}>
+                  <div className="checkout-item__info">
+                    <select
+                      className="checkout-item__select"
+                      aria-label="Товар"
+                      value={row.product_id}
+                      onChange={(e) => pickProduct(row.key, Number(e.target.value))}
+                    >
+                      {products.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="checkout-item__controls">
+                      {sizeOptions.length > 0 ? (
+                        <select
+                          className="checkout-item__select"
+                          aria-label="Размер"
+                          value={row.size}
+                          onChange={(e) => patchRow(row.key, { size: e.target.value })}
+                        >
+                          <option value="">без размера</option>
+                          {sizeOptions.map((s) => (
+                            <option key={s.id} value={s.label}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          className="checkout-item__select"
+                          aria-label="Размер"
+                          value={row.size}
+                          placeholder="размер"
+                          onChange={(e) => patchRow(row.key, { size: e.target.value })}
+                        />
+                      )}
+                      <input
+                        className="checkout-item__select checkout-item__select--num"
+                        aria-label="Количество"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={row.qty}
+                        onChange={(e) => patchRow(row.key, { qty: e.target.value })}
+                      />
+                      <input
+                        className="checkout-item__select checkout-item__select--num"
+                        aria-label="Цена, ₽"
+                        type="number"
+                        min="0"
+                        value={row.price}
+                        onChange={(e) => patchRow(row.key, { price: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="checkout-item__right">
+                    <span className="checkout-item__price">{formatPrice(rowSum(row))}</span>
+                    <button
+                      className="checkout-item__remove"
+                      type="button"
+                      aria-label="Убрать позицию"
+                      onClick={() => setNewItems(newItems.filter((r) => r.key !== row.key))}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
+
+          <button className="btn btn--outline admin-order__add-item" type="button" onClick={addRow} disabled={!products.length}>
+            + Добавить товар
+          </button>
+          {addedTotal > 0 && (
+            <p className="admin-order__hint">
+              Доплата {formatPrice(addedTotal)} — счёт заказа уже оплачен, деньги за дозаказ нужно
+              получить отдельно.
+            </p>
+          )}
 
           <div className="checkout__totals">
             <div className="checkout__total-row">
               <span>
                 Итог: {itemsCount} {plural(itemsCount, 'изделие', 'изделия', 'изделий')}
               </span>
-              <span>{formatPrice(order.items_total)}</span>
+              <span>{formatPrice(itemsTotal)}</span>
             </div>
             <div className="checkout__total-row">
               <span>Доставка:</span>
@@ -205,7 +331,7 @@ export default function AdminOrderEditPage() {
             </div>
             <div className="checkout__total-row checkout__total-row--final">
               <span>Итог:</span>
-              <span>{formatPrice(order.total)}</span>
+              <span>{formatPrice(itemsTotal + order.delivery_price)}</span>
             </div>
           </div>
 

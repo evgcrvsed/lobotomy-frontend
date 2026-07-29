@@ -142,6 +142,33 @@
     flex-shrink: 0;
 }
 
+/* ---- Дозаказ: черновые позиции в редакторе заказа ---- */
+.checkout-item--new {
+    padding-top: 14px;
+    border-top: 1px dashed var(--color-border);
+}
+
+.checkout-item--new .checkout-item__info {
+    flex: 1;
+    min-width: 0;
+    gap: 7px;
+}
+
+/* размер / количество / цена — в строку, а не столбиком, как у обычных позиций */
+.checkout-item--new .checkout-item__controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+    margin-top: 0;
+}
+
+.checkout-item__select--num { width: 64px; }
+
+.admin-order__add-item {
+    width: 100%;
+    margin-top: 16px;
+}
+
 .admin-order__hint {
     margin-top: 8px;
     font-size: 12px;
