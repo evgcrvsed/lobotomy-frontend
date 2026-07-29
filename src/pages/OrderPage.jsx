@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
-import { ORDER_STATUS_LABELS, deliveryTexts, formatPrice, plural } from '../constants'
+import { ORDER_STATUS_LABELS, deliveryTexts, formatDateTime, formatPrice, plural } from '../constants'
 import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
 
@@ -144,6 +144,13 @@ export default function OrderPage() {
             <span className={`order-tracking__value${order.tracking_number ? '' : ' order-tracking__value--empty'}`}>
               {order.tracking_number || 'Ещё не отправлено..'}
             </span>
+            {/* подпись прямо от СДЭК — она точнее нашего общего статуса */}
+            {order.cdek_status_name && (
+              <span className="order-tracking__cdek">
+                {order.cdek_status_name}
+                {order.cdek_status_at && ` — ${formatDateTime(order.cdek_status_at)}`}
+              </span>
+            )}
           </div>
         </aside>
       </div>

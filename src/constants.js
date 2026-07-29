@@ -15,11 +15,25 @@ export const deliveryTexts = (methods, code) => {
   return { index: m?.index_label ?? 'Индекс', point: m?.point_label ?? 'Адрес' }
 }
 
+// После «Отправлен» статус ведёт СДЭК: см. backend/services/cdek_sync.py
 export const ORDER_STATUS_LABELS = {
   pending: 'Ожидает оплаты',
-  paid: 'Оплачен',
+  paid: 'В работе',
   shipped: 'Отправлен',
+  ready: 'Готов к выдаче',
+  delivered: 'Вручён',
   cancelled: 'Отменён',
+}
+
+/** Дата и время в едином формате: 29.07.2026, 11:14 */
+export function formatDateTime(iso) {
+  return new Date(iso).toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 /** Цена в едином формате: 5 500 ₽ */

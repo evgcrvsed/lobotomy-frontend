@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
-import { ORDER_STATUS_LABELS, formatPrice } from '../constants'
+import { ORDER_STATUS_LABELS, formatDateTime, formatPrice } from '../constants'
 import '../styles/pages/orders.css'
 
 export default function OrderView({ order, linkTo, deliveryLabels = {} }) {
@@ -62,6 +62,12 @@ export default function OrderView({ order, linkTo, deliveryLabels = {} }) {
 
       {order.tracking_number && (
         <p className="order-view__tracking">Трек-номер: <strong>{order.tracking_number}</strong></p>
+      )}
+      {order.cdek_status_name && (
+        <p className="order-view__cdek">
+          СДЭК: {order.cdek_status_name}
+          {order.cdek_status_at && ` — ${formatDateTime(order.cdek_status_at)}`}
+        </p>
       )}
 
       {order.status === 'pending' && (

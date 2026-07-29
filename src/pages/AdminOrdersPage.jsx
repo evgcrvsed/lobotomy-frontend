@@ -1,27 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
-import { ORDER_STATUS_LABELS, deliveryLabels, formatPrice } from '../constants'
+import { ORDER_STATUS_LABELS, deliveryLabels, formatDateTime, formatPrice } from '../constants'
 import '../styles/pages/admin.css'
 import '../styles/pages/admin-orders.css'
 
 const FILTERS = [
   { id: 'all', label: 'Все' },
-  { id: 'paid', label: 'Оплаченные' },
+  { id: 'paid', label: 'В работе' },
   { id: 'shipped', label: 'Отправленные' },
+  { id: 'ready', label: 'Готовы к выдаче' },
+  { id: 'delivered', label: 'Вручённые' },
   { id: 'pending', label: 'Ожидают оплаты' },
   { id: 'cancelled', label: 'Отменённые' },
 ]
-
-function formatDate(iso) {
-  return new Date(iso).toLocaleString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([])
@@ -31,6 +23,7 @@ export default function AdminOrdersPage() {
   const [drafts, setDrafts] = useState({}) // номер заказа -> введённый трек
   const [savingNumber, setSavingNumber] = useState(null)
   const [savedNumber, setSavedNumber] = useState(null)
+  const [syncingNumber, setSyncingNumber] = useState(null)
 
   useEffect(() => {
     Promise.all([api.getAllOrders(), api.getDeliveryMethods()]).then(([list, dm]) => {
@@ -57,6 +50,23 @@ export default function AdminOrdersPage() {
       setTimeout(() => setSavedNumber(null), 1800)
     } finally {
       setSavingNumber(null)
+    }
+  }
+
+  /** Спросить у СДЭК статус этого заказа прямо сейчас. */
+  async function syncCdek(order) {
+    setSyncingNumber(order.number)
+    try {
+      const res = await api.syncOrderCdek(order.number)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('СДЭК не ответил: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      const updated = await res.json()
+      setOrders((list) => list.map((o) => (o.number === updated.number ? updated : o)))
+    } finally {
+      setSyncingNumber(null)
     }
   }
 
@@ -101,7 +111,7 @@ export default function AdminOrdersPage() {
                   <Link to={`/order/${order.number}`} target="_blank" rel="noopener" className="admin-order__number">
                     {order.number}
                   </Link>
-                  <span className="admin-order__date">{formatDate(order.created_at)}</span>
+                  <span className="admin-order__date">{formatDateTime(order.created_at)}</span>
                 </div>
                 <div className="admin-order__head-right">
                   <Link to={`/admin/orders/${order.number}`} className="btn btn--outline">
@@ -173,7 +183,24 @@ export default function AdminOrdersPage() {
                         ? 'Сохранено ✓'
                         : 'Сохранить'}
                   </button>
+                  {/* статус подтягивается сам раз в 20 минут, кнопка — чтобы не ждать */}
+                  {order.delivery_method === 'cdek' && order.tracking_number && (
+                    <button
+                      className="btn btn--outline"
+                      type="button"
+                      disabled={syncingNumber === order.number}
+                      onClick={() => syncCdek(order)}
+                    >
+                      {syncingNumber === order.number ? 'Спрашиваем...' : 'Статус СДЭК'}
+                    </button>
+                  )}
                 </div>
+                {order.cdek_status_name && (
+                  <p className="admin-order__text admin-order__text--small admin-order__cdek">
+                    СДЭК: {order.cdek_status_name}
+                    {order.cdek_status_at && ` — ${formatDateTime(order.cdek_status_at)}`}
+                  </p>
+                )}
               </footer>
             </article>
           )

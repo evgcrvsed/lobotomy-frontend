@@ -26,6 +26,8 @@
 
 .order-page__status-badge--paid { background-color: var(--status-paid-bg); color: var(--status-paid-fg); }
 .order-page__status-badge--shipped { background-color: var(--status-shipped-bg); color: var(--status-shipped-fg); }
+.order-page__status-badge--ready { background-color: var(--status-ready-bg); color: var(--status-ready-fg); }
+.order-page__status-badge--delivered { background-color: var(--status-delivered-bg); color: var(--status-delivered-fg); }
 .order-page__status-badge--cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-fg); }
 
 /* Поля только для чтения */
@@ -61,4 +63,12 @@
     font-weight: 400;
     font-style: italic;
     color: var(--color-muted);
+}
+
+/* Подпись статуса, пришедшая от СДЭК */
+.order-tracking__cdek {
+    margin-top: 3px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--color-gray);
 }

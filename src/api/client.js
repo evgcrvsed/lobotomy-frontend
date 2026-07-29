@@ -111,4 +111,7 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tracking_number: trackingNumber }),
     }),
+  // спросить статус у СДЭК прямо сейчас, не дожидаясь фонового опроса
+  syncOrderCdek: (number) =>
+    request(`/api/orders/${encodeURIComponent(number)}/cdek-sync`, { method: 'POST' }),
 }

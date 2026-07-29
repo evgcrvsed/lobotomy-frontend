@@ -59,6 +59,8 @@
 
 .admin-order__status--paid { background-color: var(--status-paid-bg); color: var(--status-paid-fg); }
 .admin-order__status--shipped { background-color: var(--status-shipped-bg); color: var(--status-shipped-fg); }
+.admin-order__status--ready { background-color: var(--status-ready-bg); color: var(--status-ready-fg); }
+.admin-order__status--delivered { background-color: var(--status-delivered-bg); color: var(--status-delivered-fg); }
 .admin-order__status--cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-fg); }
 
 /* ---- Тело карточки ---- */
@@ -120,6 +122,8 @@
 
 .admin-order__tracking-row .modal__input { flex: 1; min-width: 0; }
 .admin-order__tracking-row .btn { flex-shrink: 0; white-space: nowrap; }
+
+.admin-order__cdek { margin-top: 8px; }
 
 @media (max-width: 900px) {
     .admin-order__body {

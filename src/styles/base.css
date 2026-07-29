@@ -56,6 +56,8 @@ img {
     /* Статусы заказа: фон / текст */
     --status-paid-bg:      #e1f5ee;  --status-paid-fg:      #0f6e56;
     --status-shipped-bg:   #e6f1fb;  --status-shipped-fg:   #185fa5;
+    --status-ready-bg:     #fdf3dd;  --status-ready-fg:     #8a6318;
+    --status-delivered-bg: #eae7f7;  --status-delivered-fg: #4b3f8f;
     --status-cancelled-bg: #faece7;  --status-cancelled-fg: #993c1d;
 
     /* ---- Тени ---- */
