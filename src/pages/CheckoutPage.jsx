@@ -18,7 +18,6 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({
     fullName: '',
     email: '',
-    phone: '',
     country: '',
     city: '',
     postal: '',
@@ -29,7 +28,6 @@ export default function CheckoutPage() {
   const formFields = [
     { key: 'fullName', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text' },
     { key: 'email', label: 'Почта', placeholder: 'lobotomymerchstore@gmail.com', type: 'email', locked: authorized },
-    { key: 'phone', label: 'Телефон', placeholder: '+7 900 000-00-00', type: 'tel' },
     { key: 'country', label: 'Страна', placeholder: 'Россия', type: 'text' },
     { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text' },
     { key: 'postal', label: texts.index, placeholder: '101000', type: 'text' },
@@ -61,7 +59,6 @@ export default function CheckoutPage() {
           ...f,
           email: me.email ?? '',
           fullName: me.full_name ?? '',
-          phone: me.phone ?? '',
           country: me.country ?? '',
           city: me.city ?? '',
           postal: me.postal_code ?? '',
@@ -113,7 +110,6 @@ export default function CheckoutPage() {
     if (!email) problems.push('Почта')
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) problems.push('Почта — проверьте адрес')
 
-    if (!value('phone')) problems.push('Телефон')
     if (!value('country')) problems.push('Страна')
     if (!value('city')) problems.push('Город')
 
@@ -136,7 +132,6 @@ export default function CheckoutPage() {
       const payload = {
         email: form.email.trim(),
         full_name: form.fullName.trim() || null,
-        phone: form.phone.trim() || null,
         delivery_method: delivery,
         country: form.country.trim() || null,
         city: form.city.trim() || null,
