@@ -1,7 +1,24 @@
+import { Link } from 'react-router-dom'
+
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer__inner">
+        <div className="footer__legal">
+          <p className="footer__copy">© {new Date().getFullYear()} «LOBOTOMY»</p>
+          <p className="footer__links">
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            {' | '}
+            <span>Applications for Return of Goods</span>
+            {' | '}
+            <span>Returns</span>
+            {' | '}
+            <span>Reviews</span>
+            {' | '}
+            <Link to="/contract-offer">Contract Offer</Link>
+          </p>
+        </div>
+
         <div className="footer__social">
           <a
             href="https://t.me/lobo1omy"

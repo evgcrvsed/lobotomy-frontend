@@ -1,36 +1,62 @@
 import { useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { getToken } from '../auth'
 import { clearCart } from '../cart'
+import { getGuestOrders, rememberGuestOrder } from '../guestOrders'
 import '../styles/pages/orders.css'
 
 export default function CheckoutSuccessPage() {
+  const { number: fromPath } = useParams()
   const [params] = useSearchParams()
-  const number = params.get('OrderId')
+  const authorized = !!getToken()
+
+  // Номер приходит в пути (его кладёт бэкенд в SuccessURL). OrderId в query —
+  // запас на старые ссылки; последняя надежда — то, что запомнили при оформлении.
+  const number = fromPath || params.get('OrderId') || (authorized ? null : getGuestOrders()[0]) || null
 
   // заказ оформлен — очищаем корзину
   useEffect(() => {
     clearCart()
-  }, [])
+    if (number && !authorized) rememberGuestOrder(number)
+  }, [number, authorized])
 
   return (
     <div className="order-result">
       <h1 className="order-result__title">Спасибо за заказ!</h1>
-      {number && (
-        <p className="order-result__number">
-          Номер заказа: <strong>{number}</strong>
+
+      {number ? (
+        <>
+          <p className="order-result__number">
+            Номер заказа: <strong>{number}</strong>
+          </p>
+          {!authorized && (
+            <p className="order-result__text order-result__text--warn">
+              Сохраните номер — по нему вы сможете открыть заказ и посмотреть трек-номер.
+              Или войдите на сайт с той же почтой: заказ сам привяжется к аккаунту.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="order-result__text">
+          Оплата прошла. Номер заказа можно посмотреть в{' '}
+          {authorized ? <Link to="/profile">профиле</Link> : <Link to="/track">отслеживании</Link>}.
         </p>
       )}
-      <p className="order-result__text">
-        Информация о заказе отправлена на вашу почту. Как только он будет отправлен, добавим трек-номер.
-      </p>
+
+      <p className="order-result__text">Как только заказ будет отправлен, у него появится трек-номер.</p>
+
       <div className="order-result__actions">
-        {getToken() ? (
-          <Link to="/profile" className="btn btn--dark">
+        {number && (
+          <Link to={`/order/${encodeURIComponent(number)}`} className="btn btn--dark">
+            Открыть заказ
+          </Link>
+        )}
+        {authorized ? (
+          <Link to="/profile" className="btn btn--outline">
             Мои заказы
           </Link>
         ) : (
-          <Link to={number ? `/track?number=${encodeURIComponent(number)}` : '/track'} className="btn btn--dark">
+          <Link to={number ? `/track?number=${encodeURIComponent(number)}` : '/track'} className="btn btn--outline">
             Отследить заказ
           </Link>
         )}

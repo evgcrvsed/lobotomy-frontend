@@ -12,6 +12,8 @@ import OrderPage from './pages/OrderPage'
 import LoginPage from './pages/LoginPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminOrderEditPage from './pages/AdminOrderEditPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import ContractOfferPage from './pages/ContractOfferPage'
 import RequireAdmin from './components/RequireAdmin'
 
 function App() {
@@ -23,10 +25,16 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          {/* Т-Банк возвращает покупателя сюда; номер заказа приходит в пути.
+              Варианты без номера оставлены на случай старых ссылок. */}
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+          <Route path="/checkout/success/:number" element={<CheckoutSuccessPage />} />
           <Route path="/checkout/fail" element={<CheckoutFailPage />} />
+          <Route path="/checkout/fail/:number" element={<CheckoutFailPage />} />
           <Route path="/track" element={<TrackPage />} />
           <Route path="/order/:number" element={<OrderPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/contract-offer" element={<ContractOfferPage />} />
           <Route path="/:collectionSlug/:productSlug" element={<ProductPage />} />
           <Route
             path="/admin"

@@ -217,13 +217,6 @@ export default function ProductPage() {
             )}
           </>
         )}
-
-        <div className="product-legal">
-          <p className="product-legal__copy">© 2025 «LOBOTOMY»</p>
-          <p className="product-legal__links">
-            PRIVACY POLICY | APPLICATIONS FOR RETURN OF GOODS | RETURNS | REVIEWS | CONTRACT OFFER
-          </p>
-        </div>
       </div>
     </div>
   )

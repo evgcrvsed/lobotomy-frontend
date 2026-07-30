@@ -4,6 +4,7 @@ import { api, imageUrl } from '../api/client'
 import { getToken } from '../auth'
 import { changeCartSize, getCart, removeFromCart, setCartQty } from '../cart'
 import { deliveryTexts, formatPrice, plural } from '../constants'
+import { rememberGuestOrder } from '../guestOrders'
 import '../styles/pages/checkout.css'
 
 export default function CheckoutPage() {
@@ -150,7 +151,10 @@ export default function CheckoutPage() {
         alert('Не удалось оформить заказ: ' + (err.detail ?? 'что-то пошло не так'))
         return
       }
-      const { payment_url } = await res.json()
+      const { number, payment_url } = await res.json()
+      // запоминаем до перехода на оплату: если гость не вернётся с чека,
+      // номер всё равно останется у него на устройстве
+      if (!authorized) rememberGuestOrder(number)
       window.location.href = payment_url // уходим на страницу оплаты Т-Банка
     } finally {
       setPaying(false)

@@ -243,25 +243,6 @@
     z-index: 1; /* увеличенная — поверх соседних */
 }
 
-/* ---- ЮРИДИЧЕСКАЯ СТРОКА ПЕРЕД ФУТЕРОМ ---- */
-.product-legal {
-    margin-top: 64px;
-    text-align: center;
-    font-family: var(--font-display);
-    color: var(--color-gray);
-}
-
-.product-legal__copy {
-    font-size: 14px;
-}
-
-.product-legal__links {
-    margin-top: 6px;
-    font-size: 13px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
 /* ---- RESPONSIVE ---- */
 @media (max-width: 960px) {
     .product-columns {

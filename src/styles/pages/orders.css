@@ -28,6 +28,14 @@
     line-height: 1.6;
 }
 
+/* Просьба сохранить номер: гостю его больше взять негде */
+.order-result__text--warn {
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-black);
+}
+
 .order-result__actions {
     margin-top: 28px;
     display: flex;
@@ -73,6 +81,41 @@
 }
 
 .track-form__input:focus { border-color: var(--color-black); }
+
+/* Подсказка с номерами, запомненными на этом устройстве */
+.track-recent {
+    margin-top: 18px;
+}
+
+.track-recent__label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.track-recent__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.track-recent__item {
+    padding: 7px 14px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--color-black);
+    background-color: var(--color-field);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.track-recent__item:hover { background-color: var(--color-field-hover); }
+.track-recent__item--active { border-color: var(--color-black); }
 
 .track-page__error {
     margin-top: 18px;
