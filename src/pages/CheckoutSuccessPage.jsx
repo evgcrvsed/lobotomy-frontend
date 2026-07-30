@@ -14,10 +14,19 @@ export default function CheckoutSuccessPage() {
   // запас на старые ссылки; последняя надежда — то, что запомнили при оформлении.
   const number = fromPath || params.get('OrderId') || (authorized ? null : getGuestOrders()[0]) || null
 
-  // заказ оформлен — очищаем корзину
+  // Корзину чистим один раз на заказ. На эту же страницу ведёт ссылка из письма,
+  // и открыв её через неделю покупатель потерял бы уже собранную новую корзину.
   useEffect(() => {
-    clearCart()
-    if (number && !authorized) rememberGuestOrder(number)
+    if (!number) {
+      clearCart()
+      return
+    }
+    const key = 'lobotomy_cart_cleared_for'
+    if (localStorage.getItem(key) !== number) {
+      clearCart()
+      localStorage.setItem(key, number)
+    }
+    if (!authorized) rememberGuestOrder(number)
   }, [number, authorized])
 
   return (
