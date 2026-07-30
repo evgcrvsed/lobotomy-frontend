@@ -9,12 +9,6 @@
     padding: 64px var(--container-pad) 120px;
 }
 
-.legal-page__title {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 36px;
-}
-
 .legal-page__body {
     font-size: 15px;
     line-height: 1.7;
@@ -25,10 +19,27 @@
     margin-bottom: 16px;
 }
 
+/* Заголовок документа — задаётся самим текстом (первая строка вставленного контента) */
+.legal-page__body h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-black);
+    margin-bottom: 28px;
+}
+
 .legal-page__body h2 {
     margin-top: 36px;
     margin-bottom: 14px;
     font-size: 18px;
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+/* Номер пункта договора (2.1, 2.2 …) — мельче h2, без лишнего интервала сверху */
+.legal-page__body h3 {
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--color-black);
 }
@@ -54,7 +65,7 @@
         padding: 48px var(--container-pad) 96px;
     }
 
-    .legal-page__title {
-        font-size: 22px;
+    .legal-page__body h1 {
+        font-size: 21px;
     }
 }

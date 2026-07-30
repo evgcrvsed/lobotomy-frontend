@@ -15,7 +15,7 @@ export default function Footer() {
             {' | '}
             <span>Reviews</span>
             {' | '}
-            <Link to="/contract-offer">Contract Offer</Link>
+            <Link to="/contract-offer">Offer Agreement</Link>
           </p>
         </div>
 
