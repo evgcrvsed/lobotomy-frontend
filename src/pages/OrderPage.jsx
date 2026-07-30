@@ -4,6 +4,7 @@ import { api, imageUrl } from '../api/client'
 import { ORDER_STATUS_LABELS, deliveryTexts, formatDateTime, formatPrice, plural } from '../constants'
 import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
+import '../styles/pages/orders.css'
 
 export default function OrderPage() {
   const { number } = useParams()
@@ -11,7 +12,7 @@ export default function OrderPage() {
   const [productsById, setProductsById] = useState({})
   const [collections, setCollections] = useState([])
   const [deliveryMethods, setDeliveryMethods] = useState([])
-  const [state, setState] = useState('loading') // loading | ok | notfound
+  const [state, setState] = useState('loading') // loading | ok | notfound | denied
 
   useEffect(() => {
     Promise.all([
@@ -19,9 +20,10 @@ export default function OrderPage() {
       api.getProducts(),
       api.getCollections(),
       api.getDeliveryMethods(),
-    ]).then(([ord, prods, cols, methods]) => {
+    ]).then(([{ order: ord, denied }, prods, cols, methods]) => {
       if (!ord) {
-        setState('notfound')
+        // 403 — заказ есть, но привязан к аккаунту: зовём войти, а не пугаем «не найден»
+        setState(denied ? 'denied' : 'notfound')
         return
       }
       setOrder(ord)
@@ -34,6 +36,28 @@ export default function OrderPage() {
 
   if (state === 'loading') return <p className="order-page__status">Загрузка...</p>
   if (state === 'notfound') return <p className="order-page__status">Заказ не найден</p>
+  if (state === 'denied') {
+    return (
+      <div className="order-result">
+        <h1 className="order-result__title">Заказ привязан к аккаунту</h1>
+        <p className="order-result__number">
+          Номер заказа: <strong>{number}</strong>
+        </p>
+        <p className="order-result__text">
+          Вы уже входили на сайт с почтой, на которую оформлен этот заказ — теперь он виден
+          только из аккаунта. Войдите с той же почты, и заказ откроется в профиле.
+        </p>
+        <div className="order-result__actions">
+          <Link to="/login" className="btn btn--dark">
+            Войти
+          </Link>
+          <Link to="/" className="btn btn--outline">
+            В каталог
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   const texts = deliveryTexts(deliveryMethods, order.delivery_method)
   const fields = [

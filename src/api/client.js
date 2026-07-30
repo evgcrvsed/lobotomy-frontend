@@ -89,7 +89,13 @@ export const api = {
   trackOrder: (number) => request(`/api/orders/track/${encodeURIComponent(number)}`),
   getMyOrders: () => request('/api/orders/my').then((r) => (r.ok ? r.json() : [])),
   resumePayment: (number) => request(`/api/orders/${encodeURIComponent(number)}/pay`, { method: 'POST' }),
-  getOrder: (number) => request(`/api/orders/${encodeURIComponent(number)}`).then((r) => (r.ok ? r.json() : null)),
+  // Возвращает { order, denied }: 403 надо отличать от 404 — заказ существует,
+  // но привязан к аккаунту, и человеку нужно предложить вход, а не «не найдено»
+  getOrder: (number) =>
+    request(`/api/orders/${encodeURIComponent(number)}`).then(async (r) => ({
+      order: r.ok ? await r.json() : null,
+      denied: r.status === 403,
+    })),
   // админские
   getDeliveryMethods: () => request('/api/delivery/').then((r) => (r.ok ? r.json() : [])),
   updateDeliveryMethod: (code, data) =>

@@ -21,7 +21,7 @@ export default function AdminOrderEditPage() {
 
   useEffect(() => {
     Promise.all([api.getOrder(number), api.getProducts(), api.getDeliveryMethods()]).then(
-      ([ord, prods, dm]) => {
+      ([{ order: ord }, prods, dm]) => {
         if (!ord) {
           setState('notfound')
           return
