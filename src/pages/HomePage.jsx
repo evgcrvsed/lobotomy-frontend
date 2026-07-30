@@ -34,9 +34,12 @@ export default function HomePage() {
   const filteredProducts =
     activeFilter === 'all' ? products : products.filter((p) => p.collection_id === activeFilter)
 
-  // hero — картинка последней добавленной коллекции, у которой она задана; иначе заглушка
-  const latestCollectionImage = [...collections].reverse().find((c) => c.image)?.image
-  const heroSrc = latestCollectionImage ? imageUrl(latestCollectionImage) : previewImg
+  // hero — картинка коллекции, выбранной в админке. Если выбор не сделан (или у
+  // выбранной коллекции нет картинки) — как раньше: последняя добавленная с картинкой.
+  const chosen = collections.find((c) => c.is_hero && c.image)
+  const fallback = [...collections].reverse().find((c) => c.image)
+  const heroImage = (chosen ?? fallback)?.image
+  const heroSrc = heroImage ? imageUrl(heroImage) : previewImg
 
   return (
     <>

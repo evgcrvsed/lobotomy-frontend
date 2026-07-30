@@ -96,6 +96,14 @@ img {
     --container-pad:    24px;
 }
 
+/* На дробном масштабе экрана (Windows 125%/150%) высота #root, посчитанная
+   через 100vh, иногда на доли пикселя не дотягивает до низа окна — в эту щель
+   просвечивал бы белый фон body. Красим html в цвет футера: раскладка кончается
+   именно им, так что щель (если она есть) сливается с ним, а не белеет. */
+html {
+    background-color: var(--color-black);
+}
+
 body {
     font-family: var(--font-body), sans-serif;
     background-color: var(--color-white);

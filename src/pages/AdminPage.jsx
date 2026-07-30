@@ -174,6 +174,17 @@ export default function AdminPage() {
     await refreshMedia()
   }
 
+  /** Чья картинка стоит сверху на главной. Выбранная всегда одна — бэкенд снимает флаг с остальных. */
+  async function setHeroCollection(col) {
+    const res = await api.updateCollection(col.id, { name: col.name, image: col.image, is_hero: true })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert('Не удалось выбрать главную картинку: ' + (err.detail ?? 'что-то пошло не так'))
+      return
+    }
+    await reloadCollections()
+  }
+
   async function handleColImageSelect(e, col) {
     const file = e.target.files[0]
     if (!file) return
@@ -862,10 +873,29 @@ export default function AdminPage() {
       <Modal open={colModalOpen} titleId="col-modal-title" title="Коллекции" onClose={() => setColModalOpen(false)}>
         <div className="modal__form">
           <p className="admin-media__hint">
-            Картинка коллекции показывается сверху на страницах её товаров. Чтобы её установить - кликай по квадрату с плюсиком
+            Картинка коллекции показывается сверху на страницах её товаров. Чтобы её установить - кликай по квадрату с плюсиком.
+            Кружком слева выбирается, чья картинка стоит в самом верху главной страницы.
           </p>
           {collections.map((col) => (
             <div className="col-row" key={col.id}>
+              <label
+                className="col-row__hero"
+                title={
+                  col.image
+                    ? 'Показывать эту картинку сверху на главной'
+                    : 'Сначала загрузите картинку этой коллекции'
+                }
+              >
+                <input
+                  type="radio"
+                  name="hero-collection"
+                  className="col-row__hero-input"
+                  checked={!!col.is_hero}
+                  disabled={!col.image}
+                  onChange={() => setHeroCollection(col)}
+                />
+                <span className="col-row__hero-dot" />
+              </label>
               <label className="col-row__img" title="Картинка коллекции">
                 {col.image ? (
                   <img src={imageUrl(col.image)} alt="" />

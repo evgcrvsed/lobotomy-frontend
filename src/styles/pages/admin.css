@@ -184,6 +184,57 @@
 .col-row .modal__input { flex: 1; min-width: 0; }
 .col-row .btn { flex-shrink: 0; white-space: nowrap; }
 
+/* Выбор коллекции, чья картинка стоит сверху на главной странице */
+.col-row__hero {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.col-row__hero-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.col-row__hero-dot {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--color-control);
+    border-radius: 50%;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.col-row__hero:hover .col-row__hero-dot {
+    border-color: var(--color-muted);
+}
+
+/* Выбранная — залитый кружок с белым зазором по краю */
+.col-row__hero-input:checked + .col-row__hero-dot {
+    border-color: var(--color-black);
+    background-color: var(--color-black);
+    box-shadow: inset 0 0 0 3px var(--color-white);
+}
+
+.col-row__hero-input:focus-visible + .col-row__hero-dot {
+    box-shadow: var(--focus-ring);
+}
+
+.col-row__hero-input:checked:focus-visible + .col-row__hero-dot {
+    box-shadow: inset 0 0 0 3px var(--color-white), var(--focus-ring);
+}
+
+/* Без картинки выбирать нечего */
+.col-row__hero-input:disabled + .col-row__hero-dot {
+    border-style: dashed;
+    opacity: 0.45;
+}
+
+.col-row__hero:has(.col-row__hero-input:disabled) {
+    cursor: not-allowed;
+}
+
 .col-row__img {
     position: relative;
     width: 44px;
