@@ -102,7 +102,7 @@ export default function LoginPage() {
     <div className="login-page">
       <div className="login-card">
         {/*<img src={logoBlack} alt="Lobotomy" className="login-card__logo" />*/}
-        <h1 className="login-card__title">Вход в LOBOTOMY</h1>
+        <h1 className="login-card__title">Авторизация</h1>
         <p className="login-card__subtitle">Быстрый вход — пришлём код на почту</p>
 
         {VK_APP_ID > 0 && (

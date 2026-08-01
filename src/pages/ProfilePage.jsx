@@ -109,7 +109,7 @@ export default function ProfilePage() {
     <>
       <section className="hello">
         {/*<h1 className="hello__title">Привет, {firstName || 'Lobotomy'}</h1>*/}
-        <h1 className="hello__title">? ? ?</h1>
+        <h1 className="hello__title">Охаёшечки Датебаёшечки</h1>
       </section>
 
       <section className="profile">
