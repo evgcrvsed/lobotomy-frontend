@@ -1,0 +1,41 @@
+/* ============================================================
+   IMAGE VIEWER — картинка на весь экран по клику.
+   Используется для размерной сетки в корзине и для фотографий
+   на странице товара. Закрывается кликом в любом месте.
+   ============================================================ */
+
+.image-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(17, 17, 17, 0.85);
+    cursor: zoom-out;
+    animation: imageViewerIn 0.18s ease;
+}
+
+@keyframes imageViewerIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.image-viewer img {
+    max-width: 94vw;
+    max-height: 94vh;
+    object-fit: contain;
+    background-color: var(--color-white);
+}
+
+.image-viewer__close {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
+}

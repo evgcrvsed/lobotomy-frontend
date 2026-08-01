@@ -235,6 +235,7 @@
     display: block;
     background-color: var(--color-placeholder);
     transition: transform 0.25s ease;
+    cursor: zoom-in; /* по клику откроется на весь экран */
 }
 
 .product-similar__img:hover {

@@ -5,6 +5,7 @@ import { addToCart, getCart } from '../cart'
 import { formatPrice } from '../constants'
 import previewImg from '../assets/images/preview.webp'
 import '../styles/components/hero.css'
+import '../styles/components/image-viewer.css'
 import '../styles/pages/product.css'
 
 const SIZE_COLUMNS = [
@@ -25,6 +26,8 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
   const [cartItems, setCartItems] = useState(() => getCart())
+  // открытая на весь экран фотография; null — просмотр закрыт
+  const [viewerSrc, setViewerSrc] = useState(null)
 
   useEffect(() => {
     const sync = () => setCartItems(getCart())
@@ -201,7 +204,8 @@ export default function ProductPage() {
               <span />
             </div>
 
-            {/* Фотографии со страницы товара; сколько бы их ни было — ряд по центру */}
+            {/* Фотографии со страницы товара; сколько бы их ни было — ряд по центру.
+                По клику — на весь экран, как размерная сетка в корзине */}
             {gallery.length > 0 && (
               <div className="product-similar">
                 {gallery.map((img) => (
@@ -211,6 +215,7 @@ export default function ProductPage() {
                     alt={product.name}
                     className="product-similar__img"
                     loading="lazy"
+                    onClick={() => setViewerSrc(imageUrl(img.filename))}
                   />
                 ))}
               </div>
@@ -218,6 +223,16 @@ export default function ProductPage() {
           </>
         )}
       </div>
+
+      {/* Полноэкранный просмотр фотографии */}
+      {viewerSrc && (
+        <div className="image-viewer" onClick={() => setViewerSrc(null)}>
+          <img src={viewerSrc} alt={product?.name ?? ''} />
+          <button type="button" className="image-viewer__close" aria-label="Закрыть">
+            ×
+          </button>
+        </div>
+      )}
     </div>
   )
 }

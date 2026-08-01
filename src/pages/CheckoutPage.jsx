@@ -5,6 +5,7 @@ import { getToken } from '../auth'
 import { changeCartSize, getCart, removeFromCart, setCartQty } from '../cart'
 import { deliveryTexts, formatPrice, plural } from '../constants'
 import { rememberGuestOrder } from '../guestOrders'
+import '../styles/components/image-viewer.css'
 import '../styles/pages/checkout.css'
 
 export default function CheckoutPage() {
@@ -330,9 +331,9 @@ export default function CheckoutPage() {
 
       {/* Полноэкранный просмотр размерной сетки */}
       {chartSrc && (
-        <div className="sizechart-overlay" onClick={() => setChartSrc(null)}>
+        <div className="image-viewer" onClick={() => setChartSrc(null)}>
           <img src={chartSrc} alt="Размерная сетка" />
-          <button type="button" className="sizechart-overlay__close" aria-label="Закрыть">
+          <button type="button" className="image-viewer__close" aria-label="Закрыть">
             ×
           </button>
         </div>

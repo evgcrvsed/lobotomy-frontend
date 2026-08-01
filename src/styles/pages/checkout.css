@@ -305,42 +305,7 @@
 .checkout__pay:hover:not(:disabled) { background-color: var(--color-btn-hover); }
 .checkout__pay:disabled { opacity: 0.5; cursor: default; }
 
-/* ---- ПРОСМОТР РАЗМЕРНОЙ СЕТКИ ---- */
-.sizechart-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-overlay);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(17, 17, 17, 0.85);
-    cursor: zoom-out;
-    animation: chartIn 0.18s ease;
-}
-
-@keyframes chartIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-.sizechart-overlay img {
-    max-width: 94vw;
-    max-height: 94vh;
-    object-fit: contain;
-    background-color: var(--color-white);
-}
-
-.sizechart-overlay__close {
-    position: absolute;
-    top: 14px;
-    right: 20px;
-    background: none;
-    border: none;
-    color: #ffffff;
-    font-size: 32px;
-    line-height: 1;
-    cursor: pointer;
-}
+/* Просмотр картинки на весь экран — в styles/components/image-viewer.css */
 
 /* ---- RESPONSIVE ---- */
 @media (max-width: 860px) {
