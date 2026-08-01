@@ -96,6 +96,15 @@ export const api = {
       order: r.ok ? await r.json() : null,
       denied: r.status === 403,
     })),
+  // Тексты витрины, редактируемые в админке. При недоступном бэкенде — пустой
+  // объект, страницы подставят свои значения по умолчанию.
+  getSettings: () => request('/api/settings/').then((r) => (r.ok ? r.json() : {})),
+  updateSetting: (key, value) =>
+    request(`/api/settings/${encodeURIComponent(key)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value }),
+    }),
   // админские
   getDeliveryMethods: () => request('/api/delivery/').then((r) => (r.ok ? r.json() : [])),
   updateDeliveryMethod: (code, data) =>

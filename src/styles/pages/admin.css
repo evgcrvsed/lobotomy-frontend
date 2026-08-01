@@ -184,6 +184,16 @@
 .col-row .modal__input { flex: 1; min-width: 0; }
 .col-row .btn { flex-shrink: 0; white-space: nowrap; }
 
+/* Поле настройки текста + кнопка сохранения в одну строку */
+.setting-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.setting-row .modal__input { flex: 1; min-width: 0; }
+.setting-row .btn { flex-shrink: 0; white-space: nowrap; }
+
 /* Выбор коллекции, чья картинка стоит сверху на главной странице */
 .col-row__hero {
     flex-shrink: 0;

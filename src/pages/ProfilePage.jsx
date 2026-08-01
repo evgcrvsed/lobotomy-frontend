@@ -10,6 +10,9 @@ import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/profile.css'
 
+// Пока настройка не загрузилась (или бэкенд молчит) — то же, что на бэкенде
+const DEFAULT_GREETING = '? ? ?'
+
 // Порядок как на оформлении заказа — данные там и тут одни и те же
 const FIELDS = [
   { key: 'full_name', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text', autoComplete: 'name' },
@@ -32,13 +35,21 @@ export default function ProfilePage() {
   const [form, setForm] = useState({})
   const [modalOpen, setModalOpen] = useState(false)
   const [saved, setSaved] = useState(false)
+  // приветствие задаётся в админке; до загрузки — значение по умолчанию
+  const [greeting, setGreeting] = useState(DEFAULT_GREETING)
 
   // 2 случайных существующих товара в блок «Вам также может понравиться»
   useEffect(() => {
-    Promise.all([api.getProducts(), api.getCollections(), api.getDeliveryMethods()]).then(([list, cols, dm]) => {
+    Promise.all([
+      api.getProducts(),
+      api.getCollections(),
+      api.getDeliveryMethods(),
+      api.getSettings(),
+    ]).then(([list, cols, dm, settings]) => {
       setCollections(cols)
       setMethods(dm)
       setRecommended([...list].sort(() => Math.random() - 0.5).slice(0, 2))
+      if (settings.profile_greeting) setGreeting(settings.profile_greeting)
     })
   }, [])
 
@@ -103,13 +114,10 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 1800)
   }
 
-  const firstName = user?.full_name?.split(' ').at(-1)
-
   return (
     <>
       <section className="hello">
-        {/*<h1 className="hello__title">Привет, {firstName || 'Lobotomy'}</h1>*/}
-        <h1 className="hello__title">Охаёшечки Датебаёшечки</h1>
+        <h1 className="hello__title">{greeting}</h1>
       </section>
 
       <section className="profile">

@@ -16,6 +16,16 @@ const SIZE_FIELDS = [
 const emptySizeRow = (label = '') => ({ label, length: '', shoulder: '', chest: '', sleeve: '' })
 const defaultSizes = () => ['S', 'M', 'L', 'XL'].map(emptySizeRow)
 
+// Подписи к настройкам витрины. Ключи должны совпадать с KNOWN_SETTINGS
+// в backend/services/settings_service.py
+const SETTING_FIELDS = [
+  {
+    key: 'profile_greeting',
+    label: 'Приветствие в профиле',
+    hint: 'Крупная надпись сверху на странице профиля. Пусто — вернётся «? ? ?».',
+  },
+]
+
 const EMPTY_FORM = {
   collectionId: '',
   name: '',
@@ -82,6 +92,11 @@ export default function AdminPage() {
   const [deliveryDrafts, setDeliveryDrafts] = useState([])
   const [savingDelivery, setSavingDelivery] = useState(null)
 
+  const [textsModalOpen, setTextsModalOpen] = useState(false)
+  const [settingDrafts, setSettingDrafts] = useState({})
+  const [savedSetting, setSavedSetting] = useState(null)
+  const [savingSetting, setSavingSetting] = useState(null)
+
   const [colModalOpen, setColModalOpen] = useState(false)
   const [colDrafts, setColDrafts] = useState({})
   const [newColName, setNewColName] = useState('')
@@ -141,6 +156,29 @@ export default function AdminPage() {
       setDeliveryDrafts((list) => list.map((m) => (m.code === updated.code ? updated : m)))
     } finally {
       setSavingDelivery(null)
+    }
+  }
+
+  async function openTextsModal() {
+    setSettingDrafts(await api.getSettings())
+    setTextsModalOpen(true)
+  }
+
+  async function saveSetting(key) {
+    setSavingSetting(key)
+    try {
+      const res = await api.updateSetting(key, settingDrafts[key] ?? '')
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Не удалось сохранить: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      // бэкенд возвращает все настройки: пустое поле он заменяет значением по умолчанию
+      setSettingDrafts(await res.json())
+      setSavedSetting(key)
+      setTimeout(() => setSavedSetting(null), 1800)
+    } finally {
+      setSavingSetting(null)
     }
   }
 
@@ -450,6 +488,9 @@ export default function AdminPage() {
             </Link>
             <button className="btn btn--outline" onClick={openDeliveryModal}>
               Доставка
+            </button>
+            <button className="btn btn--outline" onClick={openTextsModal}>
+              Тексты
             </button>
             <button className="btn btn--dark" onClick={openColModal}>
               + Редактировать коллекции
@@ -865,6 +906,41 @@ export default function AdminPage() {
                   onChange={(e) => editDelivery(m.code, 'point_label', e.target.value)}
                 />
               </div>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={textsModalOpen}
+        titleId="texts-modal-title"
+        title="Тексты сайта"
+        onClose={() => setTextsModalOpen(false)}
+      >
+        <div className="modal__form">
+          {SETTING_FIELDS.map(({ key, label, hint }) => (
+            <div className="modal__field" key={key}>
+              <label className="modal__label" htmlFor={`setting-${key}`}>
+                {label}
+              </label>
+              <div className="setting-row">
+                <input
+                  className="modal__input"
+                  id={`setting-${key}`}
+                  type="text"
+                  value={settingDrafts[key] ?? ''}
+                  onChange={(e) => setSettingDrafts({ ...settingDrafts, [key]: e.target.value })}
+                />
+                <button
+                  className="btn btn--dark"
+                  type="button"
+                  disabled={savingSetting === key}
+                  onClick={() => saveSetting(key)}
+                >
+                  {savingSetting === key ? '...' : savedSetting === key ? 'Сохранено ✓' : 'Сохранить'}
+                </button>
+              </div>
+              <span className="modal__hint">{hint}</span>
             </div>
           ))}
         </div>
