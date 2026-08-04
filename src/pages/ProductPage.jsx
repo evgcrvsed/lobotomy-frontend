@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { addToCart, getCart } from '../cart'
+import HeroImage from '../components/HeroImage'
 import { formatPrice } from '../constants'
 import previewImg from '../assets/images/preview.webp'
-import '../styles/components/hero.css'
 import '../styles/components/image-viewer.css'
 import '../styles/pages/product.css'
 
@@ -65,8 +65,9 @@ export default function ProductPage() {
     })
   }, [productSlug, collectionSlug])
 
-  // верхняя картинка — своя у каждой коллекции; пока не задана — заглушка
-  const heroSrc = collection?.image ? imageUrl(collection.image) : previewImg
+  // Верхняя картинка — своя у каждой коллекции; если не задана — заглушка.
+  // Пока грузимся — null: иначе заглушка мелькнёт и сменится настоящей.
+  const heroSrc = loading ? null : collection?.image ? imageUrl(collection.image) : previewImg
 
   const gallery = product
     ? product.images.filter((i) => i.role === 'gallery').sort((a, b) => a.sort_order - b.sort_order)
@@ -79,9 +80,7 @@ export default function ProductPage() {
   return (
     <div className="product-page">
       {/* Коллаж — одна большая картинка коллекции на весь экран */}
-      <section className="hero">
-        <img src={heroSrc} alt="" className="hero__img" />
-      </section>
+      <HeroImage src={heroSrc} />
 
       <div className="product-info">
         {loading && <p className="product-status">Загрузка...</p>}

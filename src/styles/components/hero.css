@@ -16,6 +16,14 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    /* картинка вставляется уже скачанной — плавно проявляем,
+       чтобы она не возникала рывком на чёрном фоне */
+    animation: heroImgIn 0.35s ease;
+}
+
+@keyframes heroImgIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
 @media (max-width: 640px) {

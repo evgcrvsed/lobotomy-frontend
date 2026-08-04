@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { api, imageUrl } from '../api/client'
+import HeroImage from '../components/HeroImage'
 import ProductCard from '../components/ProductCard'
 import { formatPrice } from '../constants'
 import previewImg from '../assets/images/preview.webp'
-import '../styles/components/hero.css'
 import '../styles/components/product-card.css'
 import '../styles/pages/index.css'
 
@@ -45,13 +45,13 @@ export default function HomePage() {
     collections.find((c) => c.is_hero && c.image)?.image ??
     [...collections].reverse().find((c) => c.image)?.image
   const heroImage = activeCollectionImage ?? defaultImage
-  const heroSrc = heroImage ? imageUrl(heroImage) : previewImg
+  // null, пока коллекции не пришли: тогда ещё неизвестно, какая картинка нужна,
+  // и заглушку показывать нельзя — она мелькнёт и сменится настоящей
+  const heroSrc = loading ? null : heroImage ? imageUrl(heroImage) : previewImg
 
   return (
     <>
-      <section className="hero">
-        <img src={heroSrc} alt="" className="hero__img" />
-      </section>
+      <HeroImage src={heroSrc} />
 
       <section className="catalog" id="catalog">
         <div className="catalog__head">
