@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { addToCart, getCart } from '../cart'
+import FitText from '../components/FitText'
 import HeroImage from '../components/HeroImage'
 import { formatPrice } from '../constants'
 import previewImg from '../assets/images/preview.webp'
@@ -98,7 +99,9 @@ export default function ProductPage() {
                 <Link to="/">{collection?.name ?? collectionSlug}</Link>
                 /{product.name}
               </nav>
-              <h1 className="product-title">{product.name}</h1>
+              {/* 20px — потолок; если название длинное, шрифт уменьшится,
+                  чтобы оно осталось в одну строку */}
+              <FitText as="h1" className="product-title" text={product.name} maxSize={20} minSize={12} />
               <span className="product-price">{formatPrice(product.price)}</span>
             </div>
 
