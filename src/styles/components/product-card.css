@@ -60,16 +60,25 @@
     transform: scale(1.03);
 }
 
-/* Второе фото поверх основного, проявляется при наведении на карточку */
+/* Второе фото (вид сзади) лежит поверх основного и подменяет его при наведении.
+   Подмена мгновенная, без проявления через прозрачность: пока картинка
+   проявлялась бы, обе были бы видны одновременно и силуэты накладывались
+   друг на друга. Плавность оставлена только у масштаба — она это не ломает. */
 .product-card__img--hover {
     position: absolute;
     inset: 0;
     opacity: 0;
-    transition: opacity 0.25s ease, transform 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .product-card:hover .product-card__img--hover {
     opacity: 1;
+}
+
+/* Передняя прячется, когда показана задняя: даже если у картинки окажется
+   прозрачный фон, передняя сквозь неё не просветит */
+.product-card:hover .product-card__img:not(.product-card__img--hover) {
+    opacity: 0;
 }
 
 .product-card__info {

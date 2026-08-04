@@ -54,15 +54,18 @@ export default function ProductPage() {
 
   useEffect(() => {
     setLoading(true)
-    Promise.all([api.getProductBySlug(productSlug), api.getCollections()]).then(([prod, cols]) => {
-      setProduct(prod)
-      setCollection(
-        cols.find((c) => c.id === prod?.collection_id) ?? cols.find((c) => c.slug === collectionSlug) ?? null
-      )
-      setSize(prod?.sizes[0]?.label ?? '')
-      setQty(1)
-      setLoading(false)
-    })
+    Promise.all([api.getProductBySlug(productSlug), api.getCollections()])
+      .then(([prod, cols]) => {
+        setProduct(prod)
+        setCollection(
+          cols.find((c) => c.id === prod?.collection_id) ?? cols.find((c) => c.slug === collectionSlug) ?? null
+        )
+        setSize(prod?.sizes[0]?.label ?? '')
+        setQty(1)
+      })
+      // finally: при недоступном бэкенде промис отклоняется, и без этого
+      // страница навсегда осталась бы в состоянии загрузки
+      .finally(() => setLoading(false))
   }, [productSlug, collectionSlug])
 
   // Верхняя картинка — своя у каждой коллекции; если не задана — заглушка.

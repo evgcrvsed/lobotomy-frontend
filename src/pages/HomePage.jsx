@@ -19,11 +19,15 @@ export default function HomePage() {
   const [activeFilter, setActiveFilter] = useState('all')
 
   useEffect(() => {
-    Promise.all([api.getProducts(), api.getCollections()]).then(([list, cols]) => {
-      setProducts(list)
-      setCollections(cols)
-      setLoading(false)
-    })
+    Promise.all([api.getProducts(), api.getCollections()])
+      .then(([list, cols]) => {
+        setProducts(list)
+        setCollections(cols)
+      })
+      // finally, а не then: если бэкенд недоступен, промис отклоняется, и без
+      // этого loading остался бы true навсегда — верхняя картинка не появилась бы
+      // вообще (осталась бы чёрная секция вместо заглушки)
+      .finally(() => setLoading(false))
   }, [])
 
   function productHref(product) {
