@@ -10,15 +10,18 @@
 }
 
 .product-info__head {
-    position: relative;
     text-align: center;
     margin-bottom: 36px;
 }
 
+/* В обычном потоке, не position:absolute: у длинных названий сюда
+   подставляется полное имя товара, крошка переносится на 2-3 строки —
+   абсолютное позиционирование не резервирует под них место и заголовок
+   наезжает поверх. В потоке место резервируется само, при любой длине. */
 .product-breadcrumbs {
-    position: absolute;
-    left: 0;
-    top: 8px;
+    display: block;
+    text-align: left;
+    margin-bottom: 10px;
     font-size: 12px;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -253,7 +256,6 @@
 
     .product-info__head {
         text-align: left;
-        padding-top: 28px;
     }
 
     /* на узком экране — друг под другом */
