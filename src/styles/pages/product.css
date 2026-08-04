@@ -259,7 +259,20 @@
 @media (max-width: 960px) {
     .product-columns {
         grid-template-columns: 1fr;
-        gap: 32px;
+        gap: 24px;
+    }
+
+    /* Отступ сверху нужен, только когда колонки стоят рядом: он выравнивает
+       кнопку с полем «Размер». В одну колонку он превращается в пустоту
+       между описанием и кнопкой. */
+    .product-col--right {
+        padding-top: 0;
+    }
+
+    /* Расстояние до кнопки задаёт gap сетки — нижний отступ последнего
+       блока в колонке к нему прибавляться не должен */
+    .product-col > .product-block:last-child {
+        margin-bottom: 0;
     }
 
     .product-info__head {
