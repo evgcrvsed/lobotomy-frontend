@@ -29,7 +29,6 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
   const [cartItems, setCartItems] = useState(() => getCart())
-  // открытая на весь экран фотография; null — просмотр закрыт
   const [viewerSrc, setViewerSrc] = useState(null)
 
   useEffect(() => {
@@ -97,10 +96,8 @@ export default function ProductPage() {
 
   return (
     <div className="product-page">
-      {/* Коллаж — одна большая картинка коллекции на весь экран */}
       {!isMobile && <HeroImage src={heroSrc} />}
 
-      {/* На телефоне вместо картинки коллекции — галерея товара */}
       {isMobile && !loading && product && (
         <ProductGalleryMobile
           key={product.id}
@@ -123,8 +120,6 @@ export default function ProductPage() {
                 <Link to="/">{collection?.name ?? collectionSlug}</Link>
                 /{product.name}
               </nav>
-              {/* 20px — потолок; если название длинное, шрифт уменьшится,
-                  чтобы оно осталось в одну строку */}
               <FitText as="h1" className="product-title" text={product.name} maxSize={20} minSize={12} />
               <span className="product-price">{formatPrice(product.price)}</span>
             </div>
@@ -194,7 +189,6 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* Материал слева, размерная сетка — по центру страницы на его уровне */}
             <div className="product-material-row">
               <div className="product-block">
                 {materialLines.length > 0 && (
@@ -233,9 +227,7 @@ export default function ProductPage() {
               <span />
             </div>
 
-            {/* Фотографии со страницы товара; сколько бы их ни было — ряд по центру.
-                По клику — на весь экран, как размерная сетка в корзине.
-                На телефоне их здесь нет: они показаны сверху галереей. */}
+            {/* на телефоне этих фото здесь нет — они показаны сверху галереей */}
             {!isMobile && gallery.length > 0 && (
               <div className="product-similar">
                 {gallery.map((img) => (
@@ -254,7 +246,6 @@ export default function ProductPage() {
         )}
       </div>
 
-      {/* Полноэкранный просмотр фотографии */}
       {viewerSrc && (
         <div className="image-viewer" onClick={() => setViewerSrc(null)}>
           <img src={viewerSrc} alt={product?.name ?? ''} />

@@ -282,9 +282,8 @@ export default function AdminPage() {
     return collections.find((c) => c.id === id)?.name ?? '—'
   }
 
-  // Порядок задаёт бэкенд, но пересортируем и здесь: список должен вставать
-  // по возрастанию сразу после сохранения, а не только после перезагрузки.
-  // При равных номерах — по id, как и на бэкенде.
+  // порядок задаёт бэкенд, но сортируем и здесь — чтобы список перестроился
+  // сразу после сохранения, а не только после перезагрузки
   const filteredProducts = (
     activeCollectionId !== null ? products.filter((p) => p.collection_id === activeCollectionId) : products
   )

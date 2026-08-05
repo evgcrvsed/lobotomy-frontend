@@ -38,7 +38,6 @@ export default function CheckoutPage() {
     { key: 'pickupPoint', label: texts.point, placeholder: 'ул. Кутузова, 27', type: 'text' },
   ]
 
-  // корзина может измениться (кнопка «убрать») — держим список свежим
   useEffect(() => {
     const sync = () => setItems(getCart())
     window.addEventListener('cart-changed', sync)
@@ -54,7 +53,6 @@ export default function CheckoutPage() {
         setDelivery((cur) => cur || methods[0]?.code || '')
       }
     )
-    // если авторизован — подставляем данные из профиля
     if (getToken()) {
       api.getMe().then((me) => {
         if (!me) return

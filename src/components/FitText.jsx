@@ -28,14 +28,12 @@ export default function FitText({ as: Tag = 'span', text, maxSize, minSize = 12,
 
     fit()
 
-    // Пересчитываем по трём поводам:
-    // 1) ресайз окна — самый частый случай (поворот телефона, изменение окна);
+    // ресайз окна и поворот телефона
     window.addEventListener('resize', fit)
-    // 2) контейнер поменял ширину сам по себе, без ресайза окна;
+    // контейнер мог поменять ширину и без ресайза окна
     const observer = new ResizeObserver(fit)
     if (el.parentElement) observer.observe(el.parentElement)
-    // 3) догрузился шрифт — до этого ширина меряется по запасному,
-    //    и подобранный размер оказался бы неверным
+    // до загрузки шрифта ширина меряется по запасному — размер был бы неверным
     let cancelled = false
     document.fonts?.ready.then(() => {
       if (!cancelled) fit()

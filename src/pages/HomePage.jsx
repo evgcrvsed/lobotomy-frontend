@@ -38,11 +38,8 @@ export default function HomePage() {
   const filteredProducts =
     activeFilter === 'all' ? products : products.filter((p) => p.collection_id === activeFilter)
 
-  // Картинка сверху зависит от выбранного фильтра:
-  //  · конкретная коллекция — её собственная картинка;
-  //  · «Все» — та, что отмечена в админке; если выбор не сделан, то как раньше:
-  //    последняя добавленная коллекция с картинкой.
-  // Если у выбранной коллекции картинки нет, показываем общую, а не заглушку.
+  // «Все» — картинка, отмеченная в админке; иначе последняя добавленная.
+  // У коллекции без своей картинки показываем общую, а не заглушку.
   const activeCollectionImage =
     activeFilter === 'all' ? null : collections.find((c) => c.id === activeFilter)?.image
   const defaultImage =
