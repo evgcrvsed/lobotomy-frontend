@@ -4,7 +4,9 @@ import { api, imageUrl } from '../api/client'
 import { addToCart, getCart } from '../cart'
 import FitText from '../components/FitText'
 import HeroImage from '../components/HeroImage'
+import ProductGalleryMobile from '../components/ProductGalleryMobile'
 import { formatPrice } from '../constants'
+import useMediaQuery from '../useMediaQuery'
 import previewImg from '../assets/images/preview.webp'
 import '../styles/components/image-viewer.css'
 import '../styles/pages/product.css'
@@ -81,10 +83,32 @@ export default function ProductPage() {
     ? [product.material, product.density ? `Плотность — ${product.density}г/м²` : null].filter(Boolean)
     : []
 
+  // На телефоне сверху не картинка коллекции, а фотографии товара: большая
+  // плюс лента остальных. Разметка разная, одним CSS не обойтись.
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  const galleryUrls = gallery.map((i) => imageUrl(i.filename))
+  // если галереи нет — берём главное фото, иначе верх страницы будет пустым
+  const mainImage = product?.images.find((i) => i.role === 'main') ?? product?.images[0]
+  const mobileImages = galleryUrls.length
+    ? galleryUrls
+    : mainImage
+      ? [imageUrl(mainImage.filename)]
+      : []
+
   return (
     <div className="product-page">
       {/* Коллаж — одна большая картинка коллекции на весь экран */}
-      <HeroImage src={heroSrc} />
+      {!isMobile && <HeroImage src={heroSrc} />}
+
+      {/* На телефоне вместо картинки коллекции — галерея товара */}
+      {isMobile && !loading && product && (
+        <ProductGalleryMobile
+          key={product.id}
+          images={mobileImages}
+          alt={product.name}
+          onZoom={setViewerSrc}
+        />
+      )}
 
       <div className="product-info">
         {loading && <p className="product-status">Загрузка...</p>}
@@ -210,8 +234,9 @@ export default function ProductPage() {
             </div>
 
             {/* Фотографии со страницы товара; сколько бы их ни было — ряд по центру.
-                По клику — на весь экран, как размерная сетка в корзине */}
-            {gallery.length > 0 && (
+                По клику — на весь экран, как размерная сетка в корзине.
+                На телефоне их здесь нет: они показаны сверху галереей. */}
+            {!isMobile && gallery.length > 0 && (
               <div className="product-similar">
                 {gallery.map((img) => (
                   <img
