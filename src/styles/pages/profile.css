@@ -100,7 +100,9 @@
 .support-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    /* карточка — колоночный флекс и растянула бы ссылку на всю ширину:
+       кликабельной стала бы вся строка, а не кружок */
+    align-self: flex-start;
     margin-top: 16px;
     font-size: 14px;
     color: var(--color-gray);
@@ -123,9 +125,28 @@
     line-height: 1;
 }
 
-.support-link:hover {
+/* Подпись раскрывается только при наведении. Обрезанный до нуля текст выпадает
+   из дерева доступности, поэтому имя ссылки задано через aria-label */
+.support-link__label {
+    max-width: 0;
+    margin-left: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 0.3s ease, opacity 0.25s ease, margin-left 0.3s ease;
+}
+
+.support-link:hover,
+.support-link:focus-visible {
     color: var(--color-black);
     transform: scale(1.05);
+}
+
+.support-link:hover .support-link__label,
+.support-link:focus-visible .support-link__label {
+    max-width: 200px;
+    margin-left: 8px;
+    opacity: 1;
 }
 
 /* PROFILE INFO */

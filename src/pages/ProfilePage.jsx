@@ -153,9 +153,10 @@ export default function ProfilePage() {
                     href="https://t.me/lobotomy_support"
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="Тех. поддержка"
                   >
                     <span className="support-link__icon" aria-hidden="true">?</span>
-                    Тех. поддержка
+                    <span className="support-link__label">Тех. поддержка</span>
                   </a>
                 </>
               ) : (
