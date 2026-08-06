@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import * as VKID from '@vkid/sdk'
 import { api } from '../api/client'
 import { getToken, setToken } from '../auth'
@@ -124,7 +124,7 @@ export default function LoginPage() {
               id="login-email"
               type="email"
               autoComplete="email"
-              placeholder="alan.turing@example.com"
+              placeholder="hieronymus@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoFocus
@@ -178,7 +178,7 @@ export default function LoginPage() {
         )}
 
         <p className="login-terms">
-          Входя, вы соглашаетесь с условиями использования и политикой конфиденциальности
+          Входя, вы соглашаетесь с условиями использования и <Link to="/privacy-policy">политикой конфиденциальности</Link>
         </p>
       </div>
     </div>

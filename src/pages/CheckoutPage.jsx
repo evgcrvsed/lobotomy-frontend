@@ -30,7 +30,7 @@ export default function CheckoutPage() {
   const texts = deliveryTexts(deliveryMethods, delivery)
   const formFields = [
     { key: 'fullName', label: 'ФИО', placeholder: 'Иванов Иван Иванович', type: 'text' },
-    { key: 'email', label: 'Почта', placeholder: 'lobotomymerchstore@gmail.com', type: 'email', locked: authorized },
+    { key: 'email', label: 'Почта', placeholder: 'hieronymus@example.com', type: 'email', locked: authorized },
     { key: 'phone', label: 'Телефон', placeholder: '+7 900 000-00-00', type: 'tel' },
     { key: 'country', label: 'Страна', placeholder: 'Россия', type: 'text' },
     { key: 'city', label: 'Город', placeholder: 'Москва', type: 'text' },
