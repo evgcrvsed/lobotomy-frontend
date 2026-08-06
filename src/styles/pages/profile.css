@@ -103,8 +103,8 @@
     /* карточка — колоночный флекс и растянула бы ссылку на всю ширину:
        кликабельной стала бы вся строка, а не кружок */
     align-self: flex-start;
-    margin-top: 16px;
-    font-size: 14px;
+    margin-top: 20px;
+    font-size: 28px;
     color: var(--color-gray);
     text-decoration: none;
     transition: color 0.2s ease, transform 0.2s ease;
@@ -115,12 +115,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
-    border: 1px solid currentColor;
+    border: 2px solid currentColor;
     border-radius: 50%;
-    font-size: 13px;
+    font-size: 26px;
     font-weight: 600;
     line-height: 1;
 }
@@ -144,8 +144,8 @@
 
 .support-link:hover .support-link__label,
 .support-link:focus-visible .support-link__label {
-    max-width: 200px;
-    margin-left: 8px;
+    max-width: 400px;
+    margin-left: 14px;
     opacity: 1;
 }
 
