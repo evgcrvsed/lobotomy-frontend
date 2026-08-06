@@ -96,6 +96,38 @@
     margin-top: 4px;
 }
 
+/* ССЫЛКА В ТЕХПОДДЕРЖКУ */
+.support-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--color-gray);
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+    transform-origin: left center;
+}
+
+.support-link__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.support-link:hover {
+    color: var(--color-black);
+    transform: scale(1.05);
+}
+
 /* PROFILE INFO */
 .profile-info__list {
     display: flex;

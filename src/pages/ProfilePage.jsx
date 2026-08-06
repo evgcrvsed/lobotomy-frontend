@@ -146,7 +146,18 @@ export default function ProfilePage() {
             <div className="profile-card">
               <h2 className="profile-card__title section-title">Последний заказ</h2>
               {orders.length > 0 ? (
-                <OrderView order={orders[0]} linkTo={`/order/${orders[0].number}`} deliveryLabels={deliveryLabels(methods)} />
+                <>
+                  <OrderView order={orders[0]} linkTo={`/order/${orders[0].number}`} deliveryLabels={deliveryLabels(methods)} />
+                  <a
+                    className="support-link"
+                    href="https://t.me/lobotomy_support"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="support-link__icon" aria-hidden="true">?</span>
+                    Тех. поддержка
+                  </a>
+                </>
               ) : (
                 <>
                   <p className="profile-card__empty">Вы ещё ничего не заказывали</p>
