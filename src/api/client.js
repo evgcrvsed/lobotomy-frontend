@@ -124,6 +124,9 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tracking_number: trackingNumber }),
     }),
+  // журнал оплаты заказа: попытки и уведомления банка — для ручной сверки
+  getOrderPayments: (number) =>
+    request(`/api/orders/${encodeURIComponent(number)}/payments`).then((r) => (r.ok ? r.json() : null)),
   // не дожидаясь фонового опроса
   syncOrderCdek: (number) =>
     request(`/api/orders/${encodeURIComponent(number)}/cdek-sync`, { method: 'POST' }),

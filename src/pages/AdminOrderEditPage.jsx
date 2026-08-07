@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
-import { ORDER_STATUS_LABELS, deliveryTexts, formatPrice, plural } from '../constants'
+import { ORDER_STATUS_LABELS, deliveryTexts, formatDateTime, formatPrice, plural } from '../constants'
 import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
 import '../styles/pages/admin-orders.css'
@@ -18,6 +18,11 @@ export default function AdminOrderEditPage() {
   const [newItems, setNewItems] = useState([]) // дозаказ: позиции, которых ещё нет в заказе
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [payments, setPayments] = useState(null) // журнал оплаты; null — ещё не загрузили
+
+  useEffect(() => {
+    api.getOrderPayments(number).then(setPayments)
+  }, [number])
 
   useEffect(() => {
     Promise.all([api.getOrder(number), api.getProducts(), api.getDeliveryMethods()]).then(
@@ -347,6 +352,130 @@ export default function AdminOrderEditPage() {
           </div>
         </aside>
       </div>
+
+      <PaymentLog payments={payments} />
     </div>
+  )
+}
+
+const ATTEMPT_LABELS = {
+  new: 'ждёт оплату',
+  confirmed: 'оплачена',
+  failed: 'банк отклонил',
+}
+
+const kopecks = (value) => (value === null || value === undefined ? '—' : formatPrice(value / 100))
+
+/** Журнал оплаты: с чем мы ходили в Т-Банк и что он присылал в ответ.
+ *  Нужен, когда покупатель говорит «деньги списались» — по PaymentId и номеру
+ *  заказа платёж ищется в личном кабинете банка. */
+function PaymentLog({ payments }) {
+  if (payments === null) {
+    return (
+      <section className="payment-log">
+        <h2 className="payment-log__title">Оплата</h2>
+        <p className="admin-order__hint">Загрузка журнала...</p>
+      </section>
+    )
+  }
+
+  const { attempts, notifications } = payments
+
+  return (
+    <section className="payment-log">
+      <h2 className="payment-log__title">Оплата</h2>
+      <p className="admin-order__hint">
+        В личном кабинете Т-Банка платёж ищется по PaymentId, а номер заказа {payments.number} —
+        это OrderId. Он один на все попытки, PaymentId у каждой свой.
+      </p>
+
+      <div className="payment-log__summary">
+        <div className="payment-log__fact">
+          <span>Статус заказа</span>
+          <b>{ORDER_STATUS_LABELS[payments.status] ?? payments.status}</b>
+        </div>
+        <div className="payment-log__fact">
+          <span>Сумма заказа</span>
+          <b>{formatPrice(payments.total)}</b>
+        </div>
+        <div className="payment-log__fact">
+          <span>Отмечен оплаченным</span>
+          <b>{payments.paid_at ? formatDateTime(payments.paid_at) : '—'}</b>
+        </div>
+        <div className="payment-log__fact">
+          <span>Последний PaymentId</span>
+          <b>{payments.tinkoff_payment_id || '—'}</b>
+        </div>
+      </div>
+
+      <h3 className="payment-log__subtitle">Попытки оплаты ({attempts.length})</h3>
+      {attempts.length === 0 ? (
+        <p className="admin-order__hint">Попыток не записано — заказ создан до появления журнала.</p>
+      ) : (
+        <div className="payment-table__wrap">
+          <table className="payment-table">
+            <thead>
+              <tr>
+                <th>Когда</th>
+                <th>PaymentId</th>
+                <th>Сумма</th>
+                <th>Что с ней</th>
+                <th>Примечание</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attempts.map((a) => (
+                <tr key={a.id} className={a.status === 'confirmed' ? 'payment-table__row--ok' : undefined}>
+                  <td>{formatDateTime(a.created_at)}</td>
+                  <td className="payment-table__id">{a.payment_id || '—'}</td>
+                  <td>{formatPrice(a.amount)}</td>
+                  <td>
+                    {ATTEMPT_LABELS[a.status] ?? a.status}
+                    {a.confirmed_at && ` — ${formatDateTime(a.confirmed_at)}`}
+                  </td>
+                  <td>{a.error || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <h3 className="payment-log__subtitle">Уведомления банка ({notifications.length})</h3>
+      {notifications.length === 0 ? (
+        <p className="admin-order__hint">
+          По этому заказу банк ничего не присылал. Если покупатель уверяет, что платил —
+          значит уведомление до нас не дошло, ищите платёж в кабинете по номеру заказа.
+        </p>
+      ) : (
+        <div className="payment-notes">
+          {notifications.map((n) => (
+            <div
+              key={n.id}
+              className={`payment-note${n.accepted ? ' payment-note--ok' : ''}${
+                n.signature_ok ? '' : ' payment-note--bad'
+              }`}
+            >
+              <div className="payment-note__head">
+                <b>{n.status ?? 'без статуса'}</b>
+                <span>{kopecks(n.amount_kopecks)}</span>
+                <span className="payment-table__id">{n.payment_id || 'без PaymentId'}</span>
+                <span>{formatDateTime(n.created_at)}</span>
+              </div>
+              <div className="payment-note__flags">
+                <span>{n.signature_ok ? 'подпись верна' : '⚠ подпись не сошлась'}</span>
+                <span>{n.accepted ? 'засчитано как оплата' : 'оплатой не засчитано'}</span>
+                {n.ip && <span>IP {n.ip}</span>}
+              </div>
+              {n.note && <p className="payment-note__reason">{n.note}</p>}
+              <details className="payment-note__raw">
+                <summary>Что прислал банк</summary>
+                <pre>{JSON.stringify(n.payload, null, 2)}</pre>
+              </details>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }

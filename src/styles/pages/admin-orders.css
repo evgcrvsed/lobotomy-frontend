@@ -179,3 +179,157 @@
     color: var(--color-muted);
     line-height: 1.5;
 }
+
+/* ---- ЖУРНАЛ ОПЛАТЫ ---- */
+/* Разбор спорных оплат: попытки Init и уведомления банка по этому заказу */
+.payment-log {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--color-border);
+}
+
+.payment-log__title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.payment-log__subtitle {
+    margin-top: 28px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.payment-log__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.payment-log__fact {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    background-color: var(--color-bg);
+    border-radius: 8px;
+}
+
+.payment-log__fact span {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+}
+
+.payment-log__fact b {
+    font-size: 14px;
+    font-weight: 500;
+    overflow-wrap: anywhere; /* PaymentId длинный и без пробелов */
+}
+
+/* таблица шире модалки на телефоне — пусть прокручивается сама, а не тянет страницу */
+.payment-table__wrap {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.payment-table th {
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.payment-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+}
+
+.payment-table__row--ok {
+    background-color: var(--status-paid-bg);
+    color: var(--status-paid-fg);
+}
+
+.payment-table__id {
+    font-family: monospace;
+    overflow-wrap: anywhere;
+}
+
+.payment-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.payment-note {
+    padding: 12px 14px;
+    background-color: var(--color-bg);
+    border-left: 3px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.payment-note--ok { border-left-color: var(--status-paid-fg); }
+/* битая подпись важнее «засчитано» — правило идёт следом и перекрывает его */
+.payment-note--bad { border-left-color: var(--color-danger); }
+
+.payment-note__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.payment-note__head span:last-child {
+    margin-left: auto;
+    color: var(--color-muted);
+}
+
+.payment-note__flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+.payment-note__reason {
+    margin-top: 6px;
+    color: var(--color-danger);
+}
+
+.payment-note__raw {
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+.payment-note__raw summary {
+    cursor: pointer;
+    color: var(--color-muted);
+}
+
+.payment-note__raw pre {
+    margin-top: 6px;
+    padding: 10px;
+    overflow-x: auto;
+    background-color: var(--color-white);
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+}
