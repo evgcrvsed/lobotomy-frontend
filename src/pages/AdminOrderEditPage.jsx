@@ -18,7 +18,8 @@ export default function AdminOrderEditPage() {
   const [newItems, setNewItems] = useState([]) // дозаказ: позиции, которых ещё нет в заказе
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [payments, setPayments] = useState(null) // журнал оплаты; null — ещё не загрузили
+  // журнал оплаты: undefined — ещё грузим, null — запрос не прошёл, объект — данные
+  const [payments, setPayments] = useState(undefined)
 
   useEffect(() => {
     api.getOrderPayments(number).then(setPayments)
@@ -370,11 +371,15 @@ const kopecks = (value) => (value === null || value === undefined ? '—' : form
  *  Нужен, когда покупатель говорит «деньги списались» — по PaymentId и номеру
  *  заказа платёж ищется в личном кабинете банка. */
 function PaymentLog({ payments }) {
-  if (payments === null) {
+  if (payments === undefined || payments === null) {
     return (
       <section className="payment-log">
         <h2 className="payment-log__title">Оплата</h2>
-        <p className="admin-order__hint">Загрузка журнала...</p>
+        <p className="admin-order__hint">
+          {payments === undefined
+            ? 'Загрузка журнала...'
+            : 'Журнал оплаты не загрузился — обновите страницу или войдите заново.'}
+        </p>
       </section>
     )
   }
