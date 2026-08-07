@@ -312,9 +312,18 @@
 
 .size-table__row {
     display: grid;
-    grid-template-columns: 64px repeat(4, 1fr) 24px;
+    /* --size-cols ставит форма: столбцы замеров задаются в админке */
+    grid-template-columns: 64px repeat(var(--size-cols, 0), minmax(0, 1fr)) 24px;
     gap: 6px;
     align-items: center;
+}
+
+/* название столбца плюс кнопка, которая его убирает */
+.size-table__column-head {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
 }
 
 .size-table__row--head span {
@@ -328,6 +337,7 @@
 .size-table__row .modal__input {
     padding: 7px 8px;
     font-size: 13px;
+    min-width: 0; /* иначе поля не дают колонкам сжаться и сетка вылезает за модалку */
 }
 
 .size-table__remove {
@@ -344,8 +354,14 @@
 
 .size-table__remove:hover { color: var(--color-danger); }
 
-.size-table__add {
+.size-table__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 4px;
+}
+
+.size-table__add {
     align-self: flex-start;
 }
 

@@ -11,15 +11,6 @@ import previewImg from '../assets/images/preview.webp'
 import '../styles/components/image-viewer.css'
 import '../styles/pages/product.css'
 
-const SIZE_COLUMNS = [
-  ['length', 'Длина'],
-  ['shoulder', 'Плечо'],
-  ['chest', 'Грудь'],
-  ['sleeve', 'Рукав'],
-]
-
-const cm = (value) => (value ? `${value}cm` : '—')
-
 export default function ProductPage() {
   const { collectionSlug, productSlug } = useParams()
   const [loading, setLoading] = useState(true)
@@ -77,6 +68,8 @@ export default function ProductPage() {
   const gallery = product
     ? product.images.filter((i) => i.role === 'gallery').sort((a, b) => a.sort_order - b.sort_order)
     : []
+
+  const sizeColumns = product?.size_columns ?? []
 
   const materialLines = product
     ? [product.material, product.density ? `Плотность — ${product.density}г/м²` : null].filter(Boolean)
@@ -199,13 +192,15 @@ export default function ProductPage() {
                 )}
               </div>
 
-              {product.sizes.length > 0 ? (
+              {/* столбцы сетки — свои у каждого товара, задаются в админке;
+                  без них показывать нечего: остались бы одни подписи размеров */}
+              {product.sizes.length > 0 && sizeColumns.length > 0 ? (
                 <table className="product-sizes">
                   <thead>
                     <tr>
                       <th />
-                      {SIZE_COLUMNS.map(([field, title]) => (
-                        <th key={field}>{title}</th>
+                      {sizeColumns.map((column) => (
+                        <th key={column}>{column}</th>
                       ))}
                     </tr>
                   </thead>
@@ -213,8 +208,8 @@ export default function ProductPage() {
                     {product.sizes.map((s) => (
                       <tr key={s.id}>
                         <td>{s.label} —</td>
-                        {SIZE_COLUMNS.map(([field]) => (
-                          <td key={field}>{cm(s[field])}</td>
+                        {sizeColumns.map((column) => (
+                          <td key={column}>{s.measurements?.[column] || '—'}</td>
                         ))}
                       </tr>
                     ))}

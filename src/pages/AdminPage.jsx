@@ -6,15 +6,16 @@ import Modal from '../components/Modal'
 import '../styles/components/modal.css'
 import '../styles/pages/admin.css'
 
-const SIZE_FIELDS = [
-  ['length', 'Length'],
-  ['shoulder', 'Shoulder'],
-  ['chest', 'Chest'],
-  ['sleeve', 'Sleeve'],
-]
+// Столбцы размерной сетки задаются у каждого товара свои — это лишь заготовка
+// для нового изделия, её можно переименовать, дополнить или снести целиком.
+const DEFAULT_SIZE_COLUMNS = ['Длина', 'Плечо', 'Грудь', 'Рукав']
+// Совпадает с MAX_SIZE_COLUMNS в backend/schemas/product.py
+const MAX_SIZE_COLUMNS = 8
 
-const emptySizeRow = (label = '') => ({ label, length: '', shoulder: '', chest: '', sleeve: '' })
-const defaultSizes = () => ['S', 'M', 'L', 'XL'].map(emptySizeRow)
+// values — замеры по индексам столбцов, а не по названиям: так переименование
+// столбца не теряет уже введённые значения
+const emptySizeRow = (label = '') => ({ label, values: [] })
+const defaultSizes = () => ['S', 'M', 'L', 'XL'].map((label) => emptySizeRow(label))
 
 // Подписи к настройкам витрины. Ключи должны совпадать с KNOWN_SETTINGS
 // в backend/services/settings_service.py
@@ -39,6 +40,7 @@ const EMPTY_FORM = {
   imageHover: null,
   imageSizechart: null,
   gallery: [],
+  sizeColumns: [],
   sizes: [],
 }
 
@@ -292,13 +294,22 @@ export default function AdminPage() {
 
   function openCreateModal() {
     setCurrentProductId(null)
-    setForm({ ...EMPTY_FORM, collectionId: collections[0]?.id ?? '', sizes: defaultSizes() })
+    setForm({
+      ...EMPTY_FORM,
+      collectionId: collections[0]?.id ?? '',
+      sizeColumns: [...DEFAULT_SIZE_COLUMNS],
+      sizes: defaultSizes(),
+    })
     setModalOpen(true)
   }
 
   async function openEditModal(productId) {
     const product = await api.getProduct(productId)
     if (!product) return
+
+    // у товара без размеров шапки тоже нет — подставляем заготовку,
+    // чтобы не начинать с пустой сетки
+    const sizeColumns = product.sizes.length ? (product.size_columns ?? []) : [...DEFAULT_SIZE_COLUMNS]
 
     setCurrentProductId(productId)
     setForm({
@@ -317,13 +328,11 @@ export default function AdminPage() {
         .filter((i) => i.role === 'gallery')
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((i) => i.filename),
+      sizeColumns,
       sizes: product.sizes.length
         ? product.sizes.map((s) => ({
             label: s.label,
-            length: s.length ?? '',
-            shoulder: s.shoulder ?? '',
-            chest: s.chest ?? '',
-            sleeve: s.sleeve ?? '',
+            values: sizeColumns.map((column) => s.measurements?.[column] ?? ''),
           }))
         : defaultSizes(),
     })
@@ -386,10 +395,24 @@ export default function AdminPage() {
     setForm((f) => ({ ...f, gallery: f.gallery.filter((_, i) => i !== index) }))
   }
 
-  function updateSizeRow(index, field, value) {
+  function updateSizeLabel(index, value) {
     setForm((f) => ({
       ...f,
-      sizes: f.sizes.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
+      sizes: f.sizes.map((row, i) => (i === index ? { ...row, label: value } : row)),
+    }))
+  }
+
+  function updateSizeValue(rowIndex, columnIndex, value) {
+    setForm((f) => ({
+      ...f,
+      sizes: f.sizes.map((row, i) => {
+        if (i !== rowIndex) return row
+        const values = [...row.values]
+        // строка короче шапки, если столбец добавили уже после неё
+        while (values.length <= columnIndex) values.push('')
+        values[columnIndex] = value
+        return { ...row, values }
+      }),
     }))
   }
 
@@ -399,6 +422,26 @@ export default function AdminPage() {
 
   function removeSizeRow(index) {
     setForm((f) => ({ ...f, sizes: f.sizes.filter((_, i) => i !== index) }))
+  }
+
+  function updateSizeColumn(index, value) {
+    setForm((f) => ({
+      ...f,
+      sizeColumns: f.sizeColumns.map((name, i) => (i === index ? value : name)),
+    }))
+  }
+
+  function addSizeColumn() {
+    setForm((f) => ({ ...f, sizeColumns: [...f.sizeColumns, ''] }))
+  }
+
+  function removeSizeColumn(index) {
+    // вместе со столбцом уходят замеры под ним — иначе значения съедут влево
+    setForm((f) => ({
+      ...f,
+      sizeColumns: f.sizeColumns.filter((_, i) => i !== index),
+      sizes: f.sizes.map((row) => ({ ...row, values: row.values.filter((_, i) => i !== index) })),
+    }))
   }
 
   async function handleSubmit(e) {
@@ -420,16 +463,24 @@ export default function AdminPage() {
       images.push({ filename: form.imageSizechart, role: 'sizechart', sort_order: 99 })
     }
 
-    // строки, где не заполнен ни один замер, не сохраняем
-    const toNum = (v) => (v === '' ? null : parseInt(v, 10))
+    // столбцы без названия не сохраняем — вместе со значениями под ними
+    const columns = form.sizeColumns
+      .map((name, index) => ({ name: name.trim(), index }))
+      .filter((column) => column.name)
+    const valueAt = (row, index) => (row.values[index] ?? '').trim()
+
+    // строки, где не заполнен ни один замер, не сохраняем; если столбцов нет
+    // вовсе — хватает одной подписи, она нужна для выбора размера в карточке
     const sizes = form.sizes
-      .filter((row) => row.label.trim() && SIZE_FIELDS.some(([field]) => row[field] !== ''))
+      .filter(
+        (row) =>
+          row.label.trim() && (columns.length === 0 || columns.some((c) => valueAt(row, c.index)))
+      )
       .map((row) => ({
         label: row.label.trim(),
-        length: toNum(row.length),
-        shoulder: toNum(row.shoulder),
-        chest: toNum(row.chest),
-        sleeve: toNum(row.sleeve),
+        measurements: Object.fromEntries(
+          columns.map((c) => [c.name, valueAt(row, c.index)]).filter(([, value]) => value)
+        ),
       }))
 
     const data = {
@@ -443,6 +494,7 @@ export default function AdminPage() {
       // пусто — бэкенд поставит товар в конец каталога
       sort_order: form.sortOrder.trim() === '' ? null : parseInt(form.sortOrder, 10),
       images,
+      size_columns: columns.map((c) => c.name),
       sizes,
     }
 
@@ -798,12 +850,33 @@ export default function AdminPage() {
           </div>
 
           <div className="modal__field">
-            <span className="modal__label">Размерная сетка, всё в СМ!</span>
-            <div className="size-table">
+            <span className="modal__label">Размерная сетка</span>
+            <p className="admin-media__hint">
+              Названия столбцов и значения — свободный текст: единицы измерения пишите сами
+              («70cm», «46-48», «one size»). Пустые клетки в карточку не попадут.
+            </p>
+            {/* число столбцов задаёт сетку строк — см. --size-cols в admin.css */}
+            <div className="size-table" style={{ '--size-cols': form.sizeColumns.length }}>
               <div className="size-table__row size-table__row--head">
-                <span></span>
-                {SIZE_FIELDS.map(([field, title]) => (
-                  <span key={field}>{title}</span>
+                <span>Размер</span>
+                {form.sizeColumns.map((name, c) => (
+                  <div className="size-table__column-head" key={c}>
+                    <input
+                      className="modal__input"
+                      type="text"
+                      placeholder="Замер"
+                      value={name}
+                      onChange={(e) => updateSizeColumn(c, e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="size-table__remove"
+                      onClick={() => removeSizeColumn(c)}
+                      aria-label={`Убрать столбец «${name || 'без названия'}»`}
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
                 <span />
               </div>
@@ -814,17 +887,16 @@ export default function AdminPage() {
                     type="text"
                     placeholder="S"
                     value={row.label}
-                    onChange={(e) => updateSizeRow(i, 'label', e.target.value)}
+                    onChange={(e) => updateSizeLabel(i, e.target.value)}
                   />
-                  {SIZE_FIELDS.map(([field]) => (
+                  {form.sizeColumns.map((_, c) => (
                     <input
-                      key={field}
+                      key={c}
                       className="modal__input"
-                      type="number"
-                      min="1"
+                      type="text"
                       placeholder="—"
-                      value={row[field]}
-                      onChange={(e) => updateSizeRow(i, field, e.target.value)}
+                      value={row.values[c] ?? ''}
+                      onChange={(e) => updateSizeValue(i, c, e.target.value)}
                     />
                   ))}
                   <button
@@ -837,9 +909,19 @@ export default function AdminPage() {
                   </button>
                 </div>
               ))}
-              <button type="button" className="btn btn--outline size-table__add" onClick={addSizeRow}>
-                + Добавить размер
-              </button>
+              <div className="size-table__buttons">
+                <button type="button" className="btn btn--outline size-table__add" onClick={addSizeRow}>
+                  + Добавить размер
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--outline size-table__add"
+                  onClick={addSizeColumn}
+                  disabled={form.sizeColumns.length >= MAX_SIZE_COLUMNS}
+                >
+                  + Добавить столбец
+                </button>
+              </div>
             </div>
           </div>
 
