@@ -9,8 +9,12 @@ import '../styles/pages/admin.css'
 // Столбцы размерной сетки задаются у каждого товара свои — это лишь заготовка
 // для нового изделия, её можно переименовать, дополнить или снести целиком.
 const DEFAULT_SIZE_COLUMNS = ['Длина', 'Плечо', 'Грудь', 'Рукав']
-// Совпадает с MAX_SIZE_COLUMNS в backend/schemas/product.py
+// Совпадает с ограничениями в backend/schemas/product.py — иначе форма
+// упрётся в 422 или бэкенд молча обрежет введённое
 const MAX_SIZE_COLUMNS = 8
+const MAX_COLUMN_NAME = 50
+const MAX_MEASUREMENT = 50
+const MAX_SIZE_LABEL = 10
 
 // values — замеры по индексам столбцов, а не по названиям: так переименование
 // столбца не теряет уже введённые значения
@@ -469,6 +473,14 @@ export default function AdminPage() {
       .filter((column) => column.name)
     const valueAt = (row, index) => (row.values[index] ?? '').trim()
 
+    // имя столбца — это ключ замера: по двум одинаковым бэкенд не различит клетки
+    // и молча оставит один столбец вместе со значениями последнего
+    const names = columns.map((c) => c.name)
+    if (new Set(names).size !== names.length) {
+      alert('Два столбца размерной сетки названы одинаково — переименуйте один из них')
+      return
+    }
+
     // строки, где не заполнен ни один замер, не сохраняем; если столбцов нет
     // вовсе — хватает одной подписи, она нужна для выбора размера в карточке
     const sizes = form.sizes
@@ -852,11 +864,15 @@ export default function AdminPage() {
           <div className="modal__field">
             <span className="modal__label">Размерная сетка</span>
             <p className="admin-media__hint">
-              Названия столбцов и значения — свободный текст: единицы измерения пишите сами
-              («70cm», «46-48», «one size»). Пустые клетки в карточку не попадут.
+              Столбцы и значения — свободный текст. К голому числу карточка сама допишет
+              «cm», всё остальное («46-48», «one size») покажет как есть.
+              Пустые клетки в карточку не попадут.
             </p>
             {/* число столбцов задаёт сетку строк — см. --size-cols в admin.css */}
-            <div className="size-table" style={{ '--size-cols': form.sizeColumns.length }}>
+            <div
+              className={`size-table${form.sizeColumns.length === 0 ? ' size-table--bare' : ''}`}
+              style={{ '--size-cols': form.sizeColumns.length }}
+            >
               <div className="size-table__row size-table__row--head">
                 <span>Размер</span>
                 {form.sizeColumns.map((name, c) => (
@@ -865,6 +881,7 @@ export default function AdminPage() {
                       className="modal__input"
                       type="text"
                       placeholder="Замер"
+                      maxLength={MAX_COLUMN_NAME}
                       value={name}
                       onChange={(e) => updateSizeColumn(c, e.target.value)}
                     />
@@ -886,6 +903,7 @@ export default function AdminPage() {
                     className="modal__input"
                     type="text"
                     placeholder="S"
+                    maxLength={MAX_SIZE_LABEL}
                     value={row.label}
                     onChange={(e) => updateSizeLabel(i, e.target.value)}
                   />
@@ -895,6 +913,7 @@ export default function AdminPage() {
                       className="modal__input"
                       type="text"
                       placeholder="—"
+                      maxLength={MAX_MEASUREMENT}
                       value={row.values[c] ?? ''}
                       onChange={(e) => updateSizeValue(i, c, e.target.value)}
                     />

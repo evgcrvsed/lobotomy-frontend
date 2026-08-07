@@ -11,6 +11,10 @@ import previewImg from '../assets/images/preview.webp'
 import '../styles/components/image-viewer.css'
 import '../styles/pages/product.css'
 
+// Голое число админ пишет без единиц — «cm» дописываем сами, как было раньше.
+// Всё остальное («46-48», «one size», «70 см») показываем ровно как введено.
+const withUnits = (value) => (/^\d+([.,]\d+)?$/.test(value) ? `${value}cm` : value)
+
 export default function ProductPage() {
   const { collectionSlug, productSlug } = useParams()
   const [loading, setLoading] = useState(true)
@@ -209,7 +213,9 @@ export default function ProductPage() {
                       <tr key={s.id}>
                         <td>{s.label} —</td>
                         {sizeColumns.map((column) => (
-                          <td key={column}>{s.measurements?.[column] || '—'}</td>
+                          <td key={column}>
+                            {s.measurements?.[column] ? withUnits(s.measurements[column]) : '—'}
+                          </td>
                         ))}
                       </tr>
                     ))}

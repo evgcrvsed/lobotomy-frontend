@@ -313,9 +313,15 @@
 .size-table__row {
     display: grid;
     /* --size-cols ставит форма: столбцы замеров задаются в админке */
-    grid-template-columns: 64px repeat(var(--size-cols, 0), minmax(0, 1fr)) 24px;
+    grid-template-columns: 64px repeat(var(--size-cols, 1), minmax(0, 1fr)) 24px;
     gap: 6px;
     align-items: center;
+}
+
+/* repeat(0, ...) — невалидное значение, из-за него всё правило отбрасывается
+   и ряд схлопывается в одну колонку. Сетку без замеров описываем отдельно. */
+.size-table--bare .size-table__row {
+    grid-template-columns: 64px 1fr 24px;
 }
 
 /* название столбца плюс кнопка, которая его убирает */
