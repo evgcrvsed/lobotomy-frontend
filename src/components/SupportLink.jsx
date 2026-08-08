@@ -4,13 +4,16 @@ import '../styles/components/support-link.css'
 const SUPPORT_URL = 'https://t.me/lobotomy_support'
 
 /**
- * Кружок с «?» — ссылка в техподдержку; подпись раскрывается при наведении.
- * Стоит в профиле, на странице после оплаты и в карточке заказа.
+ * Кружок с «?» — ссылка в техподдержку. Стоит в профиле, после оплаты и в заказе.
+ *
+ * По умолчанию подпись раскрывается при наведении. В центрированной колонке так
+ * нельзя: раскрываясь, подпись раздвигает ссылку и уводит кружок из-под курсора —
+ * для таких мест есть showLabel, с ним подпись видна всегда.
  */
-export default function SupportLink({ label = 'Тех. поддержка' }) {
+export default function SupportLink({ label = 'Тех. поддержка', showLabel = false }) {
   return (
     <a
-      className="support-link"
+      className={`support-link${showLabel ? ' support-link--with-label' : ''}`}
       href={SUPPORT_URL}
       target="_blank"
       rel="noopener noreferrer"

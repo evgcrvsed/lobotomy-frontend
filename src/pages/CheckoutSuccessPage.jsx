@@ -77,7 +77,7 @@ export default function CheckoutSuccessPage() {
 
       {/* если с заказом что-то не так, писать некуда — даём поддержку сразу здесь */}
       <div className="order-result__support">
-        <SupportLink />
+        <SupportLink showLabel />
       </div>
     </div>
   )

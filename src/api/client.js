@@ -111,7 +111,11 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     }),
-  getAllOrders: () => request('/api/orders').then((r) => (r.ok ? r.json() : [])),
+  // без search — только заказы в работе; с search — поиск по всем, включая архивные
+  getAllOrders: (search) =>
+    request(`/api/orders${search ? `?search=${encodeURIComponent(search)}` : ''}`).then((r) =>
+      r.ok ? r.json() : []
+    ),
   adminUpdateOrder: (number, data) =>
     request(`/api/orders/${encodeURIComponent(number)}`, {
       method: 'PATCH',

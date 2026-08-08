@@ -5,15 +5,19 @@ import { ORDER_STATUS_LABELS, deliveryLabels, formatDateTime, formatPrice } from
 import '../styles/pages/admin.css'
 import '../styles/pages/admin-orders.css'
 
+// Вручённых и отменённых здесь нет: с ними работа закончена, и в списке они
+// только мешают. Достаются поиском — он идёт по всем заказам (см. ACTIVE_STATUSES
+// в backend/services/order_service.py)
 const FILTERS = [
   { id: 'all', label: 'Все' },
   { id: 'paid', label: 'В работе' },
   { id: 'shipped', label: 'Отправленные' },
   { id: 'ready', label: 'Готовы к выдаче' },
-  { id: 'delivered', label: 'Вручённые' },
   { id: 'pending', label: 'Ожидают оплаты' },
-  { id: 'cancelled', label: 'Отменённые' },
 ]
+
+// Пауза перед запросом: иначе поиск уходит на сервер на каждую букву
+const SEARCH_DELAY = 300
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([])
@@ -24,15 +28,48 @@ export default function AdminOrdersPage() {
   const [savingNumber, setSavingNumber] = useState(null)
   const [savedNumber, setSavedNumber] = useState(null)
   const [syncingNumber, setSyncingNumber] = useState(null)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState(null) // null — поиск не идёт, показываем список
+  const [searching, setSearching] = useState(false)
 
   useEffect(() => {
     Promise.all([api.getAllOrders(), api.getDeliveryMethods()]).then(([list, dm]) => {
       setOrders(list)
       setMethods(dm)
-      setDrafts(Object.fromEntries(list.map((o) => [o.number, o.tracking_number ?? ''])))
       setLoading(false)
     })
   }, [])
+
+  useEffect(() => {
+    const text = query.trim()
+    if (!text) {
+      setResults(null)
+      setSearching(false)
+      return
+    }
+    setSearching(true)
+    // stale защищает от гонки: ответ на прошлый запрос может прийти позже нового
+    let stale = false
+    const timer = setTimeout(() => {
+      api.getAllOrders(text).then((list) => {
+        if (stale) return
+        setResults(list)
+        setSearching(false)
+      })
+    }, SEARCH_DELAY)
+    return () => {
+      stale = true
+      clearTimeout(timer)
+    }
+  }, [query])
+
+  /** Заказ изменился — подменяем его и в списке, и в результатах поиска:
+   *  сейчас на экране может быть любой из двух. */
+  function replaceOrder(updated) {
+    const patch = (list) => list.map((o) => (o.number === updated.number ? updated : o))
+    setOrders(patch)
+    setResults((list) => (list ? patch(list) : list))
+  }
 
   async function saveTracking(order) {
     const value = (drafts[order.number] ?? '').trim()
@@ -45,7 +82,7 @@ export default function AdminOrdersPage() {
         return
       }
       const updated = await res.json()
-      setOrders((list) => list.map((o) => (o.number === updated.number ? updated : o)))
+      replaceOrder(updated)
       setSavedNumber(order.number)
       setTimeout(() => setSavedNumber(null), 1800)
     } finally {
@@ -64,13 +101,16 @@ export default function AdminOrdersPage() {
         return
       }
       const updated = await res.json()
-      setOrders((list) => list.map((o) => (o.number === updated.number ? updated : o)))
+      replaceOrder(updated)
     } finally {
       setSyncingNumber(null)
     }
   }
 
-  const visible = filter === 'all' ? orders : orders.filter((o) => o.status === filter)
+  // при поиске показываем найденное (там бывают и вручённые, и отменённые),
+  // иначе — заказы в работе; фильтр по статусу применяется к тому, что на экране
+  const shown = results ?? orders
+  const visible = filter === 'all' ? shown : shown.filter((o) => o.status === filter)
 
   return (
     <div className="admin-page">
@@ -79,6 +119,22 @@ export default function AdminOrdersPage() {
         <Link to="/admin" className="btn btn--outline">
           К каталогу
         </Link>
+      </div>
+
+      <div className="admin-orders__search">
+        <input
+          className="admin-orders__search-input"
+          type="search"
+          placeholder="Поиск по номеру, ФИО, почте или телефону"
+          aria-label="Поиск заказов"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && (
+          <button type="button" className="btn btn--outline" onClick={() => setQuery('')}>
+            Сбросить
+          </button>
+        )}
       </div>
 
       <div className="admin-filters">
@@ -93,15 +149,26 @@ export default function AdminOrdersPage() {
         ))}
       </div>
 
+      <p className="admin-orders__note">
+        {results
+          ? 'Поиск идёт по всем заказам, включая вручённые и отменённые.'
+          : 'Показаны заказы в работе. Вручённые и отменённые — через поиск.'}
+      </p>
+
       {loading && <p className="admin-empty">Загрузка...</p>}
-      {!loading && visible.length === 0 && <p className="admin-empty">Заказов нет</p>}
+      {!loading && searching && <p className="admin-empty">Поиск...</p>}
+      {!loading && !searching && visible.length === 0 && (
+        <p className="admin-empty">{results ? 'Ничего не найдено' : 'Заказов нет'}</p>
+      )}
 
       <div className="admin-orders">
         {visible.map((order) => {
           const address = [order.country, order.city, order.address, order.postal_code, order.pickup_point]
             .filter(Boolean)
             .join(', ')
-          const draft = drafts[order.number] ?? ''
+          // черновика нет — показываем сохранённый трек; так работает и для
+          // заказов, пришедших из поиска, а не только из первой загрузки
+          const draft = drafts[order.number] ?? order.tracking_number ?? ''
           const unchanged = draft.trim() === (order.tracking_number ?? '')
 
           return (

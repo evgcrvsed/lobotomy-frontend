@@ -46,8 +46,15 @@
 }
 
 .support-link:hover .support-link__label,
-.support-link:focus-visible .support-link__label {
+.support-link:focus-visible .support-link__label,
+.support-link--with-label .support-link__label {
     max-width: 400px;
     margin-left: 14px;
     opacity: 1;
+}
+
+/* Подпись раскрыта всегда — значит ссылка уже во всю ширину, и растить её
+   от левого края больше некуда: увеличиваем от середины, иначе поедет вбок */
+.support-link--with-label {
+    transform-origin: center;
 }

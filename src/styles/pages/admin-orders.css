@@ -333,3 +333,34 @@
     font-size: 12px;
     line-height: 1.5;
 }
+
+/* ---- ПОИСК ПО ЗАКАЗАМ ---- */
+/* Единственный способ добраться до вручённых и отменённых — их нет в списке */
+.admin-orders__search {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.admin-orders__search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-white);
+    font: inherit;
+    font-size: 14px;
+}
+
+.admin-orders__search-input:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+    box-shadow: var(--focus-ring);
+}
+
+.admin-orders__note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--color-muted);
+}
