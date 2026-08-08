@@ -73,7 +73,7 @@
 .product-card--v2 .product-card__img-wrap {
     position: relative;
     aspect-ratio: 3 / 4;
-    background-color: var(--color-placeholder-2);
+    background-color: var(--color-photo-bg);
 }
 
 
