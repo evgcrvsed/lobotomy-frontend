@@ -96,59 +96,6 @@
     margin-top: 4px;
 }
 
-/* ССЫЛКА В ТЕХПОДДЕРЖКУ */
-.support-link {
-    display: inline-flex;
-    align-items: center;
-    /* карточка — колоночный флекс и растянула бы ссылку на всю ширину:
-       кликабельной стала бы вся строка, а не кружок */
-    align-self: flex-start;
-    margin-top: 20px;
-    font-size: 28px;
-    color: var(--color-gray);
-    text-decoration: none;
-    transition: color 0.2s ease, transform 0.2s ease;
-    transform-origin: left center;
-}
-
-.support-link__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    border: 2px solid currentColor;
-    border-radius: 50%;
-    font-size: 26px;
-    font-weight: 600;
-    line-height: 1;
-}
-
-/* Подпись раскрывается только при наведении. Обрезанный до нуля текст выпадает
-   из дерева доступности, поэтому имя ссылки задано через aria-label */
-.support-link__label {
-    max-width: 0;
-    margin-left: 0;
-    opacity: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    transition: max-width 0.3s ease, opacity 0.25s ease, margin-left 0.3s ease;
-}
-
-.support-link:hover,
-.support-link:focus-visible {
-    color: var(--color-black);
-    transform: scale(1.05);
-}
-
-.support-link:hover .support-link__label,
-.support-link:focus-visible .support-link__label {
-    max-width: 400px;
-    margin-left: 14px;
-    opacity: 1;
-}
-
 /* PROFILE INFO */
 .profile-info__list {
     display: flex;

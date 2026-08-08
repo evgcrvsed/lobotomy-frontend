@@ -5,6 +5,7 @@ import { clearToken, getToken } from '../auth'
 import Modal from '../components/Modal'
 import OrderView from '../components/OrderView'
 import ProductCard from '../components/ProductCard'
+import SupportLink from '../components/SupportLink'
 import { deliveryLabels, formatPrice } from '../constants'
 import '../styles/components/modal.css'
 import '../styles/components/product-card.css'
@@ -148,16 +149,7 @@ export default function ProfilePage() {
               {orders.length > 0 ? (
                 <>
                   <OrderView order={orders[0]} linkTo={`/order/${orders[0].number}`} deliveryLabels={deliveryLabels(methods)} />
-                  <a
-                    className="support-link"
-                    href="https://t.me/lobotomy_support"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Тех. поддержка"
-                  >
-                    <span className="support-link__icon" aria-hidden="true">?</span>
-                    <span className="support-link__label">Тех. поддержка</span>
-                  </a>
+                  <SupportLink />
                 </>
               ) : (
                 <>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import SupportLink from '../components/SupportLink'
 import { ORDER_STATUS_LABELS, deliveryTexts, formatDateTime, formatPrice, plural } from '../constants'
 import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
@@ -176,6 +177,9 @@ export default function OrderPage() {
               </span>
             )}
           </div>
+
+          {/* вопросы по заказу возникают именно здесь — когда смотрят на трек-номер */}
+          <SupportLink />
         </aside>
       </div>
     </div>

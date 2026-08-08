@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { getToken } from '../auth'
 import { clearCart } from '../cart'
+import SupportLink from '../components/SupportLink'
 import { getGuestOrders, rememberGuestOrder } from '../guestOrders'
 import '../styles/pages/orders.css'
 
@@ -72,6 +73,11 @@ export default function CheckoutSuccessPage() {
         <Link to="/" className="btn btn--outline">
           В каталог
         </Link>
+      </div>
+
+      {/* если с заказом что-то не так, писать некуда — даём поддержку сразу здесь */}
+      <div className="order-result__support">
+        <SupportLink />
       </div>
     </div>
   )

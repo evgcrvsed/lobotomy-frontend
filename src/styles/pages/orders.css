@@ -244,3 +244,10 @@
 
 .order-view__pay:hover:not(:disabled) { background-color: var(--color-btn-hover); }
 .order-view__pay:disabled { opacity: 0.5; cursor: default; }
+
+/* Поддержка под кнопками: страница выровнена по центру, а сама ссылка —
+   inline-flex, поэтому центрируем её отдельной строкой */
+.order-result__support {
+    display: flex;
+    justify-content: center;
+}
