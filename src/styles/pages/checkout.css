@@ -118,7 +118,7 @@
     width: 72px;
     height: 88px;
     flex-shrink: 0;
-    background-color: var(--color-placeholder);
+    background-color: var(--color-photo-bg);
 }
 
 .checkout-item__img img {
