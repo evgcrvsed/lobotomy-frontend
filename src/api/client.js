@@ -122,6 +122,16 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     }),
+  // оплата пришла мимо банка (перевод на карту) — админ подтверждает её сам
+  markOrderPaid: (number, note) =>
+    request(`/api/orders/${encodeURIComponent(number)}/mark-paid`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note }),
+    }),
+  // безвозвратно: вместе с заказом уходят позиции и журнал оплаты
+  deleteOrder: (number) =>
+    request(`/api/orders/${encodeURIComponent(number)}`, { method: 'DELETE' }),
   setOrderTracking: (number, trackingNumber) =>
     request(`/api/orders/${encodeURIComponent(number)}/tracking`, {
       method: 'PATCH',

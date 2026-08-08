@@ -364,3 +364,23 @@
     font-size: 12px;
     color: var(--color-muted);
 }
+
+/* ---- УДАЛЕНИЕ ЗАКАЗА ---- */
+/* Отделено от остальной карточки: действие необратимое */
+.admin-order__danger {
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--color-border);
+}
+
+.admin-order__danger .btn {
+    margin-top: 12px;
+}
+
+/* Отметка об оплате мимо банка — рядом со сводкой, до таблиц журнала */
+.payment-log__manual {
+    margin-top: 16px;
+    padding: 14px;
+    background-color: var(--color-bg);
+    border-radius: 8px;
+}

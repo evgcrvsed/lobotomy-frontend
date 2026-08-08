@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { ORDER_STATUS_LABELS, deliveryTexts, formatDateTime, formatPrice, plural } from '../constants'
+import '../styles/pages/admin.css'
 import '../styles/pages/checkout.css'
 import '../styles/pages/order-page.css'
 import '../styles/pages/admin-orders.css'
 
 export default function AdminOrderEditPage() {
   const { number } = useParams()
+  const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [products, setProducts] = useState([])
   const [productsById, setProductsById] = useState({})
@@ -18,6 +20,8 @@ export default function AdminOrderEditPage() {
   const [newItems, setNewItems] = useState([]) // дозаказ: позиции, которых ещё нет в заказе
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [markingPaid, setMarkingPaid] = useState(false)
   // журнал оплаты: undefined — ещё грузим, null — запрос не прошёл, объект — данные
   const [payments, setPayments] = useState(undefined)
 
@@ -134,6 +138,50 @@ export default function AdminOrderEditPage() {
       setTimeout(() => setSaved(false), 2000)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function markPaidManually() {
+    const note = prompt(
+      'Чем подтверждается оплата? Например: перевод на карту 07.08. Можно оставить пустым.',
+      ''
+    )
+    if (note === null) return // передумали
+
+    setMarkingPaid(true)
+    try {
+      const res = await api.markOrderPaid(order.number, note.trim() || null)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Не удалось отметить: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      setOrder(await res.json())
+      setPayments(await api.getOrderPayments(number)) // в журнале появилась запись
+    } finally {
+      setMarkingPaid(false)
+    }
+  }
+
+  async function removeOrder() {
+    // об оплаченном заказе предупреждаем отдельно: вместе с ним уходит журнал,
+    // и подтвердить платёж, если покупатель придёт с претензией, будет нечем
+    const paidWarning = ['paid', 'shipped', 'ready', 'delivered'].includes(order.status)
+      ? '\n\nЗаказ оплачен: журнал оплаты удалится вместе с ним, подтвердить платёж будет нечем.'
+      : ''
+    if (!confirm(`Удалить заказ ${order.number} без возможности восстановить?${paidWarning}`)) return
+
+    setDeleting(true)
+    try {
+      const res = await api.deleteOrder(order.number)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        alert('Не удалось удалить: ' + (err.detail ?? 'что-то пошло не так'))
+        return
+      }
+      navigate('/admin/orders')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -354,7 +402,31 @@ export default function AdminOrderEditPage() {
         </aside>
       </div>
 
-      <PaymentLog payments={payments} />
+      <PaymentLog
+        payments={payments}
+        // отметить вручную можно только то, что банк ещё не подтвердил;
+        // отменённый — это протухший неоплаченный, деньги могли прийти и после
+        canMarkPaid={['pending', 'cancelled'].includes(order.status)}
+        marking={markingPaid}
+        onMarkPaid={markPaidManually}
+      />
+
+      {/* в самом низу, под журналом: чтобы дотянуться, надо пролистать всю карточку */}
+      <section className="admin-order__danger">
+        <h2 className="payment-log__title">Удаление</h2>
+        <p className="admin-order__hint">
+          Заказ исчезнет и из админки, и из профиля покупателя — вместе с позициями и журналом
+          оплаты. Восстановить нечем.
+        </p>
+        <button
+          className="btn btn--outline admin-btn--danger"
+          type="button"
+          onClick={removeOrder}
+          disabled={deleting}
+        >
+          {deleting ? 'Удаление...' : 'Удалить заказ'}
+        </button>
+      </section>
     </div>
   )
 }
@@ -363,6 +435,7 @@ const ATTEMPT_LABELS = {
   new: 'ждёт оплату',
   confirmed: 'оплачена',
   failed: 'банк отклонил',
+  manual: 'отмечена вручную',
 }
 
 const kopecks = (value) => (value === null || value === undefined ? '—' : formatPrice(value / 100))
@@ -370,7 +443,7 @@ const kopecks = (value) => (value === null || value === undefined ? '—' : form
 /** Журнал оплаты: с чем мы ходили в Т-Банк и что он присылал в ответ.
  *  Нужен, когда покупатель говорит «деньги списались» — по PaymentId и номеру
  *  заказа платёж ищется в личном кабинете банка. */
-function PaymentLog({ payments }) {
+function PaymentLog({ payments, canMarkPaid, marking, onMarkPaid }) {
   if (payments === undefined || payments === null) {
     return (
       <section className="payment-log">
@@ -413,6 +486,19 @@ function PaymentLog({ payments }) {
         </div>
       </div>
 
+      {canMarkPaid && (
+        <div className="payment-log__manual">
+          <button className="btn btn--outline" type="button" onClick={onMarkPaid} disabled={marking}>
+            {marking ? 'Отмечаем...' : 'Отметить оплаченным вручную'}
+          </button>
+          <p className="admin-order__hint">
+            Если деньги пришли переводом на карту. Заказ перейдёт в «В работе», а в журнале
+            появится запись — банк такую оплату не подтверждал, и сверить её можно только
+            по вашему комментарию.
+          </p>
+        </div>
+      )}
+
       <h3 className="payment-log__subtitle">Попытки оплаты ({attempts.length})</h3>
       {attempts.length === 0 ? (
         <p className="admin-order__hint">Попыток не записано — заказ создан до появления журнала.</p>
@@ -430,7 +516,12 @@ function PaymentLog({ payments }) {
             </thead>
             <tbody>
               {attempts.map((a) => (
-                <tr key={a.id} className={a.status === 'confirmed' ? 'payment-table__row--ok' : undefined}>
+                <tr
+                  key={a.id}
+                  className={
+                    ['confirmed', 'manual'].includes(a.status) ? 'payment-table__row--ok' : undefined
+                  }
+                >
                   <td>{formatDateTime(a.created_at)}</td>
                   <td className="payment-table__id">{a.payment_id || '—'}</td>
                   <td>{formatPrice(a.amount)}</td>
@@ -438,7 +529,7 @@ function PaymentLog({ payments }) {
                     {ATTEMPT_LABELS[a.status] ?? a.status}
                     {a.confirmed_at && ` — ${formatDateTime(a.confirmed_at)}`}
                   </td>
-                  <td>{a.error || '—'}</td>
+                  <td>{a.note || a.error || '—'}</td>
                 </tr>
               ))}
             </tbody>
