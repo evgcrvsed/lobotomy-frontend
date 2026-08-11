@@ -9,11 +9,11 @@ export default function Footer() {
         <p className="footer-legal__links">
           <Link to="/privacy-policy">Privacy Policy</Link>
           {' | '}
-          <span>Applications for Return of Goods</span>
+          <Link to="/return-policy">Return Policy</Link>
           {' | '}
-          <span>Returns</span>
+          <Link to="/delivery-info">Delivery</Link>
           {' | '}
-          <span>Reviews</span>
+          <Link to="/contacts">Contacts</Link>
           {' | '}
           <Link to="/contract-offer">Offer Agreement</Link>
         </p>

@@ -15,6 +15,9 @@ import AdminOrderEditPage from './pages/AdminOrderEditPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import ContractOfferPage from './pages/ContractOfferPage'
 import RequireAdmin from './components/RequireAdmin'
+import DeliveryInfoPage from "./pages/DeliveryInfoPage.jsx";
+import ReturnPolicyPage from "./pages/ReturnPolicyPage.jsx";
+import ContactsPage from "./pages/ContactsPage.jsx";
 
 function App() {
   return (
@@ -34,7 +37,10 @@ function App() {
           <Route path="/track" element={<TrackPage />} />
           <Route path="/order/:number" element={<OrderPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/return-policy" element={<ReturnPolicyPage />} />
+          <Route path="/contacts" element={<ContactsPage />} />
           <Route path="/contract-offer" element={<ContractOfferPage />} />
+          <Route path="/delivery-info" element={<DeliveryInfoPage />} />
           <Route path="/:collectionSlug/:productSlug" element={<ProductPage />} />
           <Route
             path="/admin"
