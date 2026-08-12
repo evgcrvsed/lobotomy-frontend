@@ -18,7 +18,13 @@ const RING_WIDTH = 6
 const SEGMENT_GAP = 0.4
 // Совсем тонкий сектор всё равно должен быть виден — иначе площадка с одним
 // заходом просто пропадает с диаграммы
-const MIN_ARC = 0.35
+const MIN_ARC = 0.2
+
+/** Длина дуги: доля минус зазор, но не тоньше волоска и не длиннее самой доли —
+ *  иначе крошечный сектор налезет на соседний. */
+function arcLength(share) {
+  return Math.min(Math.max(share - SEGMENT_GAP, MIN_ARC), share)
+}
 
 export default function AdminTrafficPage() {
   const period = usePeriod()
@@ -122,9 +128,10 @@ export default function AdminTrafficPage() {
                       fill="none"
                       stroke={s.color}
                       strokeWidth={RING_WIDTH}
-                      // из дуги вычитаем зазор, а «остаток» на столько же длиннее —
-                      // иначе сумма перестанет сходиться и сектора уползут
-                      strokeDasharray={`${Math.max(s.share - SEGMENT_GAP, MIN_ARC)} ${100 - Math.max(s.share - SEGMENT_GAP, MIN_ARC)}`}
+                      // остаток окружности — до сотни: длина видимой дуги
+                      // короче доли на зазор, но начало каждой считается от доли,
+                      // иначе сектора поехали бы по кругу
+                      strokeDasharray={`${arcLength(s.share)} ${100 - arcLength(s.share)}`}
                       strokeDashoffset={-s.offset}
                       // без поворота дуги начинаются справа, на трёх часах
                       transform="rotate(-90 21 21)"
