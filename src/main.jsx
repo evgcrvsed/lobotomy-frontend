@@ -6,6 +6,9 @@ import './styles/components/footer.css'
 import './styles/components/buttons.css'
 import './styles/components/hello.css'
 import App from './App.jsx'
+import { trackVisit } from './visits'
+
+trackVisit()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -121,6 +121,19 @@ export const api = {
     request(`/api/orders/stats?date_from=${dateFrom}&date_to=${dateTo}`).then((r) =>
       r.ok ? r.json() : null
     ),
+  // откуда пришли посетители за период
+  getTrafficStats: (dateFrom, dateTo) =>
+    request(`/api/visits/stats?date_from=${dateFrom}&date_to=${dateTo}`).then((r) =>
+      r.ok ? r.json() : null
+    ),
+  // Отметка о заходе. Ответ не читаем и ошибку глотаем: счётчик посетителей
+  // не должен мешать человеку смотреть магазин, если бэкенд прилёг
+  trackVisit: (referrer) =>
+    request('/api/visits/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ referrer }),
+    }).catch(() => {}),
   adminUpdateOrder: (number, data) =>
     request(`/api/orders/${encodeURIComponent(number)}`, {
       method: 'PATCH',

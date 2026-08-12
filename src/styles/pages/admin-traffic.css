@@ -1,0 +1,162 @@
+/* ============================================================
+   ADMIN TRAFFIC — откуда пришли посетители
+   ============================================================ */
+
+.traffic {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    align-items: center;
+    gap: 40px;
+    margin-top: 24px;
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-white);
+}
+
+/* ---- Кольцо ---- */
+.traffic__donut {
+    position: relative;
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+.donut {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible; /* дуга рисуется по центру линии и на 3px выходит за viewBox */
+}
+
+.donut__arc {
+    cursor: default;
+    transition: opacity 0.12s ease;
+}
+
+/* Наведение выделяет один сектор, приглушая остальные: подсветка самого сектора
+   на кольце почти не видна, а гашение соседей — сразу */
+.donut__arc--dim { opacity: 0.25; }
+
+/* Середина кольца — не украшение, а место для цифр: там либо итог,
+   либо то, на что навели */
+.donut__center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-align: center;
+    pointer-events: none; /* иначе центр перехватывал бы наведение у дуг */
+    padding: 0 18%;
+}
+
+.donut__value {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--color-black);
+    font-variant-numeric: tabular-nums;
+}
+
+.donut__caption {
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--color-muted);
+}
+
+/* ---- Таблица источников ---- */
+.traffic-legend {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.traffic-legend__row {
+    border-bottom: 1px solid var(--color-border);
+    cursor: default;
+}
+
+.traffic-legend__row:last-child { border-bottom: none; }
+.traffic-legend__row--active { background-color: var(--color-bg); }
+
+.traffic-legend td,
+.traffic-legend th {
+    padding: 9px 8px;
+    vertical-align: middle;
+}
+
+.traffic-legend__chip-cell { width: 22px; padding-right: 0; }
+
+.traffic-legend__chip {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.traffic-legend__name {
+    text-align: left;
+    font-weight: 500;
+    color: var(--color-black);
+}
+
+.traffic-legend__share {
+    text-align: right;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.traffic-legend__visits {
+    width: 64px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--color-black);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- Разбор «Другого» ---- */
+.traffic-hosts { margin-top: 40px; }
+
+.traffic-hosts__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+}
+
+.traffic-hosts__item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-white);
+    font-size: 13px;
+}
+
+.traffic-hosts__host {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.traffic-hosts__count {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+    .traffic {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 18px 14px;
+    }
+
+    .traffic__donut { max-width: 220px; }
+}

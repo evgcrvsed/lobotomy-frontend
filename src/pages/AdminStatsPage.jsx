@@ -2,20 +2,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import { formatPrice, plural } from '../constants'
+import PeriodPicker from '../components/PeriodPicker'
+import usePeriod, { parseDate } from '../usePeriod'
 import '../styles/components/modal.css' // поля дат берут оформление у .modal__input
 import '../styles/pages/admin.css'
 import '../styles/pages/admin-stats.css'
-
-// Готовые промежутки. days — сколько дней захватываем, считая сегодняшний:
-// «месяц» — это последние 30 дней, а не календарный август
-const PRESETS = [
-  { id: 'week', label: 'Неделя', days: 7 },
-  { id: 'month', label: 'Месяц', days: 30 },
-  { id: 'quarter', label: 'Квартал', days: 90 },
-  { id: 'halfyear', label: 'Полгода', days: 182 },
-  { id: 'year', label: 'Год', days: 365 },
-]
-const DEFAULT_PRESET = 'month'
 
 // Подписи оси: сколько их максимум и сколько пикселей нужно каждой, чтобы
 // соседние не слиплись («14.07» на 10px — это ~26px плюс воздух)
@@ -23,28 +14,6 @@ const MAX_AXIS_LABELS = 10
 const AXIS_LABEL_SPACE = 46
 // Горизонтальные линии сетки (кроме нуля)
 const GRID_LINES = 4
-
-/** Дата в YYYY-MM-DD по местному времени — именно её ждёт бэкенд.
- *  toISOString() тут не годится: он переводит в UTC и вечером сдвигает день назад. */
-function toInputDate(date) {
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${date.getFullYear()}-${m}-${d}`
-}
-
-/** «2026-08-12» -> Date на местную полночь. new Date(строка) разобрал бы её как UTC,
- *  и в минусовых поясах подпись столбца уехала бы на день назад. */
-function parseDate(iso) {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
-
-function rangeForPreset(days) {
-  const to = new Date()
-  const from = new Date()
-  from.setDate(from.getDate() - (days - 1))
-  return { from: toInputDate(from), to: toInputDate(to) }
-}
 
 /** Короткая сумма для шкалы: 150 тыс, 1.2 млн — целиком там не помещается */
 function shortMoney(value) {
@@ -86,10 +55,8 @@ function bucketTitle(iso, unit) {
 const UNIT_NOTE = { day: 'по дням', week: 'по неделям', month: 'по месяцам' }
 
 export default function AdminStatsPage() {
-  const [preset, setPreset] = useState(DEFAULT_PRESET)
-  const [range, setRange] = useState(() =>
-    rangeForPreset(PRESETS.find((p) => p.id === DEFAULT_PRESET).days)
-  )
+  const period = usePeriod()
+  const { range, invalid } = period
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -98,9 +65,9 @@ export default function AdminStatsPage() {
   const [plotWidth, setPlotWidth] = useState(0) // сколько подписей оси влезет
 
   useEffect(() => {
-    // конец раньше начала — бэкенд ответит 400, но и спрашивать незачем:
-    // такие даты получаются прямо во время правки поля вручную
-    if (range.from > range.to) {
+    // с перевёрнутыми датами на бэкенд не ходим — он ответит 400,
+    // а получаются они прямо во время правки поля вручную
+    if (invalid) {
       setError('Начало периода позже его конца')
       setLoading(false)
       return
@@ -119,7 +86,7 @@ export default function AdminStatsPage() {
     return () => {
       stale = true
     }
-  }, [range])
+  }, [range, invalid])
 
   // На телефоне под диаграммой втрое меньше места, чем на десктопе: держим
   // ширину под рукой, чтобы прореживать подписи оси по ней, а не по числу столбцов.
@@ -131,17 +98,6 @@ export default function AdminStatsPage() {
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
   }, [stats])
-
-  function applyPreset(p) {
-    setPreset(p.id)
-    setRange(rangeForPreset(p.days))
-  }
-
-  function editRange(field, value) {
-    if (!value) return // очищенное поле дат — период остаётся прежним
-    setPreset(null) // даты правили руками, готовый промежуток больше не выбран
-    setRange((r) => ({ ...r, [field]: value }))
-  }
 
   const points = stats?.points ?? []
   const maxRevenue = Math.max(0, ...points.map((p) => p.revenue))
@@ -163,6 +119,9 @@ export default function AdminStatsPage() {
       <div className="admin-page__top">
         <h1 className="admin-page__title">Статы</h1>
         <div className="admin-page__actions">
+          <Link to="/admin/traffic" className="btn btn--outline">
+            Трафик
+          </Link>
           <Link to="/admin/orders" className="btn btn--outline">
             Заказы
           </Link>
@@ -172,40 +131,7 @@ export default function AdminStatsPage() {
         </div>
       </div>
 
-      <div className="admin-filters">
-        {PRESETS.map((p) => (
-          <button
-            key={p.id}
-            className={`admin-filter${preset === p.id ? ' admin-filter--active' : ''}`}
-            onClick={() => applyPreset(p)}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="stats-range">
-        <label className="stats-range__field">
-          <span>С</span>
-          <input
-            type="date"
-            className="modal__input"
-            value={range.from}
-            max={range.to}
-            onChange={(e) => editRange('from', e.target.value)}
-          />
-        </label>
-        <label className="stats-range__field">
-          <span>По</span>
-          <input
-            type="date"
-            className="modal__input"
-            value={range.to}
-            min={range.from}
-            onChange={(e) => editRange('to', e.target.value)}
-          />
-        </label>
-      </div>
+      <PeriodPicker period={period} />
 
       <p className="stats-note">
         Считается по дате оплаты: заказ попадает в тот день, когда пришли деньги. Неоплаченные

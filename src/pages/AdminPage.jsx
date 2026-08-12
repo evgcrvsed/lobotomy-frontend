@@ -552,6 +552,9 @@ export default function AdminPage() {
             <Link to="/admin/stats" className="btn btn--outline">
               Статы
             </Link>
+            <Link to="/admin/traffic" className="btn btn--outline">
+              Трафик
+            </Link>
             <button className="btn btn--outline" onClick={openDeliveryModal}>
               Доставка
             </button>
