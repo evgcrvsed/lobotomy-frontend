@@ -1,0 +1,207 @@
+/* ============================================================
+   ADMIN STATS — диаграмма заработка за выбранный промежуток
+   ============================================================ */
+
+/* ---- Свой промежуток датами ---- */
+.stats-range {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.stats-range__field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stats-range__field span {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.stats-range__field .modal__input {
+    width: auto;
+    font-size: 13px;
+    padding: 7px 10px;
+}
+
+.stats-note {
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-muted);
+}
+
+/* ---- Сводка по периоду ---- */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.stats-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-white);
+}
+
+/* Доход — то, ради чего страница открывается: он на белом, остальные приглушены */
+.stats-card--main {
+    background-color: var(--color-bg);
+}
+
+.stats-card__label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.stats-card__value {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--color-black);
+    font-variant-numeric: tabular-nums;
+}
+
+.stats-card__hint {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-muted);
+}
+
+/* ---- Диаграмма ---- */
+.stats-chart {
+    margin-top: 32px;
+    padding: 20px 22px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-white);
+}
+
+.stats-chart__head {
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.stats-chart__title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.1px;
+}
+
+/* Цифры наведённого столбца. Высота фиксирована: строка есть всегда,
+   иначе появление подписи сдвигало бы диаграмму под курсором */
+.stats-chart__readout {
+    margin-top: 6px;
+    min-height: 20px;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--color-muted);
+}
+
+.stats-chart__readout b {
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+.stats-chart__body {
+    /* место слева — под подписи шкалы, они вынесены за столбцы */
+    padding: 20px 0 0 52px;
+}
+
+.stats-chart__plot {
+    position: relative;
+    height: 260px;
+}
+
+.stats-chart__grid-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed var(--color-border);
+    pointer-events: none; /* линии лежат поверх столбцов и съедали бы наведение */
+}
+
+.stats-chart__grid-label {
+    position: absolute;
+    right: calc(100% + 10px);
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: var(--color-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.stats-chart__bars {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 100%;
+    border-bottom: 1px solid var(--color-border-hover);
+}
+
+/* Колонка — вся высота диаграммы: наводить удобнее на неё, а не на сам столбец,
+   иначе к низким пришлось бы целиться */
+.stats-chart__col {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    cursor: default;
+}
+
+.stats-chart__col:hover { background-color: var(--color-bg); }
+
+.stats-chart__bar {
+    width: 100%;
+    background-color: var(--color-black);
+    border-radius: 2px 2px 0 0;
+    transition: background-color 0.12s ease;
+}
+
+.stats-chart__col--active .stats-chart__bar {
+    background-color: var(--color-gray);
+}
+
+/* ---- Ось дат ---- */
+/* Те же колонки, что и в диаграмме: подпись стоит ровно под своим столбцом */
+.stats-chart__axis {
+    display: flex;
+    gap: 2px;
+    margin-top: 8px;
+    padding-left: 52px;
+}
+
+.stats-chart__axis-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 10px;
+    color: var(--color-muted);
+    text-align: center;
+    white-space: nowrap;
+    /* подпись шире столбца — пусть вылезает за его края, а не режется */
+    overflow: visible;
+}
+
+@media (max-width: 560px) {
+    .stats-chart { padding: 16px 14px 12px; }
+    .stats-chart__body { padding-left: 40px; }
+    .stats-chart__axis { padding-left: 40px; }
+    .stats-chart__plot { height: 200px; }
+    .stats-card__value { font-size: 20px; }
+}

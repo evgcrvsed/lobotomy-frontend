@@ -116,6 +116,11 @@ export const api = {
     request(`/api/orders${search ? `?search=${encodeURIComponent(search)}` : ''}`).then((r) =>
       r.ok ? r.json() : []
     ),
+  // доход за период для диаграммы; даты — YYYY-MM-DD, включительно с обеих сторон
+  getOrderStats: (dateFrom, dateTo) =>
+    request(`/api/orders/stats?date_from=${dateFrom}&date_to=${dateTo}`).then((r) =>
+      r.ok ? r.json() : null
+    ),
   adminUpdateOrder: (number, data) =>
     request(`/api/orders/${encodeURIComponent(number)}`, {
       method: 'PATCH',

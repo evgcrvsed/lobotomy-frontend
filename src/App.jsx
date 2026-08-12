@@ -12,6 +12,7 @@ import OrderPage from './pages/OrderPage'
 import LoginPage from './pages/LoginPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminOrderEditPage from './pages/AdminOrderEditPage'
+import AdminStatsPage from './pages/AdminStatsPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import ContractOfferPage from './pages/ContractOfferPage'
 import RequireAdmin from './components/RequireAdmin'
@@ -63,6 +64,14 @@ function App() {
             element={
               <RequireAdmin>
                 <AdminOrderEditPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/stats"
+            element={
+              <RequireAdmin>
+                <AdminStatsPage />
               </RequireAdmin>
             }
           />

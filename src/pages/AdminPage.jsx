@@ -549,6 +549,9 @@ export default function AdminPage() {
             <Link to="/admin/orders" className="btn btn--outline">
               Заказы
             </Link>
+            <Link to="/admin/stats" className="btn btn--outline">
+              Статы
+            </Link>
             <button className="btn btn--outline" onClick={openDeliveryModal}>
               Доставка
             </button>
