@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import { formatPrice, plural } from '../constants'
@@ -17,8 +17,10 @@ const PRESETS = [
 ]
 const DEFAULT_PRESET = 'month'
 
-// Сколько подписей влезает под диаграмму, не наезжая друг на друга
+// Подписи оси: сколько их максимум и сколько пикселей нужно каждой, чтобы
+// соседние не слиплись («14.07» на 10px — это ~26px плюс воздух)
 const MAX_AXIS_LABELS = 10
+const AXIS_LABEL_SPACE = 46
 // Горизонтальные линии сетки (кроме нуля)
 const GRID_LINES = 4
 
@@ -48,7 +50,17 @@ function rangeForPreset(days) {
 function shortMoney(value) {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)} млн`
   if (value >= 10_000) return `${Math.round(value / 1000)} тыс`
-  return String(value)
+  return Number(value).toLocaleString('ru-RU')
+}
+
+/** Ближайшее круглое число сверху: 9538 -> 10 000, 2300 -> 2500.
+ *  По нему считается шаг шкалы — иначе на линиях стояли бы 9538 и 19 075. */
+function niceCeil(value) {
+  if (value <= 0) return 0
+  const pow = 10 ** Math.floor(Math.log10(value))
+  const n = value / pow
+  const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10
+  return step * pow
 }
 
 const MONTHS = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
@@ -69,11 +81,9 @@ function bucketTitle(iso, unit) {
   return day
 }
 
-const UNIT_NOTE = {
-  day: 'по дням',
-  week: 'по неделям — на длинном промежутке дневные столбцы не читаются',
-  month: 'по месяцам — на длинном промежутке дневные столбцы не читаются',
-}
+// Шаг столбца выбирает бэкенд по размаху периода — на полугоде дневные
+// столбцы уже не читаются. Здесь только подпись к тому, что он выбрал.
+const UNIT_NOTE = { day: 'по дням', week: 'по неделям', month: 'по месяцам' }
 
 export default function AdminStatsPage() {
   const [preset, setPreset] = useState(DEFAULT_PRESET)
@@ -84,6 +94,8 @@ export default function AdminStatsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [hovered, setHovered] = useState(null) // индекс столбца под курсором
+  const plotRef = useRef(null)
+  const [plotWidth, setPlotWidth] = useState(0) // сколько подписей оси влезет
 
   useEffect(() => {
     // конец раньше начала — бэкенд ответит 400, но и спрашивать незачем:
@@ -109,6 +121,17 @@ export default function AdminStatsPage() {
     }
   }, [range])
 
+  // На телефоне под диаграммой втрое меньше места, чем на десктопе: держим
+  // ширину под рукой, чтобы прореживать подписи оси по ней, а не по числу столбцов.
+  // Замер до отрисовки — иначе виден кадр с частыми подписями. Зависимость от
+  // stats: пока данные не пришли, диаграммы нет и мерить нечего.
+  useLayoutEffect(() => {
+    const measure = () => setPlotWidth(plotRef.current?.getBoundingClientRect().width ?? 0)
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [stats])
+
   function applyPreset(p) {
     setPreset(p.id)
     setRange(rangeForPreset(p.days))
@@ -122,12 +145,17 @@ export default function AdminStatsPage() {
 
   const points = stats?.points ?? []
   const maxRevenue = Math.max(0, ...points.map((p) => p.revenue))
-  // шаг подписей по оси: показываем не все, иначе они наезжают друг на друга
-  const labelStep = Math.ceil(points.length / MAX_AXIS_LABELS)
-  // сетка от нуля до максимума; при пустом периоде рисовать её нечем
-  const gridValues = maxRevenue
-    ? Array.from({ length: GRID_LINES }, (_, i) => (maxRevenue / GRID_LINES) * (i + 1))
-    : []
+  // шаг подписей по оси: показываем не все, иначе они наезжают друг на друга.
+  // До первого замера ширины считаем по десктопному пределу
+  const fits = plotWidth ? Math.floor(plotWidth / AXIS_LABEL_SPACE) : MAX_AXIS_LABELS
+  const labelStep = Math.ceil(points.length / Math.max(2, Math.min(fits, MAX_AXIS_LABELS)))
+  // Верх шкалы — круглое число выше самого высокого столбца, а не он сам:
+  // так на линиях сетки стоят «10 тыс», а не «9538»
+  const gridStep = niceCeil(maxRevenue / GRID_LINES)
+  // || 1 — только чтобы не делить на ноль: у периода без выручки высоты столбцов
+  // всё равно нулевые, а сетку в этом случае не рисуем
+  const scaleMax = gridStep * GRID_LINES || 1
+  const gridValues = gridStep ? Array.from({ length: GRID_LINES }, (_, i) => gridStep * (i + 1)) : []
   const active = hovered !== null ? points[hovered] : null
 
   return (
@@ -232,12 +260,12 @@ export default function AdminStatsPage() {
               <p className="admin-empty">За этот промежуток оплаченных заказов не было</p>
             ) : (
               <div className="stats-chart__body">
-                <div className="stats-chart__plot">
+                <div className="stats-chart__plot" ref={plotRef}>
                   {gridValues.map((value) => (
                     <div
                       className="stats-chart__grid-line"
                       key={value}
-                      style={{ bottom: `${(value / maxRevenue) * 100}%` }}
+                      style={{ bottom: `${(value / scaleMax) * 100}%` }}
                     >
                       <span className="stats-chart__grid-label">{shortMoney(Math.round(value))}</span>
                     </div>
@@ -250,12 +278,14 @@ export default function AdminStatsPage() {
                         title={`${bucketTitle(point.date, stats.unit)}: ${formatPrice(point.revenue)}`}
                         onMouseEnter={() => setHovered(i)}
                         onMouseLeave={() => setHovered(null)}
+                        // на телефоне наведения нет — цифры показывает касание
+                        onClick={() => setHovered(i)}
                       >
                         <div
                           className="stats-chart__bar"
                           // 1% минимум: нулевой столбец иначе исчезает, и по диаграмме
                           // не видно, что этот день вообще был в периоде
-                          style={{ height: `${Math.max((point.revenue / maxRevenue) * 100, 1)}%` }}
+                          style={{ height: `${Math.max((point.revenue / scaleMax) * 100, 1)}%` }}
                         />
                       </div>
                     ))}
