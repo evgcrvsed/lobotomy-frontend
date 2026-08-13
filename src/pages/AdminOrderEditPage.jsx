@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import { ORDER_STATUS_LABELS, deliveryTexts, formatDateTime, formatPrice, plural } from '../constants'
 import '../styles/pages/admin.css'
 import '../styles/pages/checkout.css'
@@ -126,8 +127,7 @@ export default function AdminOrderEditPage() {
       }
       const res = await api.adminUpdateOrder(number, payload)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось сохранить: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось сохранить: ' + (await errorTextFrom(res)))
         return
       }
       const updated = await res.json()
@@ -152,8 +152,7 @@ export default function AdminOrderEditPage() {
     try {
       const res = await api.markOrderPaid(order.number, note.trim() || null)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось отметить: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось отметить: ' + (await errorTextFrom(res)))
         return
       }
       setOrder(await res.json())
@@ -175,8 +174,7 @@ export default function AdminOrderEditPage() {
     try {
       const res = await api.deleteOrder(order.number)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось удалить: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось удалить: ' + (await errorTextFrom(res)))
         return
       }
       navigate('/admin/orders')

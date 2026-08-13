@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import { getToken } from '../auth'
-import { changeCartSize, getCart, removeFromCart, setCartQty } from '../cart'
+import { MAX_QTY, changeCartSize, getCart, removeFromCart, setCartQty } from '../cart'
 import { deliveryTexts, formatPrice, plural } from '../constants'
 import { rememberGuestOrder } from '../guestOrders'
 import '../styles/components/image-viewer.css'
@@ -14,6 +15,11 @@ export default function CheckoutPage() {
   const [collections, setCollections] = useState([])
   const [delivery, setDelivery] = useState('')
   const [deliveryMethods, setDeliveryMethods] = useState([])
+  // Справочники приезжают с сервера, и до их появления заказ отправлять нельзя:
+  // delivery пуст, а бэкенд такой заказ отвергает валидацией. Пустой список
+  // способов доставки — это не «состояние», а три разных случая, поэтому нужен
+  // отдельный статус: loading | ready | failed
+  const [refsStatus, setRefsStatus] = useState('loading')
   const [chartSrc, setChartSrc] = useState(null)
   const [paying, setPaying] = useState(false)
   const [authorized, setAuthorized] = useState(false)
@@ -45,14 +51,20 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
-    Promise.all([api.getProducts(), api.getCollections(), api.getDeliveryMethods()]).then(
-      ([list, cols, methods]) => {
+    Promise.all([api.getProducts(), api.getCollections(), api.getDeliveryMethods()])
+      .then(([list, cols, methods]) => {
         setProductsById(Object.fromEntries(list.map((p) => [p.id, p])))
         setCollections(cols)
         setDeliveryMethods(methods)
         setDelivery((cur) => cur || methods[0]?.code || '')
-      }
-    )
+        // Пустой список означает сбой запроса, а не «доставки нет»: набор способов
+        // заводится при старте бэкенда (_seed_delivery_methods) и пустым не бывает.
+        // Клиент при не-ok молча отдаёт [], поэтому отличить можно только так.
+        setRefsStatus(methods.length ? 'ready' : 'failed')
+      })
+      // сеть отвалилась совсем — тогда .then не выполнится вовсе и страница
+      // осталась бы навсегда в состоянии «загружаем»
+      .catch(() => setRefsStatus('failed'))
     if (getToken()) {
       api.getMe().then((me) => {
         if (!me) return
@@ -122,10 +134,32 @@ export default function CheckoutPage() {
 
     if (!value('pickupPoint')) problems.push(texts.point)
 
+    // Способ доставки человек не вводит руками, он приезжает справочником с сервера —
+    // и раньше в проверке его не было вовсе. На медленной сети форму успевали
+    // отправить до загрузки справочника, и заказ падал на валидации бэкенда
+    if (!delivery) problems.push('Способ доставки')
+
     return problems
   }
 
+  /** Подпись кнопки оплаты: она же объясняет, почему кнопка недоступна. */
+  function payLabel() {
+    if (paying) return 'Переходим к оплате...'
+    if (refsStatus === 'loading') return 'Загружаем...'
+    if (refsStatus === 'failed') return 'Данные не загрузились'
+    return `Оплатить ${formatPrice(itemsTotal + deliveryPrice)}`
+  }
+
   async function pay() {
+    if (refsStatus !== 'ready') {
+      alert(
+        refsStatus === 'loading'
+          ? 'Ещё загружаем способы доставки — секунду.'
+          : 'Не удалось загрузить способы доставки. Обновите страницу и попробуйте снова.'
+      )
+      return
+    }
+
     const problems = validate()
     if (problems.length) {
       alert('Проверьте, пожалуйста:\n\n• ' + problems.join('\n• '))
@@ -146,8 +180,7 @@ export default function CheckoutPage() {
       }
       const res = await api.createOrder(payload)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось оформить заказ: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось оформить заказ: ' + (await errorTextFrom(res)))
         return
       }
       const { number, payment_url } = await res.json()
@@ -155,6 +188,10 @@ export default function CheckoutPage() {
       // номер всё равно останется у него на устройстве
       if (!authorized) rememberGuestOrder(number)
       window.location.href = payment_url // уходим на страницу оплаты Т-Банка
+    } catch {
+      // запрос не дошёл вовсе: без этого fetch падал молча и человек
+      // видел только, как кнопка перестала нажиматься
+      alert('Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.')
     } finally {
       setPaying(false)
     }
@@ -200,6 +237,14 @@ export default function CheckoutPage() {
             <div className="checkout__field">
               <span className="checkout__label">Способ доставки</span>
               <div className="delivery-options">
+                {refsStatus === 'loading' && (
+                  <span className="delivery-options__note">Загружаем способы доставки…</span>
+                )}
+                {refsStatus === 'failed' && (
+                  <span className="delivery-options__note delivery-options__note--error">
+                    Не удалось загрузить способы доставки. Обновите страницу.
+                  </span>
+                )}
                 {deliveryMethods.map((opt) => (
                   <label className="delivery-option" key={opt.code}>
                     <input
@@ -280,6 +325,8 @@ export default function CheckoutPage() {
                         <button
                           type="button"
                           aria-label="Больше"
+                          disabled={item.qty >= MAX_QTY}
+                          title={item.qty >= MAX_QTY ? `Не больше ${MAX_QTY} шт. одной позиции` : undefined}
                           onClick={() => setCartQty(item.productId, item.size, item.qty + 1)}
                         >
                           +
@@ -320,8 +367,13 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <button className="checkout__pay" type="button" onClick={pay} disabled={paying}>
-              {paying ? 'Переходим к оплате...' : `Оплатить ${formatPrice(itemsTotal + deliveryPrice)}`}
+            <button
+              className="checkout__pay"
+              type="button"
+              onClick={pay}
+              disabled={paying || refsStatus !== 'ready'}
+            >
+              {payLabel()}
             </button>
           </aside>
         </div>

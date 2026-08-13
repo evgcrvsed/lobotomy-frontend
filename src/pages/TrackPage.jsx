@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import OrderView from '../components/OrderView'
 import { deliveryLabels } from '../constants'
 import { getGuestOrders } from '../guestOrders'
@@ -29,8 +30,7 @@ export default function TrackPage() {
     try {
       const res = await api.trackOrder(number.trim())
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        setError(err.detail ?? 'Заказ не найден')
+        setError(await errorTextFrom(res, 'Заказ не найден'))
         return
       }
       setOrder(await res.json())

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 import * as VKID from '@vkid/sdk'
 import { api } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import { getToken, setToken } from '../auth'
 import logoBlack from '../assets/images/logo-black.png'
 import '../styles/pages/login.css'
@@ -47,8 +48,7 @@ export default function LoginPage() {
         const { access_token: accessToken } = await VKID.Auth.exchangeCode(vkCode, deviceId)
         const res = await api.vkLogin(accessToken)
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          setError(err.detail ?? 'Не удалось войти')
+          setError(await errorTextFrom(res, 'Не удалось войти'))
           return
         }
         onLoggedIn((await res.json()).token)
@@ -69,8 +69,7 @@ export default function LoginPage() {
     try {
       const res = await api.requestEmailCode(email.trim())
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        setError(err.detail ?? 'Не удалось отправить код')
+        setError(await errorTextFrom(res, 'Не удалось отправить код'))
         return
       }
       setStep('code')
@@ -88,8 +87,7 @@ export default function LoginPage() {
     try {
       const res = await api.verifyEmailCode(email.trim(), code.trim())
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        setError(err.detail ?? 'Неверный код')
+        setError(await errorTextFrom(res, 'Неверный код'))
         return
       }
       onLoggedIn((await res.json()).token)

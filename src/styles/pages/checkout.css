@@ -100,6 +100,15 @@
     background-color: var(--color-black);
 }
 
+/* Состояние справочника вместо списка: «грузится» и «не загрузилось» —
+   разные сообщения, потому что во втором случае нужно обновить страницу */
+.delivery-options__note {
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+.delivery-options__note--error { color: #b03030; }
+
 /* ---- ПОЗИЦИИ КОРЗИНЫ ---- */
 .checkout__items {
     display: flex;
@@ -233,6 +242,11 @@
     line-height: 1;
     color: var(--color-black);
     cursor: pointer;
+}
+
+.checkout-item__stepper button:disabled {
+    opacity: 0.35;
+    cursor: default;
 }
 
 .checkout-item__stepper span {

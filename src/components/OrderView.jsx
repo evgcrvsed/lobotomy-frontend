@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import { ORDER_STATUS_LABELS, formatDateTime, formatPrice } from '../constants'
 import '../styles/pages/orders.css'
 
@@ -12,8 +13,7 @@ export default function OrderView({ order, linkTo, deliveryLabels = {} }) {
     try {
       const res = await api.resumePayment(order.number)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось перейти к оплате: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось перейти к оплате: ' + (await errorTextFrom(res)))
         return
       }
       window.location.href = (await res.json()).payment_url

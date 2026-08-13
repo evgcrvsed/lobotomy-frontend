@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import { formatPrice } from '../constants'
 import Modal from '../components/Modal'
 import '../styles/components/modal.css'
@@ -154,8 +155,7 @@ export default function AdminPage() {
         point_label: method.point_label,
       })
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось сохранить: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось сохранить: ' + (await errorTextFrom(res)))
         return
       }
       const updated = await res.json()
@@ -175,8 +175,7 @@ export default function AdminPage() {
     try {
       const res = await api.updateSetting(key, settingDrafts[key] ?? '')
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось сохранить: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось сохранить: ' + (await errorTextFrom(res)))
         return
       }
       // бэкенд возвращает все настройки: пустое поле он заменяет значением по умолчанию
@@ -200,8 +199,7 @@ export default function AdminPage() {
 
     const res = await api.updateCollection(col.id, { name, image: col.image })
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      alert('Не удалось переименовать: ' + (err.detail ?? 'что-то пошло не так'))
+      alert('Не удалось переименовать: ' + (await errorTextFrom(res)))
       return
     }
     await reloadCollections()
@@ -210,8 +208,7 @@ export default function AdminPage() {
   async function setCollectionImage(col, image) {
     const res = await api.updateCollection(col.id, { name: col.name, image })
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      alert('Не удалось сохранить картинку: ' + (err.detail ?? 'что-то пошло не так'))
+      alert('Не удалось сохранить картинку: ' + (await errorTextFrom(res)))
       return
     }
     await reloadCollections()
@@ -222,8 +219,7 @@ export default function AdminPage() {
   async function setHeroCollection(col) {
     const res = await api.updateCollection(col.id, { name: col.name, image: col.image, is_hero: true })
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      alert('Не удалось выбрать главную картинку: ' + (err.detail ?? 'что-то пошло не так'))
+      alert('Не удалось выбрать главную картинку: ' + (await errorTextFrom(res)))
       return
     }
     await reloadCollections()
@@ -235,8 +231,7 @@ export default function AdminPage() {
 
     const res = await api.uploadImage(file)
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      alert('Не удалось загрузить фото: ' + (err.detail ?? 'что-то пошло не так'))
+      alert('Не удалось загрузить фото: ' + (await errorTextFrom(res)))
       e.target.value = ''
       return
     }
@@ -251,8 +246,7 @@ export default function AdminPage() {
 
     const res = await api.createCollection({ name })
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      alert('Не удалось создать: ' + (err.detail ?? 'что-то пошло не так'))
+      alert('Не удалось создать: ' + (await errorTextFrom(res)))
       return
     }
     setNewColName('')
@@ -264,8 +258,7 @@ export default function AdminPage() {
 
     const res = await api.deleteCollection(col.id)
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      alert('Не удалось удалить: ' + (err.detail ?? 'что-то пошло не так'))
+      alert('Не удалось удалить: ' + (await errorTextFrom(res)))
       return
     }
     if (activeCollectionId === col.id) setActiveCollectionId(null)
@@ -277,8 +270,7 @@ export default function AdminPage() {
 
     const res = await api.deleteImage(filename)
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      alert('Не удалось удалить: ' + (err.detail ?? 'что-то пошло не так'))
+      alert('Не удалось удалить: ' + (await errorTextFrom(res)))
       return
     }
     await refreshMedia()
@@ -356,8 +348,7 @@ export default function AdminPage() {
     try {
       const res = await api.uploadImage(file)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось загрузить фото: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось загрузить фото: ' + (await errorTextFrom(res)))
         return
       }
       const { filename } = await res.json()
@@ -379,8 +370,7 @@ export default function AdminPage() {
       for (const file of files) {
         const res = await api.uploadImage(file)
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          alert(`Не удалось загрузить ${file.name}: ` + (err.detail ?? 'что-то пошло не так'))
+          alert(`Не удалось загрузить ${file.name}: ` + (await errorTextFrom(res)))
           continue
         }
         uploaded.push((await res.json()).filename)
@@ -515,8 +505,7 @@ export default function AdminPage() {
       const res = currentProductId ? await api.updateProduct(currentProductId, data) : await api.createProduct(data)
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Ошибка: ' + (err.detail ?? 'Что-то пошло не так'))
+        alert('Ошибка: ' + (await errorTextFrom(res)))
         return
       }
 

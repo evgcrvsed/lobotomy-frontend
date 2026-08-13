@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import { ORDER_STATUS_LABELS, deliveryLabels, formatDateTime, formatPrice } from '../constants'
 import '../styles/pages/admin.css'
 import '../styles/pages/admin-orders.css'
@@ -77,8 +78,7 @@ export default function AdminOrdersPage() {
     try {
       const res = await api.setOrderTracking(order.number, value)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось сохранить: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось сохранить: ' + (await errorTextFrom(res)))
         return
       }
       const updated = await res.json()
@@ -96,8 +96,7 @@ export default function AdminOrdersPage() {
     try {
       const res = await api.syncOrderCdek(order.number)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('СДЭК не ответил: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('СДЭК не ответил: ' + (await errorTextFrom(res)))
         return
       }
       const updated = await res.json()

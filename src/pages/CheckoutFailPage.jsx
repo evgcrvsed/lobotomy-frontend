@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
+import { errorTextFrom } from '../api/errors'
 import '../styles/pages/orders.css'
 
 export default function CheckoutFailPage() {
@@ -13,8 +14,7 @@ export default function CheckoutFailPage() {
     try {
       const res = await api.resumePayment(number)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        alert('Не удалось вернуться к оплате: ' + (err.detail ?? 'что-то пошло не так'))
+        alert('Не удалось вернуться к оплате: ' + (await errorTextFrom(res)))
         return
       }
       window.location.href = (await res.json()).payment_url
