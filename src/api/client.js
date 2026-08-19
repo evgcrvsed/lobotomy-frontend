@@ -53,6 +53,15 @@ export const api = {
       body: JSON.stringify(data),
     }),
   deleteCollection: (id) => request(`/api/collections/${id}`, { method: 'DELETE' }),
+  // промокоды видны только админу — весь список отдаётся под токеном
+  getPromoCodes: () => request('/api/promo-codes/').then((r) => (r.ok ? r.json() : [])),
+  createPromoCode: (data) =>
+    request('/api/promo-codes/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  deletePromoCode: (id) => request(`/api/promo-codes/${id}`, { method: 'DELETE' }),
   vkLogin: (accessToken) =>
     request('/api/auth/vk', {
       method: 'POST',

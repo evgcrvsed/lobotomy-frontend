@@ -16,6 +16,8 @@ const MAX_SIZE_COLUMNS = 8
 const MAX_COLUMN_NAME = 50
 const MAX_MEASUREMENT = 50
 const MAX_SIZE_LABEL = 10
+// столько же в backend/schemas/promo_code.py
+const MAX_PROMO_CODE = 50
 
 // values — замеры по индексам столбцов, а не по названиям: так переименование
 // столбца не теряет уже введённые значения
@@ -31,6 +33,10 @@ const SETTING_FIELDS = [
     hint: 'Крупная надпись сверху на странице профиля. Пусто — вернётся «? ? ?».',
   },
 ]
+
+// пустые «кол-во активаций» и «срок годности» уходят на бэкенд как null:
+// без ограничения и бессрочно
+const EMPTY_PROMO = { code: '', discount: '', maxActivations: '', expiresAt: '' }
 
 const EMPTY_FORM = {
   collectionId: '',
@@ -52,6 +58,25 @@ const EMPTY_FORM = {
 function formatSize(bytes) {
   if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} МБ`
   return `${Math.max(1, Math.round(bytes / 1024))} КБ`
+}
+
+// Дата приходит строкой YYYY-MM-DD. Разбираем её как текст, а не через Date:
+// иначе браузер прочтёт её как полночь UTC и в минусовых поясах покажет вчера.
+function formatDate(iso) {
+  const [year, month, day] = iso.split('-')
+  return `${day}.${month}.${year}`
+}
+
+/** Сегодняшний день в том же виде, что приходит от бэкенда, — чтобы сравнивать строками. */
+function todayIso() {
+  const now = new Date()
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+}
+
+// Промокод диктуют в переписке и вводят руками: кириллическая «С» в SALE
+// выглядела бы так же, но не нашлась бы. Оставляем только разрешённое бэкендом.
+function normalizePromoCode(value) {
+  return value.toUpperCase().replace(/[^A-Z0-9_-]/g, '')
 }
 
 function ImageUploadSlot({ id, label, filename, uploading, onSelect, onClear }) {
@@ -103,6 +128,11 @@ export default function AdminPage() {
   const [settingDrafts, setSettingDrafts] = useState({})
   const [savedSetting, setSavedSetting] = useState(null)
   const [savingSetting, setSavingSetting] = useState(null)
+
+  const [promoModalOpen, setPromoModalOpen] = useState(false)
+  const [promoCodes, setPromoCodes] = useState([])
+  const [promoForm, setPromoForm] = useState(EMPTY_PROMO)
+  const [promoSaving, setPromoSaving] = useState(false)
 
   const [colModalOpen, setColModalOpen] = useState(false)
   const [colDrafts, setColDrafts] = useState({})
@@ -185,6 +215,48 @@ export default function AdminPage() {
     } finally {
       setSavingSetting(null)
     }
+  }
+
+  async function openPromoModal() {
+    setPromoCodes(await api.getPromoCodes())
+    setPromoForm(EMPTY_PROMO)
+    setPromoModalOpen(true)
+  }
+
+  async function createPromo(e) {
+    e.preventDefault()
+
+    const data = {
+      code: promoForm.code.trim(),
+      discount_percent: parseInt(promoForm.discount, 10),
+      max_activations:
+        promoForm.maxActivations.trim() === '' ? null : parseInt(promoForm.maxActivations, 10),
+      expires_at: promoForm.expiresAt || null,
+    }
+
+    setPromoSaving(true)
+    try {
+      const res = await api.createPromoCode(data)
+      if (!res.ok) {
+        alert('Не удалось создать промокод: ' + (await errorTextFrom(res)))
+        return
+      }
+      setPromoForm(EMPTY_PROMO)
+      setPromoCodes(await api.getPromoCodes())
+    } finally {
+      setPromoSaving(false)
+    }
+  }
+
+  async function removePromo(promo) {
+    if (!confirm(`Удалить промокод ${promo.code}?`)) return
+
+    const res = await api.deletePromoCode(promo.id)
+    if (!res.ok) {
+      alert('Не удалось удалить: ' + (await errorTextFrom(res)))
+      return
+    }
+    setPromoCodes(await api.getPromoCodes())
   }
 
   function openColModal() {
@@ -549,6 +621,9 @@ export default function AdminPage() {
             </button>
             <button className="btn btn--outline" onClick={openTextsModal}>
               Тексты
+            </button>
+            <button className="btn btn--outline" onClick={openPromoModal}>
+              Промокоды
             </button>
             <button className="btn btn--dark" onClick={openColModal}>
               + Редактировать коллекции
@@ -1038,6 +1113,132 @@ export default function AdminPage() {
               <span className="modal__hint">{hint}</span>
             </div>
           ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={promoModalOpen}
+        titleId="promo-modal-title"
+        title="Промокоды"
+        onClose={() => setPromoModalOpen(false)}
+      >
+        <div className="modal__form">
+          <p className="admin-media__hint">
+            Скидка в процентах от суммы заказа. Пустое количество активаций — промокод
+            без ограничения, пустой срок — бессрочный. Применение промокода на оформлении
+            заказа пока не сделано: здесь они только заводятся.
+          </p>
+
+          <form className="promo-form" onSubmit={createPromo} noValidate>
+            <div className="modal__row">
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="promo-code">
+                  Промокод *
+                </label>
+                <input
+                  className="modal__input"
+                  id="promo-code"
+                  type="text"
+                  placeholder="SUMMER10"
+                  maxLength={MAX_PROMO_CODE}
+                  required
+                  value={promoForm.code}
+                  onChange={(e) => setPromoForm({ ...promoForm, code: normalizePromoCode(e.target.value) })}
+                />
+                <span className="modal__hint">Латиница, цифры, дефис и подчёркивание</span>
+              </div>
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="promo-discount">
+                  Скидка, % *
+                </label>
+                <input
+                  className="modal__input"
+                  id="promo-discount"
+                  type="number"
+                  placeholder="10"
+                  min="1"
+                  max="99"
+                  required
+                  value={promoForm.discount}
+                  onChange={(e) => setPromoForm({ ...promoForm, discount: e.target.value })}
+                />
+                <span className="modal__hint">Не больше 99: заказ на 0 ₽ не оплатить</span>
+              </div>
+            </div>
+
+            <div className="modal__row">
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="promo-activations">
+                  Количество активаций
+                </label>
+                <input
+                  className="modal__input"
+                  id="promo-activations"
+                  type="number"
+                  placeholder="без ограничения"
+                  min="1"
+                  value={promoForm.maxActivations}
+                  onChange={(e) => setPromoForm({ ...promoForm, maxActivations: e.target.value })}
+                />
+              </div>
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="promo-expires">
+                  Срок годности
+                </label>
+                <input
+                  className="modal__input"
+                  id="promo-expires"
+                  type="date"
+                  value={promoForm.expiresAt}
+                  onChange={(e) => setPromoForm({ ...promoForm, expiresAt: e.target.value })}
+                />
+                <span className="modal__hint">Последний день, когда промокод работает</span>
+              </div>
+            </div>
+
+            <div className="modal__actions">
+              <button
+                className="btn btn--dark"
+                type="submit"
+                disabled={promoSaving || !promoForm.code.trim() || !promoForm.discount}
+              >
+                {promoSaving ? 'Создание...' : 'Создать промокод'}
+              </button>
+            </div>
+          </form>
+
+          {promoCodes.length === 0 ? (
+            <p className="admin-media__hint">Промокодов пока нет</p>
+          ) : (
+            promoCodes.map((promo) => {
+              // отработавший промокод не удаляем сами — админ решит, оставить его
+              // в списке для истории или снести
+              const spent =
+                promo.max_activations !== null && promo.used_count >= promo.max_activations
+              const expired = promo.expires_at !== null && promo.expires_at < todayIso()
+
+              return (
+                <div className={`promo-row${spent || expired ? ' promo-row--dead' : ''}`} key={promo.id}>
+                  <span className="promo-row__code">{promo.code}</span>
+                  <span className="promo-row__discount">−{promo.discount_percent}%</span>
+                  <span className="promo-row__meta">
+                    {promo.max_activations === null
+                      ? `использован ${promo.used_count} раз, без ограничения`
+                      : `использован ${promo.used_count} из ${promo.max_activations}`}
+                    {' · '}
+                    {promo.expires_at ? `до ${formatDate(promo.expires_at)}` : 'бессрочно'}
+                  </span>
+                  <button
+                    className="btn btn--outline admin-btn--danger"
+                    type="button"
+                    onClick={() => removePromo(promo)}
+                  >
+                    Уд.
+                  </button>
+                </div>
+              )
+            })
+          )}
         </div>
       </Modal>
 

@@ -557,3 +557,58 @@
     .delivery-row__main { flex-wrap: wrap; }
     .delivery-row__labels { grid-template-columns: 1fr; }
 }
+
+/* Промокоды */
+.promo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.promo-form .modal__actions { margin-top: 0; }
+
+.promo-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.promo-row:last-child { border-bottom: none; }
+
+/* Отработавший или просроченный: из списка не убираем, но и не путаем с рабочим */
+.promo-row--dead { opacity: 0.45; }
+
+.promo-row__code {
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-black);
+}
+
+.promo-row__discount {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.promo-row__meta {
+    font-size: 12px;
+    color: var(--color-muted);
+    min-width: 0;
+}
+
+.promo-row .btn { flex-shrink: 0; }
+
+@media (max-width: 560px) {
+    .promo-row {
+        grid-template-columns: auto 1fr auto;
+    }
+
+    .promo-row__meta { grid-column: 1 / -1; }
+}

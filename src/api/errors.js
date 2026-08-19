@@ -26,6 +26,9 @@ const FIELD_LABELS = {
   qty: 'Количество',
   price: 'Цена',
   code: 'Код',
+  discount_percent: 'Скидка',
+  max_activations: 'Количество активаций',
+  expires_at: 'Срок годности',
   name: 'Название',
   slug: 'Адрес страницы',
   tracking_number: 'Трек-номер',
@@ -56,6 +59,9 @@ function reasonText(item) {
       return ctx.min_length > 1 ? `минимум ${ctx.min_length} символов` : 'не заполнено'
     case 'string_too_long':
       return `максимум ${ctx.max_length} символов`
+    case 'string_pattern_mismatch':
+      // единственный шаблон в API — код промокода; расшифровку regex человеку не покажешь
+      return 'недопустимые символы'
     case 'too_short':
       return ctx.min_length > 1 ? `минимум ${ctx.min_length} шт.` : 'пусто'
     case 'too_long':
