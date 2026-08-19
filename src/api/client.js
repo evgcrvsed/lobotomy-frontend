@@ -35,6 +35,13 @@ export const api = {
       body: JSON.stringify(data),
     }),
   deleteProduct: (id) => request(`/api/products/${id}`, { method: 'DELETE' }),
+  // только флаг витрины: полная форма товара для этого не нужна
+  setProductHidden: (id, isHidden) =>
+    request(`/api/products/${id}/visibility`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_hidden: isHidden }),
+    }),
   uploadImage: (file) => {
     const fd = new FormData()
     fd.append('file', file)

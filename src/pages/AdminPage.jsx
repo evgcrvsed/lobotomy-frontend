@@ -47,6 +47,7 @@ const EMPTY_FORM = {
   density: '',
   price: '',
   sortOrder: '',
+  isHidden: false,
   imageMain: null,
   imageHover: null,
   imageSizechart: null,
@@ -389,6 +390,7 @@ export default function AdminPage() {
       density: product.density ?? '',
       price: product.price,
       sortOrder: String(product.sort_order ?? ''),
+      isHidden: product.is_hidden,
       imageMain: product.images.find((i) => i.role === 'main')?.filename ?? null,
       imageHover: product.images.find((i) => i.role === 'hover')?.filename ?? null,
       imageSizechart: product.images.find((i) => i.role === 'sizechart')?.filename ?? null,
@@ -567,6 +569,7 @@ export default function AdminPage() {
       price: parseInt(form.price, 10),
       // пусто — бэкенд поставит товар в конец каталога
       sort_order: form.sortOrder.trim() === '' ? null : parseInt(form.sortOrder, 10),
+      is_hidden: form.isHidden,
       images,
       size_columns: columns.map((c) => c.name),
       sizes,
@@ -589,12 +592,25 @@ export default function AdminPage() {
     }
   }
 
+  async function toggleHidden(product) {
+    const res = await api.setProductHidden(product.id, !product.is_hidden)
+    if (!res.ok) {
+      alert('Не удалось поменять статус: ' + (await errorTextFrom(res)))
+      return
+    }
+    const updated = await res.json()
+    // подменяем один товар вместо перезагрузки списка: иначе после клика
+    // страница дёргается, а порядок и фильтр остаются те же самые
+    setProducts((list) => list.map((p) => (p.id === updated.id ? { ...p, is_hidden: updated.is_hidden } : p)))
+  }
+
   async function deleteProduct(productId, name) {
     if (!confirm(`Удалить «${name}»?`)) return
 
     const res = await api.deleteProduct(productId)
     if (!res.ok) {
-      alert('Не удалось удалить изделие')
+      // текст важен: товар из заказов удалить нельзя, и бэкенд объясняет, почему
+      alert('Не удалось удалить изделие: ' + (await errorTextFrom(res)))
       return
     }
     await refreshProducts()
@@ -664,7 +680,7 @@ export default function AdminPage() {
                 .join(' · ')
 
               return (
-                <div className="admin-row" key={product.id}>
+                <div className={`admin-row${product.is_hidden ? ' admin-row--hidden' : ''}`} key={product.id}>
                   <span className="admin-row__order" title="Порядок в каталоге">
                     {product.sort_order}
                   </span>
@@ -677,11 +693,25 @@ export default function AdminPage() {
                   </div>
                   <div className="admin-row__body">
                     <span className="admin-row__name">{product.name}</span>
-                    <span className="admin-row__collection">{getCollectionName(product.collection_id)}</span>
+                    <span className="admin-row__collection">
+                      {getCollectionName(product.collection_id)}
+                      {product.is_hidden && <span className="admin-row__badge">скрыт</span>}
+                    </span>
                   </div>
                   <div className="admin-row__meta">{meta}</div>
                   <div className="admin-row__price">{formatPrice(product.price)}</div>
                   <div className="admin-row__actions">
+                    <button
+                      className="btn btn--outline"
+                      title={
+                        product.is_hidden
+                          ? 'Вернуть в каталог на главной'
+                          : 'Убрать из каталога: карточка останется доступна по прямой ссылке'
+                      }
+                      onClick={() => toggleHidden(product)}
+                    >
+                      {product.is_hidden ? 'Показать' : 'Скрыть'}
+                    </button>
                     <button className="btn btn--outline" onClick={() => openEditModal(product.id)}>
                       Ред.
                     </button>
@@ -869,6 +899,22 @@ export default function AdminPage() {
                 Меньше — выше в каталоге. Просто давай тут каждому товару его номер по какому порядку он покажется и всё
               </span>
             </div>
+          </div>
+
+          <div className="modal__field">
+            <label className="modal__check">
+              <input
+                type="checkbox"
+                checked={form.isHidden}
+                onChange={(e) => setForm({ ...form, isHidden: e.target.checked })}
+              />
+              <span>Скрыть из каталога</span>
+            </label>
+            <span className="modal__hint">
+              Товар пропадёт из каталога на главной, но останется доступен по прямой ссылке —
+              его по-прежнему можно положить в корзину и купить. Так снимают с витрины то,
+              что уже покупали: удалить такой товар нельзя, на него ссылаются заказы.
+            </span>
           </div>
 
           <div className="modal__row modal__row--triple">

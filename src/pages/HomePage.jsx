@@ -35,8 +35,13 @@ export default function HomePage() {
     return colSlug && product.slug ? `/${colSlug}/${product.slug}` : '#'
   }
 
+  // Скрытые товары в каталог не попадают, но остаются доступны по прямой ссылке —
+  // страница товара грузится отдельно, по slug, и про этот фильтр не знает
+  const visibleProducts = products.filter((p) => !p.is_hidden)
   const filteredProducts =
-    activeFilter === 'all' ? products : products.filter((p) => p.collection_id === activeFilter)
+    activeFilter === 'all'
+      ? visibleProducts
+      : visibleProducts.filter((p) => p.collection_id === activeFilter)
 
   // «Все» — картинка, отмеченная в админке; иначе последняя добавленная.
   // У коллекции без своей картинки показываем общую, а не заглушку.
@@ -78,8 +83,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        {!loading && products.length === 0 && <p className="catalog__empty">Ой, забыл товары добавить...</p>}
-        {!loading && products.length > 0 && filteredProducts.length === 0 && (
+        {!loading && visibleProducts.length === 0 && (
+          <p className="catalog__empty">Ой, забыл товары добавить...</p>
+        )}
+        {!loading && visibleProducts.length > 0 && filteredProducts.length === 0 && (
           <p className="catalog__empty">В этой коллекции пока пусто</p>
         )}
 

@@ -612,3 +612,38 @@
 
     .promo-row__meta { grid-column: 1 / -1; }
 }
+
+/* Товар, снятый с витрины: в списке остаётся, но видно, что он не в каталоге.
+   Приглушаем только картинку и название — кнопки должны читаться как обычно. */
+.admin-row--hidden .admin-row__img,
+.admin-row--hidden .admin-row__name {
+    opacity: 0.4;
+}
+
+.admin-row__badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 6px;
+    border: 1px solid var(--color-border-hover);
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+}
+
+/* Чекбокс с подписью в форме */
+.modal__check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--color-black);
+    cursor: pointer;
+}
+
+.modal__check input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-black);
+    cursor: pointer;
+}
