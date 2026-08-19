@@ -353,6 +353,13 @@ export default function AdminPage() {
     return collections.find((c) => c.id === id)?.name ?? '—'
   }
 
+  /** Адрес карточки товара. null — пока нет slug у товара или у его коллекции:
+   *  тогда ссылка вела бы в никуда, и название остаётся обычным текстом. */
+  function productHref(product) {
+    const colSlug = collections.find((c) => c.id === product.collection_id)?.slug
+    return colSlug && product.slug ? `/${colSlug}/${product.slug}` : null
+  }
+
   // порядок задаёт бэкенд, но сортируем и здесь — чтобы список перестроился
   // сразу после сохранения, а не только после перезагрузки
   const filteredProducts = (
@@ -692,7 +699,21 @@ export default function AdminPage() {
                     )}
                   </div>
                   <div className="admin-row__body">
-                    <span className="admin-row__name">{product.name}</span>
+                    {productHref(product) ? (
+                      // в новой вкладке: из админки уходят посмотреть карточку
+                      // и возвращаются обратно к списку
+                      <Link
+                        className="admin-row__name admin-row__name--link"
+                        to={productHref(product)}
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Открыть карточку товара в новой вкладке"
+                      >
+                        {product.name}
+                      </Link>
+                    ) : (
+                      <span className="admin-row__name">{product.name}</span>
+                    )}
                     <span className="admin-row__collection">
                       {getCollectionName(product.collection_id)}
                       {product.is_hidden && <span className="admin-row__badge">скрыт</span>}
