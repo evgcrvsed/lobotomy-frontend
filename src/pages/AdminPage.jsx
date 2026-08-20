@@ -1191,8 +1191,7 @@ export default function AdminPage() {
         <div className="modal__form">
           <p className="admin-media__hint">
             Скидка в процентах от суммы заказа. Пустое количество активаций — промокод
-            без ограничения, пустой срок — бессрочный. Применение промокода на оформлении
-            заказа пока не сделано: здесь они только заводятся.
+            без ограничения, пустой срок — бессрочный.
           </p>
 
           <form className="promo-form" onSubmit={createPromo} noValidate>
@@ -1205,7 +1204,7 @@ export default function AdminPage() {
                   className="modal__input"
                   id="promo-code"
                   type="text"
-                  placeholder="SUMMER10"
+                  placeholder="PROMO123"
                   maxLength={MAX_PROMO_CODE}
                   required
                   value={promoForm.code}
