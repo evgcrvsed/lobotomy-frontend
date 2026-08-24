@@ -169,7 +169,7 @@ export default function AdminOrdersPage() {
             disabled={starting || exportRunning}
             onClick={exportToSheets}
           >
-            {starting || exportRunning ? 'Синхронизируем....' : 'В Google-таблицу'}
+            {starting || exportRunning ? 'Синхронизируем....' : 'Эксп. в Google-таблицу'}
           </button>
           <Link to="/admin" className="btn btn--outline">
             К каталогу
