@@ -45,6 +45,8 @@ const EMPTY_FORM = {
   description: '',
   material: '',
   density: '',
+  color: '',
+  weight: '',
   price: '',
   sortOrder: '',
   isHidden: false,
@@ -152,7 +154,8 @@ export default function AdminPage() {
 
   async function refreshProducts() {
     setLoading(true)
-    const list = await api.getProducts()
+    // админский список: в нём есть цвет и вес, которых нет в публичном
+    const list = await api.getAdminProducts()
     setProducts(list)
     setLoading(false)
   }
@@ -395,6 +398,8 @@ export default function AdminPage() {
       description: product.description ?? '',
       material: product.material ?? '',
       density: product.density ?? '',
+      color: product.color ?? '',
+      weight: product.weight ?? '',
       price: product.price,
       sortOrder: String(product.sort_order ?? ''),
       isHidden: product.is_hidden,
@@ -573,6 +578,9 @@ export default function AdminPage() {
       description: form.description.trim() || null,
       material: form.material.trim() || null,
       density: form.density ? parseInt(form.density, 10) : null,
+      // свободный текст: в вес пишут и «1.2», и «~500 г» — бэкенд не разбирает
+      color: form.color.trim() || null,
+      weight: form.weight.trim() || null,
       price: parseInt(form.price, 10),
       // пусто — бэкенд поставит товар в конец каталога
       sort_order: form.sortOrder.trim() === '' ? null : parseInt(form.sortOrder, 10),
@@ -886,6 +894,41 @@ export default function AdminPage() {
               />
             </div>
           </div>
+
+          {/* Служебные поля: на витрине их нет, они уходят в Google-таблицу,
+              по которой заказывают отшив. Цвет заодно различает товары
+              с одинаковым названием — две футболки разного цвета. */}
+          <div className="modal__row">
+            <div className="modal__field">
+              <label className="modal__label" htmlFor="field-color">
+                Цвет
+              </label>
+              <input
+                className="modal__input"
+                type="text"
+                id="field-color"
+                placeholder="чёрный"
+                value={form.color}
+                onChange={(e) => setForm({ ...form, color: e.target.value })}
+              />
+            </div>
+            <div className="modal__field">
+              <label className="modal__label" htmlFor="field-weight">
+                Вес
+              </label>
+              <input
+                className="modal__input"
+                type="text"
+                id="field-weight"
+                placeholder="1.2 кг"
+                value={form.weight}
+                onChange={(e) => setForm({ ...form, weight: e.target.value })}
+              />
+            </div>
+          </div>
+          <p className="modal__hint">
+            Цвет и вес покупатель не видит — они нужны только для выгрузки в Google-таблицу.
+          </p>
 
           <div className="modal__row">
             <div className="modal__field">
