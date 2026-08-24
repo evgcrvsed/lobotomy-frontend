@@ -20,6 +20,11 @@ const FILTERS = [
 // Пауза перед запросом: иначе поиск уходит на сервер на каждую букву
 const SEARCH_DELAY = 300
 
+// Как часто спрашиваем, чем кончилась выгрузка. Её делает отдельный контейнер,
+// и ответить он может только через базу — иначе кнопка не узнала бы результат
+const EXPORT_POLL_DELAY = 2000
+const EXPORT_OPEN_STATUSES = ['pending', 'running']
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([])
   const [methods, setMethods] = useState([])
@@ -32,6 +37,8 @@ export default function AdminOrdersPage() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState(null) // null — поиск не идёт, показываем список
   const [searching, setSearching] = useState(false)
+  const [exportJob, setExportJob] = useState(null) // последняя выгрузка в Google-таблицу
+  const [starting, setStarting] = useState(false) // ждём ответа на нажатие кнопки
 
   useEffect(() => {
     Promise.all([api.getAllOrders(), api.getDeliveryMethods()]).then(([list, dm]) => {
@@ -40,6 +47,28 @@ export default function AdminOrdersPage() {
       setLoading(false)
     })
   }, [])
+
+  // Состояние выгрузки живёт в базе, а не в этой вкладке: её могли запустить
+  // с другого устройства, и кнопка должна показывать это же
+  useEffect(() => {
+    api.getSheetsExport().then(setExportJob)
+  }, [])
+
+  const exportRunning = EXPORT_OPEN_STATUSES.includes(exportJob?.status)
+
+  useEffect(() => {
+    if (!exportRunning) return
+    let stale = false
+    const timer = setTimeout(() => {
+      api.getSheetsExport().then((job) => {
+        if (!stale) setExportJob(job)
+      })
+    }, EXPORT_POLL_DELAY)
+    return () => {
+      stale = true
+      clearTimeout(timer)
+    }
+  }, [exportRunning, exportJob])
 
   useEffect(() => {
     const text = query.trim()
@@ -106,6 +135,21 @@ export default function AdminOrdersPage() {
     }
   }
 
+  /** Поставить синхронизацию с таблицей в очередь. Дальше её подхватит sheets-worker. */
+  async function exportToSheets() {
+    setStarting(true)
+    try {
+      const res = await api.startSheetsExport()
+      if (!res.ok) {
+        alert('Не удалось запустить выгрузку: ' + (await errorTextFrom(res)))
+        return
+      }
+      setExportJob(await res.json())
+    } finally {
+      setStarting(false)
+    }
+  }
+
   // при поиске показываем найденное (там бывают и вручённые, и отменённые),
   // иначе — заказы в работе; фильтр по статусу применяется к тому, что на экране
   const shown = results ?? orders
@@ -115,10 +159,35 @@ export default function AdminOrdersPage() {
     <div className="admin-page">
       <div className="admin-page__top">
         <h1 className="admin-page__title">Заказы</h1>
-        <Link to="/admin" className="btn btn--outline">
-          К каталогу
-        </Link>
+        <div className="admin-page__actions">
+          {/* Кнопка не ждёт саму выгрузку: она кладёт задачу в очередь, а ходит
+              в Google отдельный контейнер — итог подтягивается опросом.
+              Жать можно сколько угодно: заказ, который уже в таблице, не задвоится */}
+          <button
+            className="btn btn--outline"
+            type="button"
+            disabled={starting || exportRunning}
+            onClick={exportToSheets}
+          >
+            {starting || exportRunning ? 'Синхронизируем....' : 'В Google-таблицу'}
+          </button>
+          <Link to="/admin" className="btn btn--outline">
+            К каталогу
+          </Link>
+        </div>
       </div>
+
+      {exportRunning && (
+        <p className="admin-export">
+          Синхронизируюсь..........
+          Отметки о пошиве в таблице не трогаются.
+        </p>
+      )}
+      {exportJob && !exportRunning && (
+        <p className={`admin-export${exportJob.status === 'error' ? ' admin-export--error' : ''}`}>
+          Таблица {formatDateTime(exportJob.finished_at ?? exportJob.created_at)} — {exportJob.message}
+        </p>
+      )}
 
       <div className="admin-orders__search">
         <input

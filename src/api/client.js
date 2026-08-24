@@ -178,4 +178,9 @@ export const api = {
   // не дожидаясь фонового опроса
   syncOrderCdek: (number) =>
     request(`/api/orders/${encodeURIComponent(number)}/cdek-sync`, { method: 'POST' }),
+  // Выгрузка проданных позиций в Google-таблицу. Кнопка только ставит задачу в
+  // очередь — в Google ходит отдельный контейнер, поэтому итог узнаём опросом.
+  startSheetsExport: () => request('/api/export/sheets', { method: 'POST' }),
+  // null — выгрузку ещё ни разу не запускали
+  getSheetsExport: () => request('/api/export/sheets').then((r) => (r.ok ? r.json() : null)),
 }

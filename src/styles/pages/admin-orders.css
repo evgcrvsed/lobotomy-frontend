@@ -365,6 +365,17 @@
     color: var(--color-muted);
 }
 
+/* Итог выгрузки в Google-таблицу: ставится под шапкой страницы */
+.admin-export {
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+.admin-export--error {
+    color: var(--color-danger);
+}
+
 /* ---- УДАЛЕНИЕ ЗАКАЗА ---- */
 /* Отделено от остальной карточки: действие необратимое */
 .admin-order__danger {
