@@ -19,9 +19,6 @@ async function request(path, options = {}) {
 export const api = {
   getCollections: () => request('/api/collections/').then((r) => (r.ok ? r.json() : [])),
   getProducts: () => request('/api/products/').then((r) => (r.ok ? r.json() : [])),
-  // То же самое плюс цвет и вес: публичный список их не отдаёт, они нужны
-  // только админке и выгрузке на отшив
-  getAdminProducts: () => request('/api/products/admin').then((r) => (r.ok ? r.json() : [])),
   getProduct: (id) => request(`/api/products/${id}`).then((r) => (r.ok ? r.json() : null)),
   getProductBySlug: (slug) =>
     request(`/api/products/slug/${encodeURIComponent(slug)}`).then((r) => (r.ok ? r.json() : null)),

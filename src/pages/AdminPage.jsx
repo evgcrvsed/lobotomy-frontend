@@ -154,8 +154,7 @@ export default function AdminPage() {
 
   async function refreshProducts() {
     setLoading(true)
-    // админский список: в нём есть цвет и вес, которых нет в публичном
-    const list = await api.getAdminProducts()
+    const list = await api.getProducts()
     setProducts(list)
     setLoading(false)
   }
