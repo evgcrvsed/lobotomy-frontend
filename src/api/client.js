@@ -163,6 +163,9 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ note }),
     }),
+  // убрать одну вещь из заказа; заказ остаётся, суммы пересчитываются на бэкенде
+  deleteOrderItem: (number, itemId) =>
+    request(`/api/orders/${encodeURIComponent(number)}/items/${itemId}`, { method: 'DELETE' }),
   // безвозвратно: вместе с заказом уходят позиции и журнал оплаты
   deleteOrder: (number) =>
     request(`/api/orders/${encodeURIComponent(number)}`, { method: 'DELETE' }),

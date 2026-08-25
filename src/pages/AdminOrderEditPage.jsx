@@ -19,6 +19,7 @@ export default function AdminOrderEditPage() {
   const [form, setForm] = useState(null)
   const [sizes, setSizes] = useState({}) // id позиции -> размер
   const [newItems, setNewItems] = useState([]) // дозаказ: позиции, которых ещё нет в заказе
+  const [removingItemId, setRemovingItemId] = useState(null) // какую вещь сейчас убираем из заказа
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -162,6 +163,34 @@ export default function AdminOrderEditPage() {
     }
   }
 
+  /** Убрать одну вещь из заказа. Уходит сразу, не дожидаясь «Сохранить»:
+   *  это не правка формы, а отдельное действие над заказом. */
+  async function removeItem(item) {
+    const paidWarning = ['paid', 'shipped', 'ready', 'delivered'].includes(order.status)
+      ? '\n\nЗаказ уже оплачен — сумма пересчитается, возврат за эту вещь придётся сделать самому.'
+      : ''
+    const label = [item.name, item.size].filter(Boolean).join(', ')
+    if (!confirm(`Убрать «${label}» из заказа ${order.number}?${paidWarning}`)) return
+
+    setRemovingItemId(item.id)
+    try {
+      const res = await api.deleteOrderItem(order.number, item.id)
+      if (!res.ok) {
+        alert('Не удалось убрать: ' + (await errorTextFrom(res)))
+        return
+      }
+      setOrder(await res.json())
+      // несохранённые размеры остальных позиций не теряем — убираем только эту
+      setSizes((current) => {
+        const next = { ...current }
+        delete next[item.id]
+        return next
+      })
+    } finally {
+      setRemovingItemId(null)
+    }
+  }
+
   async function removeOrder() {
     // об оплаченном заказе предупреждаем отдельно: вместе с ним уходит журнал,
     // и подтвердить платёж, если покупатель придёт с претензией, будет нечем
@@ -279,6 +308,20 @@ export default function AdminOrderEditPage() {
                 </div>
                 <div className="checkout-item__right">
                   <span className="checkout-item__price">{formatPrice(item.price * item.qty)}</span>
+                  {/* убрать вещь из заказа — не путать с удалением заказа целиком ниже.
+                      Последнюю позицию бэкенд убрать не даст: заказ без вещей не заказ */}
+                  {order.items.length > 1 && (
+                    <button
+                      className="checkout-item__remove"
+                      type="button"
+                      aria-label="Убрать из заказа"
+                      title="Убрать из заказа"
+                      disabled={removingItemId === item.id}
+                      onClick={() => removeItem(item)}
+                    >
+                      {removingItemId === item.id ? '…' : '✕'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
