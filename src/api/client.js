@@ -184,6 +184,7 @@ export const api = {
   // Выгрузка проданных позиций в Google-таблицу. Кнопка только ставит задачу в
   // очередь — в Google ходит отдельный контейнер, поэтому итог узнаём опросом.
   startSheetsExport: () => request('/api/export/sheets', { method: 'POST' }),
-  // null — выгрузку ещё ни разу не запускали
-  getSheetsExport: () => request('/api/export/sheets').then((r) => (r.ok ? r.json() : null)),
+  // { sheet_url, job }: job — null, если выгрузку ещё ни разу не запускали
+  getSheetsExport: () =>
+    request('/api/export/sheets').then((r) => (r.ok ? r.json() : { sheet_url: null, job: null })),
 }

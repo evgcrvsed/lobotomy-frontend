@@ -38,6 +38,7 @@ export default function AdminOrdersPage() {
   const [results, setResults] = useState(null) // null — поиск не идёт, показываем список
   const [searching, setSearching] = useState(false)
   const [exportJob, setExportJob] = useState(null) // последняя выгрузка в Google-таблицу
+  const [sheetUrl, setSheetUrl] = useState(null) // адрес таблицы; null — выгрузка не настроена
   const [starting, setStarting] = useState(false) // ждём ответа на нажатие кнопки
 
   useEffect(() => {
@@ -51,7 +52,10 @@ export default function AdminOrdersPage() {
   // Состояние выгрузки живёт в базе, а не в этой вкладке: её могли запустить
   // с другого устройства, и кнопка должна показывать это же
   useEffect(() => {
-    api.getSheetsExport().then(setExportJob)
+    api.getSheetsExport().then((status) => {
+      setSheetUrl(status.sheet_url)
+      setExportJob(status.job)
+    })
   }, [])
 
   const exportRunning = EXPORT_OPEN_STATUSES.includes(exportJob?.status)
@@ -60,8 +64,8 @@ export default function AdminOrdersPage() {
     if (!exportRunning) return
     let stale = false
     const timer = setTimeout(() => {
-      api.getSheetsExport().then((job) => {
-        if (!stale) setExportJob(job)
+      api.getSheetsExport().then((status) => {
+        if (!stale) setExportJob(status.job)
       })
     }, EXPORT_POLL_DELAY)
     return () => {
@@ -160,6 +164,12 @@ export default function AdminOrdersPage() {
       <div className="admin-page__top">
         <h1 className="admin-page__title">Заказы</h1>
         <div className="admin-page__actions">
+          {/* адрес приходит с бэкенда — id таблицы лежит в .env и меняется вместе с ней */}
+          {sheetUrl && (
+            <a className="btn btn--outline" href={sheetUrl} target="_blank" rel="noopener noreferrer">
+              Открыть таблицу
+            </a>
+          )}
           {/* Кнопка не ждёт саму выгрузку: она кладёт задачу в очередь, а ходит
               в Google отдельный контейнер — итог подтягивается опросом.
               Жать можно сколько угодно: заказ, который уже в таблице, не задвоится */}
