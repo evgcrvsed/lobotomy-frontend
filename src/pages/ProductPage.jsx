@@ -147,7 +147,7 @@ export default function ProductPage() {
               <div className="product-col product-col--right">
                 <div className="product-cart-row">
                   <button className="product-cart-btn" type="button" onClick={handleAddToCart}>
-                    {added ? 'Добавлено ✓' : 'Добавить в корзину'}
+                    {added ? 'Добавлено' : 'Добавить в корзину'}
                   </button>
                   <Link
                     to="/checkout"
