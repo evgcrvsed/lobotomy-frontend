@@ -64,6 +64,7 @@ export default function OrderPage() {
   const fields = [
     { label: 'ФИО', value: order.full_name },
     { label: 'Почта', value: order.email },
+    { label: 'Телефон', value: order.number },
     { label: 'Страна', value: order.country },
     { label: 'Город', value: order.city },
     { label: texts.index, value: order.postal_code },

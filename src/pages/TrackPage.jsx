@@ -80,7 +80,7 @@ export default function TrackPage() {
       {order && <OrderView order={order} deliveryLabels={deliveryLabels(methods)} />}
 
       <p className="track-page__login-hint">
-        Авторизуйтесь и заказ появится в профиле! <Link to="/profile">Заказы в профиле</Link>
+        Авторизуйтесь и заказ появится в профиле!<Link to="/profile">Заказы в профиле</Link>
       </p>
     </div>
   )
