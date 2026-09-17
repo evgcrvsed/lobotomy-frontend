@@ -175,6 +175,14 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tracking_number: trackingNumber }),
     }),
+  // письмо покупателю с трек-номером — по кнопке в админке.
+  // Трек уходит в теле: шлём то, что сейчас в поле, сохранять его отдельно не нужно
+  sendTrackingEmail: (number, trackingNumber) =>
+    request(`/api/orders/${encodeURIComponent(number)}/tracking-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tracking_number: trackingNumber }),
+    }),
   // журнал оплаты заказа: попытки и уведомления банка — для ручной сверки
   getOrderPayments: (number) =>
     request(`/api/orders/${encodeURIComponent(number)}/payments`).then((r) => (r.ok ? r.json() : null)),

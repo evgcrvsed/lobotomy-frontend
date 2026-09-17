@@ -118,9 +118,11 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    /* кнопок три — на узком экране им лучше перенестись, чем выдавить поле */
+    flex-wrap: wrap;
 }
 
-.admin-order__tracking-row .modal__input { flex: 1; min-width: 0; }
+.admin-order__tracking-row .modal__input { flex: 1 1 220px; min-width: 0; }
 .admin-order__tracking-row .btn { flex-shrink: 0; white-space: nowrap; }
 
 .admin-order__cdek { margin-top: 8px; }

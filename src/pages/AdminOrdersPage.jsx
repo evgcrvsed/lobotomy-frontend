@@ -33,6 +33,8 @@ export default function AdminOrdersPage() {
   const [drafts, setDrafts] = useState({}) // номер заказа -> введённый трек
   const [savingNumber, setSavingNumber] = useState(null)
   const [savedNumber, setSavedNumber] = useState(null)
+  const [sendingNumber, setSendingNumber] = useState(null) // кому сейчас шлём трек письмом
+  const [sentNumber, setSentNumber] = useState(null)
   const [syncingNumber, setSyncingNumber] = useState(null)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState(null) // null — поиск не идёт, показываем список
@@ -120,6 +122,24 @@ export default function AdminOrdersPage() {
       setTimeout(() => setSavedNumber(null), 1800)
     } finally {
       setSavingNumber(null)
+    }
+  }
+
+  /** Письмо покупателю с трек-номером. Берёт то, что сейчас в поле: заказ
+   *  при этом не меняется, за сохранение отвечает соседняя кнопка. */
+  async function sendTrackingEmail(order) {
+    const value = (drafts[order.number] ?? order.tracking_number ?? '').trim()
+    setSendingNumber(order.number)
+    try {
+      const res = await api.sendTrackingEmail(order.number, value)
+      if (!res.ok) {
+        alert('Не удалось отправить: ' + (await errorTextFrom(res)))
+        return
+      }
+      setSentNumber(order.number)
+      setTimeout(() => setSentNumber(null), 1800)
+    } finally {
+      setSendingNumber(null)
     }
   }
 
@@ -327,6 +347,20 @@ export default function AdminOrdersPage() {
                       : savedNumber === order.number
                         ? 'Сохранено ✓'
                         : 'Сохранить'}
+                  </button>
+                  {/* письмо уходит покупателю сразу, без подтверждения —
+                      отправляется ровно то, что сейчас в поле слева */}
+                  <button
+                    className="btn btn--outline"
+                    type="button"
+                    disabled={sendingNumber === order.number}
+                    onClick={() => sendTrackingEmail(order)}
+                  >
+                    {sendingNumber === order.number
+                      ? 'Отправляем...'
+                      : sentNumber === order.number
+                        ? 'Отправлено ✓'
+                        : 'Отпр. на почту'}
                   </button>
                   {/* статус подтягивается сам раз в 20 минут, кнопка — чтобы не ждать */}
                   {order.delivery_method === 'cdek' && order.tracking_number && (
