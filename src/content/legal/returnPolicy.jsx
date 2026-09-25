@@ -1,3 +1,19 @@
+function CatsRow({ count = 3 }) {
+    return (
+        <div style={{ display: "flex", gap: "0px" }}>
+            {Array.from({ length: count }).map((_, i) => (
+                <img
+                    key={i}
+                    src="/favicon.png"
+                    alt="? ? ?"
+                    loading="lazy"
+                />
+            ))}
+        </div>
+    );
+}
+
+
 export default function ReturnPolicyContent() {
     return (
         <section className="return-policy">
@@ -21,6 +37,9 @@ export default function ReturnPolicyContent() {
                     loading="lazy"
                 />
             </figure>
+            <CatsRow count={1} />
+
+
         </section>
     )
 }
