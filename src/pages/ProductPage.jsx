@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { addToCart, getCart } from '../cart'
+import DolyameBadge from '../components/DolyameBadge'
 import FitText from '../components/FitText'
 import HeroImage from '../components/HeroImage'
 import ProductGalleryMobile from '../components/ProductGalleryMobile'
@@ -183,6 +184,8 @@ export default function ProductPage() {
                     Добавить в избранное
                   </button>
                 </div>
+
+                {/*<DolyameBadge sum={product.price * qty} />*/}
               </div>
             </div>
 

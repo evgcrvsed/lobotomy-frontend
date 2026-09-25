@@ -1,0 +1,116 @@
+/* ============================================================
+   ДОЛЯМИ — плашка на карточке товара
+   Только витрина: сама оплата частями живёт на форме Т-Банка,
+   здесь мы лишь показываем, что такая возможность есть.
+   ============================================================ */
+
+/* Фирменные цвета Долями — больше нигде не используются,
+   поэтому держим их здесь, а не в общей палитре */
+.dolyame,
+.dolyame-modal {
+    --dolyame-violet: #5b32e0;
+    --dolyame-bg:     #f2eefe;
+    --dolyame-line:   #ded4fb;
+}
+
+.dolyame {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 14px;
+    padding: 8px 12px;
+    background-color: var(--dolyame-bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    cursor: pointer;
+    /* transform — ради .fx-tilt: transition не складывается из двух классов,
+       поэтому оба свойства перечисляем здесь */
+    transition: background-color 0.15s ease, transform 0.12s ease-out;
+}
+
+.dolyame:hover { background-color: #e9e2fd; }
+
+/* Логотип-таблетка: 4 столбика = 4 платежа */
+.dolyame__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    padding: 6px 12px;
+    background-color: var(--dolyame-violet);
+    border-radius: var(--radius-pill);
+    color: var(--color-white);
+    font-size: 13px;
+    line-height: 1;
+}
+
+/* Разделитель слева — как на макете, отделяет логотип от суммы */
+.dolyame__sum {
+    flex: 1;
+    padding-left: 12px;
+    border-left: 1px solid var(--dolyame-line);
+    color: var(--color-black);
+    font-size: 14px;
+    text-align: left;
+}
+
+.dolyame__info {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--dolyame-violet);
+    opacity: 0.5;
+    transition: opacity 0.15s ease;
+}
+
+.dolyame:hover .dolyame__info { opacity: 0.85; }
+
+/* ---- ОКНО «КАК ОПЛАТИТЬ» ---- */
+
+.dolyame-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px 24px 24px;
+}
+
+.dolyame-modal__sum {
+    margin: 0;
+    padding: 10px 14px;
+    background-color: var(--dolyame-bg);
+    border-radius: var(--radius-sm);
+    color: var(--dolyame-violet);
+    font-size: 15px;
+}
+
+.dolyame-modal__steps {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dolyame-modal__note {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .dolyame {
+        gap: 10px;
+        padding: 8px 10px;
+    }
+
+    .dolyame__logo { padding: 6px 10px; }
+
+    .dolyame__sum {
+        padding-left: 10px;
+        font-size: 13px;
+    }
+}
