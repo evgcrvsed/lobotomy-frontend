@@ -24,7 +24,7 @@ export default function Footer() {
         <div className="footer__inner">
           <div className="footer__social">
             <a
-              href="https://t.me/lobo1omy"
+              href="https://t.me/lobotm"
               className="footer__social-link"
               target="_blank"
               rel="noopener noreferrer"
