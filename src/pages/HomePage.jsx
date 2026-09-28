@@ -13,6 +13,9 @@ function findImage(product, role) {
   return img ? imageUrl(img.filename) : null
 }
 
+/** Дольше этого фото каталога не ждут верхнюю картинку */
+const HERO_WAIT_MAX_MS = 8000
+
 export default function HomePage() {
   const [products, setProducts] = useState([])
   const [collections, setCollections] = useState([])
@@ -34,14 +37,24 @@ export default function HomePage() {
     // finally, а не then: если бэкенд недоступен, промис отклоняется, и без
     // этого флаг загрузки остался бы true навсегда — верхняя картинка не появилась
     // бы вообще (осталась бы чёрная секция вместо заглушки)
+    // catch — ошибку уже показали пустым каталогом и заглушкой, а без него
+    // каждый сбой сети падал бы в консоль как «Uncaught (in promise)»
     api
       .getCollections()
       .then(setCollections)
+      .catch(() => {})
       .finally(() => setCollectionsLoading(false))
     api
       .getProducts()
       .then(setProducts)
+      .catch(() => {})
       .finally(() => setLoading(false))
+
+    // Страховка: если верхняя картинка зависла (на плохой связи браузер может
+    // ждать ответа минутами и не сообщать ни об успехе, ни об ошибке), фото
+    // каталога всё равно начинают грузиться — не держим их вечно
+    const fallback = setTimeout(() => setHeroReady(true), HERO_WAIT_MAX_MS)
+    return () => clearTimeout(fallback)
   }, [])
 
   function productHref(product) {
