@@ -23,6 +23,8 @@ export default function HeroImage({ src }) {
     // Грузим в памяти и показываем только готовую — так не будет
     // ни мелькания заглушки, ни рывка при появлении.
     const img = new Image()
+    // Первый экран — качаем раньше всего остального на странице
+    img.fetchPriority = 'high'
     let cancelled = false
     const done = () => {
       if (!cancelled) setReadySrc(src)
@@ -43,7 +45,7 @@ export default function HeroImage({ src }) {
 
   return (
     <section className="hero">
-      {readySrc && <img src={readySrc} alt="" className="hero__img" />}
+      {readySrc && <img src={readySrc} alt="" className="hero__img" fetchPriority="high" />}
     </section>
   )
 }

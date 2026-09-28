@@ -74,7 +74,7 @@ img {
     --focus-ring: 0 0 0 3px rgba(17, 17, 17, 0.08);
 
     /* ---- Типографика ---- */
-    --font-body: 'Montserrat', sans-serif;
+    --font-body: 'Montserrat Variable', sans-serif;
     /* Акцентный шрифт: заголовки товара, цены, таблица размеров.
        Поменяй здесь — изменится везде (напр. Georgia, 'Times New Roman', serif). */
     --font-display: var(--font-body);

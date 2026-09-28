@@ -16,20 +16,25 @@ function findImage(product, role) {
 export default function HomePage() {
   const [products, setProducts] = useState([])
   const [collections, setCollections] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Грузятся независимо: верхней картинке нужны только коллекции, и ждать
+  // список всех товаров ей незачем — на телефоне это лишние секунды чёрного экрана
+  const [loading, setLoading] = useState(true) // товары
+  const [collectionsLoading, setCollectionsLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
   // Та же граница, что и у мобильной версии страницы товара
   const isMobile = useMediaQuery('(max-width: 768px)')
 
   useEffect(() => {
-    Promise.all([api.getProducts(), api.getCollections()])
-      .then(([list, cols]) => {
-        setProducts(list)
-        setCollections(cols)
-      })
-      // finally, а не then: если бэкенд недоступен, промис отклоняется, и без
-      // этого loading остался бы true навсегда — верхняя картинка не появилась бы
-      // вообще (осталась бы чёрная секция вместо заглушки)
+    // finally, а не then: если бэкенд недоступен, промис отклоняется, и без
+    // этого флаг загрузки остался бы true навсегда — верхняя картинка не появилась
+    // бы вообще (осталась бы чёрная секция вместо заглушки)
+    api
+      .getCollections()
+      .then(setCollections)
+      .finally(() => setCollectionsLoading(false))
+    api
+      .getProducts()
+      .then(setProducts)
       .finally(() => setLoading(false))
   }, [])
 
@@ -60,7 +65,7 @@ export default function HomePage() {
   const heroImage = activeCollectionImage ?? defaultImage
   // null, пока коллекции не пришли: тогда ещё неизвестно, какая картинка нужна,
   // и заглушку показывать нельзя — она мелькнёт и сменится настоящей
-  const heroSrc = loading ? null : heroImage ? imageUrl(heroImage) : previewImg
+  const heroSrc = collectionsLoading ? null : heroImage ? imageUrl(heroImage) : previewImg
 
   return (
     <>
