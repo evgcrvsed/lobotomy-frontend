@@ -36,7 +36,8 @@ export default function DolyameBadge({ sum }) {
       >
         <img src="/dolyame-small-logo.svg" alt="" className="dolyame__logo" width="24" height="24" />
         <span className="dolyame__text">
-          {rolling} × {DOLYAME_PARTS} без переплат
+            {/*{rolling} × {DOLYAME_PARTS} без переплат*/}
+            Долями от 0 ₽
         </span>
         <img src="/chevron-right.png" alt="" className="dolyame__chevron" width="16" height="16" />
       </button>
