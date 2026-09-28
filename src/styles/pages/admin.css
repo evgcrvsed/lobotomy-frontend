@@ -274,6 +274,9 @@
     object-fit: cover;
 }
 
+/* Вертикальная версия для телефонов — и превью вертикальное */
+.col-row__img--mobile { width: 22px; }
+
 .col-row__img-plus {
     font-size: 16px;
     color: var(--color-muted);

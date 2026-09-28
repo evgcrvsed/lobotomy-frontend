@@ -272,7 +272,7 @@ export default function AdminPage() {
     const name = (colDrafts[col.id] ?? '').trim()
     if (!name) return
 
-    const res = await api.updateCollection(col.id, { name, image: col.image })
+    const res = await api.updateCollection(col.id, { name, image: col.image, image_mobile: col.image_mobile })
     if (!res.ok) {
       alert('Не удалось переименовать: ' + (await errorTextFrom(res)))
       return
@@ -280,8 +280,14 @@ export default function AdminPage() {
     await reloadCollections()
   }
 
-  async function setCollectionImage(col, image) {
-    const res = await api.updateCollection(col.id, { name: col.name, image })
+  /** field — 'image' (основная, широкая) или 'image_mobile' (вертикальная для телефонов) */
+  async function setCollectionImage(col, image, field = 'image') {
+    const res = await api.updateCollection(col.id, {
+      name: col.name,
+      image: col.image,
+      image_mobile: col.image_mobile,
+      [field]: image,
+    })
     if (!res.ok) {
       alert('Не удалось сохранить картинку: ' + (await errorTextFrom(res)))
       return
@@ -292,7 +298,12 @@ export default function AdminPage() {
 
   /** Чья картинка стоит сверху на главной. Выбранная всегда одна — бэкенд снимает флаг с остальных. */
   async function setHeroCollection(col) {
-    const res = await api.updateCollection(col.id, { name: col.name, image: col.image, is_hero: true })
+    const res = await api.updateCollection(col.id, {
+      name: col.name,
+      image: col.image,
+      image_mobile: col.image_mobile,
+      is_hero: true,
+    })
     if (!res.ok) {
       alert('Не удалось выбрать главную картинку: ' + (await errorTextFrom(res)))
       return
@@ -300,7 +311,7 @@ export default function AdminPage() {
     await reloadCollections()
   }
 
-  async function handleColImageSelect(e, col) {
+  async function handleColImageSelect(e, col, field = 'image') {
     const file = e.target.files[0]
     if (!file) return
 
@@ -312,7 +323,7 @@ export default function AdminPage() {
     }
     const { filename } = await res.json()
     e.target.value = ''
-    await setCollectionImage(col, filename)
+    await setCollectionImage(col, filename, field)
   }
 
   async function addCollection() {
@@ -1353,7 +1364,8 @@ export default function AdminPage() {
         <div className="modal__form">
           <p className="admin-media__hint">
             Картинка коллекции показывается сверху на страницах её товаров. Чтобы её установить - кликай по квадрату с плюсиком.
-            Кружком слева выбирается, чья картинка стоит в самом верху главной страницы.
+            Второй, вертикальный квадрат — версия для телефонов (примерно 9:19): без неё на телефоне показывается
+            основная картинка с обрезанными краями. Кружком слева выбирается, чья картинка стоит в самом верху главной страницы.
           </p>
           {collections.map((col) => (
             <div className="col-row" key={col.id}>
@@ -1394,6 +1406,29 @@ export default function AdminPage() {
                   className="col-row__img-clear"
                   onClick={() => setCollectionImage(col, null)}
                   aria-label="Убрать картинку"
+                >
+                  ×
+                </button>
+              )}
+              <label className="col-row__img col-row__img--mobile" title="Картинка для телефонов (вертикальная)">
+                {col.image_mobile ? (
+                  <img src={imageUrl(col.image_mobile)} alt="" />
+                ) : (
+                  <span className="col-row__img-plus">+</span>
+                )}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="col-row__img-input"
+                  onChange={(e) => handleColImageSelect(e, col, 'image_mobile')}
+                />
+              </label>
+              {col.image_mobile && (
+                <button
+                  type="button"
+                  className="col-row__img-clear"
+                  onClick={() => setCollectionImage(col, null, 'image_mobile')}
+                  aria-label="Убрать картинку для телефонов"
                 >
                   ×
                 </button>

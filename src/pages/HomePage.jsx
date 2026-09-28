@@ -4,6 +4,7 @@ import HeroImage from '../components/HeroImage'
 import ProductCard from '../components/ProductCard'
 import { formatPrice } from '../constants'
 import previewImg from '../assets/images/preview.webp'
+import useMediaQuery from '../useMediaQuery'
 import '../styles/components/product-card.css'
 import '../styles/pages/index.css'
 
@@ -17,6 +18,8 @@ export default function HomePage() {
   const [collections, setCollections] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
+  // Та же граница, что и у мобильной версии страницы товара
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
   useEffect(() => {
     Promise.all([api.getProducts(), api.getCollections()])
@@ -43,13 +46,17 @@ export default function HomePage() {
       ? visibleProducts
       : visibleProducts.filter((p) => p.collection_id === activeFilter)
 
+  // На телефоне — вертикальная версия, если её загрузили: широкая картинка
+  // на узком экране обрезается по краям. Нет вертикальной — берём основную.
+  const collectionImage = (col) => (col ? (isMobile && col.image_mobile) || col.image : null)
+
   // «Все» — картинка, отмеченная в админке; иначе последняя добавленная.
   // У коллекции без своей картинки показываем общую, а не заглушку.
   const activeCollectionImage =
-    activeFilter === 'all' ? null : collections.find((c) => c.id === activeFilter)?.image
-  const defaultImage =
-    collections.find((c) => c.is_hero && c.image)?.image ??
-    [...collections].reverse().find((c) => c.image)?.image
+    activeFilter === 'all' ? null : collectionImage(collections.find((c) => c.id === activeFilter))
+  const defaultImage = collectionImage(
+    collections.find((c) => c.is_hero && c.image) ?? [...collections].reverse().find((c) => c.image)
+  )
   const heroImage = activeCollectionImage ?? defaultImage
   // null, пока коллекции не пришли: тогда ещё неизвестно, какая картинка нужна,
   // и заглушку показывать нельзя — она мелькнёт и сменится настоящей
