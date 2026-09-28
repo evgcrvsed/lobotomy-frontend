@@ -20,6 +20,12 @@ export default function HomePage() {
   // список всех товаров ей незачем — на телефоне это лишние секунды чёрного экрана
   const [loading, setLoading] = useState(true) // товары
   const [collectionsLoading, setCollectionsLoading] = useState(true)
+  // Фото каталога не качаем, пока не скачалась верхняя картинка. Просьбы к браузеру
+  // тут не помогают: loading="lazy" на медленном интернете заранее грузит всё
+  // в пределах ~2500px от экрана (то есть весь первый ряд каталога), а приоритет
+  // запроса сервер (Caddy) при раздаче почти не учитывает — и два десятка фото
+  // делили канал с верхней, пока экран оставался чёрным.
+  const [heroReady, setHeroReady] = useState(false)
   const [activeFilter, setActiveFilter] = useState('all')
   // Та же граница, что и у мобильной версии страницы товара
   const isMobile = useMediaQuery('(max-width: 768px)')
@@ -69,7 +75,7 @@ export default function HomePage() {
 
   return (
     <>
-      <HeroImage src={heroSrc} />
+      <HeroImage src={heroSrc} onReady={() => setHeroReady(true)} />
 
       <section className="catalog" id="catalog">
         <div className="catalog__head">
@@ -108,7 +114,11 @@ export default function HomePage() {
               key={product.id}
               variant="v2"
               href={productHref(product)}
-              image={findImage(product, 'main') ?? (product.images[0] ? imageUrl(product.images[0].filename) : null)}
+              image={
+                heroReady
+                  ? (findImage(product, 'main') ?? (product.images[0] ? imageUrl(product.images[0].filename) : null))
+                  : null
+              }
               hoverImage={findImage(product, 'hover')}
               name={product.name}
               color={product.material ?? ''}

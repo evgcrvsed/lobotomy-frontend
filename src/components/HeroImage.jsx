@@ -10,8 +10,11 @@ import '../styles/components/hero.css'
  *
  * src === null означает «ещё не знаем, какую картинку показывать» (данные
  * не пришли с сервера) — это не то же самое, что «картинки нет».
+ *
+ * onReady — зовётся, когда картинка скачалась (или не смогла): по этому
+ * сигналу главная начинает качать фото каталога.
  */
-export default function HeroImage({ src }) {
+export default function HeroImage({ src, onReady }) {
   const [readySrc, setReadySrc] = useState(null)
 
   useEffect(() => {
@@ -27,7 +30,9 @@ export default function HeroImage({ src }) {
     img.fetchPriority = 'high'
     let cancelled = false
     const done = () => {
-      if (!cancelled) setReadySrc(src)
+      if (cancelled) return
+      setReadySrc(src)
+      onReady?.()
     }
 
     img.onload = done
@@ -41,6 +46,9 @@ export default function HeroImage({ src }) {
     return () => {
       cancelled = true
     }
+    // onReady намеренно не в зависимостях: новая функция при каждом рендере
+    // страницы не должна заново запускать загрузку той же картинки
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src])
 
   return (
