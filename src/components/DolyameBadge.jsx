@@ -1,12 +1,15 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DOLYAME_PARTS, dolyamePart, formatPrice } from '../constants'
-import { useCountUp, useInView, useTilt } from '../effects'
-import Modal from './Modal'
+import { useCountUp, useInView } from '../effects'
+import DolyameModal from './DolyameModal'
 import '../styles/components/effects.css'
-import '../styles/components/modal.css'
 import '../styles/components/dolyame.css'
 
-/** Плашка «Долями» на карточке товара.
+/** Пауза между «шторка доехала» и открытием окна — чтобы закрытое
+ *  состояние успели увидеть, а не окно перекрыло анимацию на излёте */
+const COVERED_PAUSE_MS = 120
+
+/** Плашка «Долями» на карточке товара — по образцу официальной от Т-Банка.
  *
  *  Только витрина. Своей кнопки оплаты частями у нас нет: Долями подключены
  *  через платёжную форму Т-Банка, и способ покупатель выбирает уже там.
@@ -16,68 +19,63 @@ import '../styles/components/dolyame.css'
  *  когда покупатель меняет счётчик рядом.
  */
 export default function DolyameBadge({ sum }) {
+  // covered — белая часть целиком закрыла «Проект Т-Банк»; держим так,
+  // пока открыто окно, и отпускаем после закрытия
+  const [covered, setCovered] = useState(false)
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
+  const mainRef = useRef(null)
   const seen = useInView(ref) // блик пробегает, когда плашку впервые увидели
-  useTilt(ref)
+  const timer = useRef(0)
+
+  useEffect(() => () => clearTimeout(timer.current), [])
 
   const part = dolyamePart(sum)
-  // докрутку показываем глазами, а в подпись и окно отдаём конечную сумму:
-  // промежуточные цифры скринридеру не нужны, а в окне они успели бы устареть
+  // докрутку показываем глазами, а в подпись отдаём конечную сумму:
+  // промежуточные цифры скринридеру не нужны
   const rolling = formatPrice(useCountUp(part))
   const exact = formatPrice(part)
+
+  function handleClick() {
+    if (covered) return
+    setCovered(true)
+
+    // Окно — только когда шторка доехала до конца. Длительность берём из CSS,
+    // а не дублируем: сколько там стоит, столько и ждём (при «уменьшить
+    // движение» там 0 — окно откроется сразу)
+    const { transitionDuration } = getComputedStyle(mainRef.current)
+    const duration = parseFloat(transitionDuration) * (transitionDuration.endsWith('ms') ? 1 : 1000)
+    timer.current = setTimeout(() => setOpen(true), duration ? duration + COVERED_PAUSE_MS : 0)
+  }
+
+  function handleClose() {
+    setOpen(false)
+    setCovered(false)
+  }
 
   return (
     <>
       <button
         ref={ref}
-        className={`dolyame fx-shimmer fx-tilt${seen ? ' fx-shimmer--run' : ''}`}
+        className={`dolyame fx-shimmer${seen ? ' fx-shimmer--run' : ''}${covered ? ' dolyame--covered' : ''}`}
         type="button"
-        onClick={() => setOpen(true)}
-        aria-label={`Долями: по ${exact} × ${DOLYAME_PARTS}. Как оплатить`}
+        onClick={handleClick}
+        aria-label={`Долями: ${exact} × ${DOLYAME_PARTS} без переплат. Как оплатить`}
       >
-        <span className="dolyame__logo">
-          <svg width="14" height="12" viewBox="0 0 14 12" fill="none" aria-hidden="true">
-            <rect x="0" y="4" width="2.6" height="8" rx="1" fill="currentColor" />
-            <rect x="3.8" y="2" width="2.6" height="10" rx="1" fill="currentColor" />
-            <rect x="7.6" y="6" width="2.6" height="6" rx="1" fill="currentColor" />
-            <rect x="11.4" y="0" width="2.6" height="12" rx="1" fill="currentColor" />
-          </svg>
-          Долями
+        <span className="dolyame__main" ref={mainRef}>
+          <img src="/dolyame-small-logo.svg" alt="" className="dolyame__logo" width="24" height="24" />
+          <span className="dolyame__text">
+            {rolling} × {DOLYAME_PARTS} без переплат
+          </span>
+          <img src="/chevron-right.png" alt="" className="dolyame__chevron" width="16" height="16" />
         </span>
 
-        <span className="dolyame__sum">
-          по {rolling} × {DOLYAME_PARTS}
-        </span>
-
-        <span className="dolyame__info" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.2" />
-            <path d="M8 7.3V11.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            <circle cx="8" cy="4.9" r="0.85" fill="currentColor" />
-          </svg>
+        <span className="dolyame__brand">
+          <img src="/proect-t-bank.svg" alt="" width="57" height="22" />
         </span>
       </button>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Оплата Долями" titleId="dolyame-title">
-        <div className="dolyame-modal">
-          <p className="dolyame-modal__sum">
-            Покупку можно разделить на {DOLYAME_PARTS} платежа по {exact}
-          </p>
-
-          <ol className="dolyame-modal__steps">
-            <li>Добавьте товар в корзину и оформите заказ как обычно.</li>
-            <li>
-              На странице оплаты нажмите <b>«Разделить оплату»</b> и выберите Долями.
-            </li>
-          </ol>
-
-          <p className="dolyame-modal__note">
-            Первый платёж спишется сразу, остальные — по графику Долями. Сервис предоставляет
-            Т-Банк, решение об оплате частями принимает он же.
-          </p>
-        </div>
-      </Modal>
+      <DolyameModal open={open} onClose={handleClose} sum={sum} />
     </>
   )
 }

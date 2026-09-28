@@ -79,3 +79,26 @@ export const DOLYAME_PARTS = 4
 
 /** Размер одного платежа. Округляем вверх, чтобы не обещать меньше реального */
 export const dolyamePart = (sum) => Math.ceil(sum / DOLYAME_PARTS)
+
+/** Сроки во вкладках окна «Долями». Переплат нет ни на одном сроке.
+ *
+ *  payments — сколько всего платежей,
+ *  upfront — первый из них списывается сразу при покупке (иначе сейчас 0 ₽),
+ *  every — как часто списываются, продолжение фразы «Затем по 1 000 ₽ …».
+ *
+ *  Сверено с официальным виджетом Т-Банка на корзине 3 400 ₽:
+ *  3 мес — 0 сейчас и 3 × 1 133, 6 мес — 6 × 566, 10 мес — 10 × 340.
+ */
+export const DOLYAME_TERMS = [
+  { label: '6 недель', payments: DOLYAME_PARTS, upfront: true, every: 'раз в 2 недели' },
+  { label: '3 мес', payments: 3, upfront: false, every: 'раз в месяц' },
+  { label: '6 мес', payments: 6, upfront: false, every: 'раз в месяц' },
+  { label: '10 мес', payments: 10, upfront: false, every: 'раз в месяц' },
+]
+
+/** Размер одного платежа по сроку из DOLYAME_TERMS.
+ *  6 недель — как на плашке (dolyamePart, вверх). Помесячные округляем вниз,
+ *  как это делает виджет Т-Банка: 3 400 / 3 → 1 133, а не 1 134. */
+export function dolyameTermPart(sum, term) {
+  return term.upfront ? dolyamePart(sum) : Math.floor(sum / term.payments)
+}

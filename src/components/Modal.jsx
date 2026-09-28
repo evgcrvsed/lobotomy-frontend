@@ -1,6 +1,20 @@
 import { useEffect } from 'react'
 
-export default function Modal({ open, titleId, title, onClose, wide = false, children }) {
+/**
+ * bare — без стандартной шапки с заголовком и крестиком: окно со своим
+ * оформлением рисует их само (титул всё равно нужен — по titleId).
+ * className — дополнительный класс окна, чтобы переопределить его вид.
+ */
+export default function Modal({
+  open,
+  titleId,
+  title,
+  onClose,
+  wide = false,
+  bare = false,
+  className = '',
+  children,
+}) {
   useEffect(() => {
     if (!open) return
 
@@ -21,17 +35,19 @@ export default function Modal({ open, titleId, title, onClose, wide = false, chi
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-      <div className={`modal${wide ? ' modal--wide' : ''}`}>
-        <div className="modal__header">
-          <span className="modal__title" id={titleId}>
-            {title}
-          </span>
-          <button className="modal__close" onClick={onClose} aria-label="Закрыть">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1L15 15M15 1L1 15" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
+      <div className={`modal${wide ? ' modal--wide' : ''}${className ? ` ${className}` : ''}`}>
+        {!bare && (
+          <div className="modal__header">
+            <span className="modal__title" id={titleId}>
+              {title}
+            </span>
+            <button className="modal__close" onClick={onClose} aria-label="Закрыть">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L15 15M15 1L1 15" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        )}
         {children}
       </div>
     </div>

@@ -1,116 +1,117 @@
 /* ============================================================
-   ДОЛЯМИ — плашка на карточке товара
-   Только витрина: сама оплата частями живёт на форме Т-Банка,
-   здесь мы лишь показываем, что такая возможность есть.
+   ДОЛЯМИ — плашка на карточке товара, по образцу официальной от Т-Банка:
+   слева белая часть с логотипом и суммой, справа чёрная «Проект Т-Банк».
+   Только витрина: сама оплата частями живёт на форме Т-Банка.
    ============================================================ */
 
-/* Фирменные цвета Долями — больше нигде не используются,
-   поэтому держим их здесь, а не в общей палитре */
-.dolyame,
-.dolyame-modal {
-    --dolyame-violet: #5b32e0;
-    --dolyame-bg:     #f2eefe;
-    --dolyame-line:   #ded4fb;
-}
-
 .dolyame {
+    /* Геометрия чёрной части — от неё считается, насколько белая наезжает */
+    --brand-pad: 18px;    /* отступ от логотипа Т-Банка до края */
+    --brand-logo: 57px;   /* ширина proect-t-bank.svg */
+    --overlap: 16px;      /* на столько белая лежит поверх чёрной в покое */
+    /* сколько белая добавляет сверху: при наведении — на 10% логотипа,
+       при нажатии — до правого края, то есть закрывает чёрное целиком */
+    --cover: 0px;
+
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: stretch;
     width: 100%;
     margin-top: 14px;
-    padding: 8px 12px;
-    background-color: var(--dolyame-bg);
+    padding: 0;
+    background: none;
     border: none;
-    border-radius: var(--radius-sm);
+    /* по форме плашки — чтобы блик (.fx-shimmer) не вылезал за скруглённые углы */
+    border-radius: 16px;
     font-family: var(--font-body);
-    cursor: pointer;
-    /* transform — ради .fx-tilt: transition не складывается из двух классов,
-       поэтому оба свойства перечисляем здесь */
-    transition: background-color 0.15s ease, transform 0.12s ease-out;
-}
-
-.dolyame:hover { background-color: #e9e2fd; }
-
-/* Логотип-таблетка: 4 столбика = 4 платежа */
-.dolyame__logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    flex-shrink: 0;
-    padding: 6px 12px;
-    background-color: var(--dolyame-violet);
-    border-radius: var(--radius-pill);
-    color: var(--color-white);
-    font-size: 13px;
-    line-height: 1;
-}
-
-/* Разделитель слева — как на макете, отделяет логотип от суммы */
-.dolyame__sum {
-    flex: 1;
-    padding-left: 12px;
-    border-left: 1px solid var(--dolyame-line);
-    color: var(--color-black);
-    font-size: 14px;
     text-align: left;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.dolyame__info {
+/* Только там, где есть настоящее наведение: на телефоне :hover «залипает»
+   после касания, и шторка осталась бы наполовину закрытой */
+@media (hover: hover) {
+    .dolyame:hover { --cover: calc(var(--brand-pad) + var(--brand-logo) * 0.1); }
+}
+
+/* Блик при первом появлении. Поверх белой части — у неё z-index: 1,
+   без этого полоса прошла бы только по чёрному. */
+.dolyame.fx-shimmer::after { z-index: 2; }
+
+/* На наведении блик не повторяем — там своя анимация, шторка. Тот же
+   animation у --run при наведении не перезапускает уже идущий блик. */
+.dolyame.fx-shimmer:hover::after { animation: none; }
+.dolyame.fx-shimmer--run:hover::after { animation: fx-shimmer 1.1s ease-out; }
+
+/* двойной класс — чтобы перебить :hover выше (у него тоже два) */
+.dolyame.dolyame--covered { --cover: calc(var(--brand-pad) * 2 + var(--brand-logo)); }
+
+/* Отступы — как на макете Т-Банка: 12 по краям, 8 между логотипом и текстом,
+   8 между текстом и стрелкой, 12 от стрелки до чёрной части */
+.dolyame__main {
     display: flex;
-    flex-shrink: 0;
-    color: var(--dolyame-violet);
-    opacity: 0.5;
-    transition: opacity 0.15s ease;
-}
-
-.dolyame:hover .dolyame__info { opacity: 0.85; }
-
-/* ---- ОКНО «КАК ОПЛАТИТЬ» ---- */
-
-.dolyame-modal {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 20px 24px 24px;
-}
-
-.dolyame-modal__sum {
-    margin: 0;
-    padding: 10px 14px;
-    background-color: var(--dolyame-bg);
-    border-radius: var(--radius-sm);
-    color: var(--dolyame-violet);
-    font-size: 15px;
-}
-
-.dolyame-modal__steps {
-    margin: 0;
-    padding-left: 20px;
-    display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 8px;
-    font-size: 14px;
-    line-height: 1.5;
+    flex: 1;
+    min-width: 0;
+    /* белая часть растягивается вправо на --cover; отступ справа постоянный,
+       поэтому стрелка едет вместе с краем */
+    margin-right: calc(-1 * var(--cover));
+    padding: 12px;
+    background-color: var(--color-white);
+    /* рамка, чтобы белое не сливалось с белой страницей */
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    /* белая часть лежит поверх чёрной: её скруглённые правые углы
+       заходят на чёрное, как на макете Т-Банка */
+    position: relative;
+    z-index: 1;
+    /* по этой длительности DolyameBadge.jsx решает, когда открыть окно */
+    transition: margin-right 0.3s ease;
 }
 
-.dolyame-modal__note {
-    margin: 0;
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 1.5;
+.dolyame__logo,
+.dolyame__chevron {
+    display: block;
+    flex-shrink: 0;
+}
+
+.dolyame__text {
+    flex: 1;
+    min-width: 0;
+    color: var(--color-black);
+    font-size: 16px;
+    line-height: 1.2;
+    /* цифры одной ширины — при докрутке суммы текст не дрожит */
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dolyame__brand {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    /* чёрная часть уходит под белую — слева отступ на столько же больше */
+    margin-left: calc(-1 * var(--overlap));
+    padding: 0 var(--brand-pad) 0 calc(var(--overlap) + var(--brand-pad));
+    background-color: #000;
+    border-radius: 0 16px 16px 0;
+}
+
+.dolyame__brand img { display: block; }
+
+.dolyame:focus-visible { outline: none; }
+.dolyame:focus-visible .dolyame__main { box-shadow: var(--focus-ring); }
+
+@media (prefers-reduced-motion: reduce) {
+    .dolyame__main { transition: none; }
 }
 
 @media (max-width: 768px) {
-    .dolyame {
-        gap: 10px;
-        padding: 8px 10px;
-    }
+    .dolyame { --brand-pad: 14px; }
 
-    .dolyame__logo { padding: 6px 10px; }
-
-    .dolyame__sum {
-        padding-left: 10px;
-        font-size: 13px;
-    }
+    .dolyame__text { font-size: 13px; }
 }

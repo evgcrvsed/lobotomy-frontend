@@ -1,0 +1,258 @@
+/* ============================================================
+   ОКНО «ДОЛЯМИ» — «Разделите стоимость покупки», по макету Т-Банка.
+   Своё оформление поверх общего .modal (шапку Modal не рисует — bare).
+   ============================================================ */
+
+.modal.dm {
+    /* Цвета из макета Т-Банка — больше нигде не используются */
+    --dm-text:    #333333;
+    --dm-muted:   #7f7f7f;
+    --dm-soft:    #f3f4f6;   /* вкладки, номера шагов, пустые доли */
+    --dm-blue:    #428bf9;
+    --dm-radius:  24px;
+
+    max-width: 640px;
+    border: none;
+    border-radius: var(--dm-radius);
+    overflow: hidden;
+    color: var(--dm-text);
+}
+
+.dm__body {
+    padding: 28px 36px 32px;
+    overflow-y: auto;
+}
+
+/* ---- ЛОГОТИПЫ И КРЕСТИК ---- */
+
+.dm__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.dm__logos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dm__logos img { display: block; }
+
+.dm__times {
+    color: var(--dm-muted);
+    font-size: 16px;
+    line-height: 1;
+}
+
+.dm__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin-right: -12px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--dm-soft);
+    color: var(--color-black);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.dm__close:hover { background-color: #e6e7ea; }
+
+.dm__close:focus-visible {
+    outline: 2px solid var(--color-black);
+    outline-offset: 2px;
+}
+
+/* ---- ЗАГОЛОВОК ---- */
+
+.dm__title,
+.dm__heading {
+    margin: 0;
+    color: var(--dm-text);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.dm__title { margin-top: 28px; }
+
+.dm__subtitle {
+    margin: 12px 0 0;
+    color: var(--dm-muted);
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+/* ---- ВКЛАДКИ СРОКОВ ---- */
+
+.dm__terms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.dm__term {
+    padding: 14px 16px;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--dm-soft);
+    color: var(--dm-text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dm__term:hover { background-color: #e6e7ea; }
+
+/* выбранная — белая с тёмной обводкой; обводка тенью, чтобы размер не прыгал */
+.dm__term--active,
+.dm__term--active:hover {
+    background-color: var(--color-white);
+    box-shadow: inset 0 0 0 2px var(--dm-text);
+}
+
+.dm__term:focus-visible {
+    outline: 2px solid var(--dm-blue);
+    outline-offset: 2px;
+}
+
+/* ---- КАРТОЧКА С РАСЧЁТОМ ---- */
+
+.dm__card {
+    margin-top: 16px;
+    padding: 24px 26px 28px;
+    border-radius: var(--dm-radius);
+    background-color: var(--color-white);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.dm__now {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.dm__then {
+    margin: 12px 0 0;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.dm__bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.dm__bar-part {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--dm-soft);
+}
+
+.dm__bar-part--paid { background-color: var(--dm-blue); }
+
+/* ---- КАК ОФОРМИТЬ ---- */
+
+.dm__heading { margin-top: 48px; }
+
+.dm__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 24px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dm__step {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.dm__step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background-color: var(--dm-soft);
+    color: var(--dm-muted);
+    font-size: 15px;
+}
+
+/* ---- ПОДВАЛ ---- */
+
+.dm__footer {
+    margin: 36px 0 0;
+    color: var(--dm-muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+.dm__footer a {
+    color: var(--dm-blue);
+    text-decoration: none;
+}
+
+.dm__footer a:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+    .modal.dm { --dm-radius: 20px; }
+
+    .dm__body { padding: 20px 20px 24px; }
+
+    .dm__close { margin-right: -4px; }
+
+    .dm__title { margin-top: 22px; }
+
+    .dm__title,
+    .dm__heading { font-size: 22px; }
+
+    .dm__subtitle { font-size: 14px; }
+
+    /* все четыре срока в одну строку — делят ширину между собой */
+    .dm__terms {
+        flex-wrap: nowrap;
+        gap: 6px;
+        /* на совсем узких экранах (320px) не влезут — тогда листаются пальцем */
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .dm__term {
+        flex: 1 1 auto;
+        padding: 12px 8px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .dm__card { padding: 20px; }
+
+    .dm__heading { margin-top: 36px; }
+
+    .dm__step { gap: 14px; font-size: 14px; }
+
+    .dm__step-num {
+        width: 40px;
+        height: 40px;
+    }
+}

@@ -185,7 +185,7 @@ export default function ProductPage() {
                   </button>
                 </div>
 
-                {/*<DolyameBadge sum={product.price * qty} />*/}
+                <DolyameBadge sum={product.price * qty} />
               </div>
             </div>
 
