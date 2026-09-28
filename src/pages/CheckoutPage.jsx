@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api, imageUrl } from '../api/client'
 import { errorTextFrom } from '../api/errors'
 import { getToken } from '../auth'
+import DolyameBadge from '../components/DolyameBadge'
 import { MAX_QTY, changeCartSize, getCart, removeFromCart, setCartQty } from '../cart'
 import { deliveryTexts, formatPrice, plural } from '../constants'
 import { rememberGuestOrder } from '../guestOrders'
@@ -375,6 +376,7 @@ export default function CheckoutPage() {
             >
               {payLabel()}
             </button>
+            <DolyameBadge sum={itemsTotal + deliveryPrice} />
           </aside>
         </div>
       )}
