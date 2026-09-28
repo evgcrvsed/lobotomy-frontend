@@ -12,7 +12,12 @@ async function request(path, options = {}) {
   const token = getToken()
   const headers = { ...(options.headers ?? {}) }
   if (token) headers.Authorization = `Bearer ${token}`
-  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
+  // Бэкенд разрешает браузеру кэшировать каталог на минуту — посетителям это
+  // ускоряет сайт, а в админке из-за этого правки видны не сразу. Здесь всегда
+  // идём на сервер; 'no-cache' (в отличие от 'no-store') ещё и обновляет запись
+  // в кэше, так что витрина в этом же браузере тоже сразу увидит изменения.
+  const cache = window.location.pathname.startsWith('/admin') ? 'no-cache' : undefined
+  const res = await fetch(`${API_BASE_URL}${path}`, { cache, ...options, headers })
   return res
 }
 
