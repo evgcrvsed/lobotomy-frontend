@@ -1,26 +1,20 @@
 /* ============================================================
-   ДОЛЯМИ — плашка на карточке товара, по образцу официальной от Т-Банка:
-   слева белая часть с логотипом и суммой, справа чёрная «Проект Т-Банк».
+   ДОЛЯМИ — плашка на карточке товара: логотип, сумма платежа, стрелка.
    Только витрина: сама оплата частями живёт на форме Т-Банка.
    ============================================================ */
 
+/* Отступы — как на макете Т-Банка: 12 по краям, 8 между логотипом и текстом,
+   8 между текстом и стрелкой */
 .dolyame {
-    /* Геометрия чёрной части — от неё считается, насколько белая наезжает */
-    --brand-pad: 18px;    /* отступ от логотипа Т-Банка до края */
-    --brand-logo: 57px;   /* ширина proect-t-bank.svg */
-    --overlap: 16px;      /* на столько белая лежит поверх чёрной в покое */
-    /* сколько белая добавляет сверху: при наведении — на 10% логотипа,
-       при нажатии — до правого края, то есть закрывает чёрное целиком */
-    --cover: 0px;
-
     display: flex;
-    align-items: stretch;
+    align-items: center;
+    gap: 8px;
     width: 100%;
     margin-top: 14px;
-    padding: 0;
-    background: none;
-    border: none;
-    /* по форме плашки — чтобы блик (.fx-shimmer) не вылезал за скруглённые углы */
+    padding: 12px;
+    background-color: var(--color-white);
+    /* рамка, чтобы белое не сливалось с белой страницей */
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     font-family: var(--font-body);
     text-align: left;
@@ -29,47 +23,10 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Только там, где есть настоящее наведение: на телефоне :hover «залипает»
-   после касания, и шторка осталась бы наполовину закрытой */
-@media (hover: hover) {
-    .dolyame:hover { --cover: calc(var(--brand-pad) + var(--brand-logo) * 0.1); }
-}
-
-/* Блик при первом появлении. Поверх белой части — у неё z-index: 1,
-   без этого полоса прошла бы только по чёрному. */
-.dolyame.fx-shimmer::after { z-index: 2; }
-
-/* На наведении блик не повторяем — там своя анимация, шторка. Тот же
-   animation у --run при наведении не перезапускает уже идущий блик. */
+/* Блик только при первом появлении — на наведении его не повторяем.
+   Тот же animation у --run при наведении не перезапускает уже идущий блик. */
 .dolyame.fx-shimmer:hover::after { animation: none; }
 .dolyame.fx-shimmer--run:hover::after { animation: fx-shimmer 1.1s ease-out; }
-
-/* двойной класс — чтобы перебить :hover выше (у него тоже два) */
-.dolyame.dolyame--covered { --cover: calc(var(--brand-pad) * 2 + var(--brand-logo)); }
-
-/* Отступы — как на макете Т-Банка: 12 по краям, 8 между логотипом и текстом,
-   8 между текстом и стрелкой, 12 от стрелки до чёрной части */
-.dolyame__main {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 0;
-    /* белая часть растягивается вправо на --cover; отступ справа постоянный,
-       поэтому стрелка едет вместе с краем */
-    margin-right: calc(-1 * var(--cover));
-    padding: 12px;
-    background-color: var(--color-white);
-    /* рамка, чтобы белое не сливалось с белой страницей */
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    /* белая часть лежит поверх чёрной: её скруглённые правые углы
-       заходят на чёрное, как на макете Т-Банка */
-    position: relative;
-    z-index: 1;
-    /* по этой длительности DolyameBadge.jsx решает, когда открыть окно */
-    transition: margin-right 0.3s ease;
-}
 
 .dolyame__logo,
 .dolyame__chevron {
@@ -90,28 +47,11 @@
     text-overflow: ellipsis;
 }
 
-.dolyame__brand {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    /* чёрная часть уходит под белую — слева отступ на столько же больше */
-    margin-left: calc(-1 * var(--overlap));
-    padding: 0 var(--brand-pad) 0 calc(var(--overlap) + var(--brand-pad));
-    background-color: #000;
-    border-radius: 0 16px 16px 0;
-}
-
-.dolyame__brand img { display: block; }
-
-.dolyame:focus-visible { outline: none; }
-.dolyame:focus-visible .dolyame__main { box-shadow: var(--focus-ring); }
-
-@media (prefers-reduced-motion: reduce) {
-    .dolyame__main { transition: none; }
+.dolyame:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 @media (max-width: 768px) {
-    .dolyame { --brand-pad: 14px; }
-
-    .dolyame__text { font-size: 13px; }
+    .dolyame__text { font-size: 14px; }
 }
