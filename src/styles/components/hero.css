@@ -21,6 +21,8 @@
     animation: heroImgIn 0.35s ease;
 }
 
+.hero__img--instant { animation: none; }
+
 @keyframes heroImgIn {
     from { opacity: 0; }
     to   { opacity: 1; }

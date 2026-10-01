@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import '../styles/components/hero.css'
 
+/** Пришла быстрее — значит, лежала в кэше браузера: показываем сразу, без
+ *  проявления. Из кэша это единицы–десятки мс, по сети — заметно дольше. */
+const CACHED_MS = 80
+
 /**
  * Верхняя картинка на всю ширину (главная и страница товара).
  *
@@ -16,6 +20,9 @@ import '../styles/components/hero.css'
  */
 export default function HeroImage({ src, onReady }) {
   const [readySrc, setReadySrc] = useState(null)
+  // Картинка уже была в кэше — плавное проявление при повторном заходе
+  // выглядело бы как загрузка заново, поэтому его не проигрываем
+  const [instant, setInstant] = useState(false)
 
   useEffect(() => {
     if (!src) {
@@ -29,8 +36,13 @@ export default function HeroImage({ src, onReady }) {
     // Первый экран — качаем раньше всего остального на странице
     img.fetchPriority = 'high'
     let cancelled = false
+    let finished = false
+    const startedAt = performance.now()
     const done = () => {
-      if (cancelled) return
+      // complete и onload могут сработать оба — второй раз не нужен
+      if (cancelled || finished) return
+      finished = true
+      setInstant(performance.now() - startedAt < CACHED_MS)
       setReadySrc(src)
       onReady?.()
     }
@@ -53,7 +65,14 @@ export default function HeroImage({ src, onReady }) {
 
   return (
     <section className="hero">
-      {readySrc && <img src={readySrc} alt="" className="hero__img" fetchPriority="high" />}
+      {readySrc && (
+        <img
+          src={readySrc}
+          alt=""
+          className={`hero__img${instant ? ' hero__img--instant' : ''}`}
+          fetchPriority="high"
+        />
+      )}
     </section>
   )
 }
